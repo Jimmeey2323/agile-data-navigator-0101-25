@@ -462,6 +462,3 @@ const Index = () => {
 };
 
 export default Index;
-
-// Add missing imports
-import { HelpCircle, Bell } from 'lucide-react';
