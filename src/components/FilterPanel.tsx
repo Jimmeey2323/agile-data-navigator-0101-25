@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Check, 
@@ -257,14 +258,14 @@ export function FilterPanel() {
 
               {/* Center Dropdown */}
               <Select
-                value={filters.center.length > 0 ? filters.center[0] : ""}
-                onValueChange={(value) => setFilters({ ...filters, center: value ? [value] : [] })}
+                value={filters.center.length > 0 ? filters.center[0] : "all-centers"}
+                onValueChange={(value) => setFilters({ ...filters, center: value === "all-centers" ? [] : [value] })}
               >
                 <SelectTrigger className={`min-w-[200px] border-2 ${filters.center.length > 0 ? 'border-primary/50 bg-primary/5' : 'border-gray-200'}`}>
                   <SelectValue placeholder="Select Center" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Centers</SelectItem>
+                  <SelectItem value="all-centers">All Centers</SelectItem>
                   {centerOptions.map((center) => (
                     <SelectItem key={center} value={center}>
                       {center}
