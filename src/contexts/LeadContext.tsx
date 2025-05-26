@@ -233,45 +233,40 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     fetchData();
   }, [fetchData]);
   
-  // Update lead with proper error handling and data consistency
+  // Update lead
   const handleUpdateLead = async (lead: Lead) => {
     try {
-      console.log('Updating lead:', lead.id, lead);
+      console.log('Updating lead:', lead.id);
       
       // Show loading state
       toast.info('Saving changes...');
       
-      // Update the Google Sheet first
-      const updatedLead = await updateLead(lead);
-      console.log('Lead updated in Google Sheets:', updatedLead);
+      // Save to Google Sheets first
+      await updateLead(lead);
       
-      // Update local state optimistically
-      setLeads(currentLeads => {
-        const newLeads = currentLeads.map(l => 
-          l.id === lead.id ? { ...updatedLead } : l
-        );
-        console.log('Updated local leads state');
-        return newLeads;
-      });
+      // Optimistic update to local state
+      setLeads(currentLeads =>
+        currentLeads.map(l => (l.id === lead.id ? lead : l))
+      );
       
-      toast.success('Lead updated successfully');
-      
-      // Force a fresh fetch after a delay to ensure data consistency
+      // Force a fresh fetch after a short delay to ensure data consistency
       setTimeout(async () => {
         try {
-          console.log('Refreshing data after update...');
-          await fetchData();
+          const freshData = await fetchLeads();
+          setLeads(freshData);
+          console.log('Data refreshed after update');
         } catch (refreshError) {
           console.error('Error refreshing data after update:', refreshError);
         }
-      }, 2000);
+      }, 1000);
       
+      toast.success('Lead updated successfully');
     } catch (err) {
       console.error('Error updating lead:', err);
       setError(err instanceof Error ? err : new Error('Failed to update lead'));
       toast.error('Failed to update lead. Please try again.');
       
-      // Refresh data to get the current state from the sheet
+      // Refresh data to get the current state
       await fetchData();
     }
   };
@@ -280,7 +275,10 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const handleAddLead = async (lead: Lead) => {
     try {
       console.log('Adding new lead');
+      // Save to Google Sheets
       await addLead(lead);
+      
+      // Refresh data to get the new lead
       await fetchData();
       toast.success('Lead added successfully');
     } catch (err) {
@@ -294,13 +292,18 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const handleDeleteLead = async (leadId: string) => {
     try {
       console.log('Deleting lead:', leadId);
+      // Optimistic delete
       setLeads(currentLeads => currentLeads.filter(l => l.id !== leadId));
+      
+      // Delete from Google Sheets
       await deleteLead(leadId);
       toast.success('Lead deleted successfully');
     } catch (err) {
       console.error('Error deleting lead:', err);
       setError(err instanceof Error ? err : new Error('Failed to delete lead'));
       toast.error('Failed to delete lead');
+      
+      // Revert optimistic delete
       await fetchData();
     }
   };
@@ -374,6 +377,7 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const applyFilters = useCallback((leads: Lead[], filters: LeadFilters): Lead[] => {
     let result = [...leads];
     
+    // Apply search filter
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase();
       result = result.filter(lead => 
@@ -383,26 +387,32 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       );
     }
     
+    // Apply source filter
     if (filters.source.length > 0) {
       result = result.filter(lead => filters.source.includes(lead.source));
     }
     
+    // Apply associate filter
     if (filters.associate.length > 0) {
       result = result.filter(lead => filters.associate.includes(lead.associate));
     }
     
+    // Apply center filter
     if (filters.center.length > 0) {
       result = result.filter(lead => filters.center.includes(lead.center));
     }
     
+    // Apply stage filter
     if (filters.stage.length > 0) {
       result = result.filter(lead => filters.stage.includes(lead.stage));
     }
     
+    // Apply status filter
     if (filters.status.length > 0) {
       result = result.filter(lead => filters.status.includes(lead.status));
     }
     
+    // Apply date range filter
     if (filters.dateRange.start || filters.dateRange.end) {
       result = result.filter(lead => {
         const createdDate = new Date(lead.createdAt);
@@ -434,12 +444,14 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const aValue = a[sortConfig.key];
       const bValue = b[sortConfig.key];
       
+      // Handle different types of values
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         return sortConfig.direction === 'asc'
           ? aValue.localeCompare(bValue)
           : bValue.localeCompare(aValue);
       }
       
+      // Handle dates
       if (aValue && bValue && !isNaN(Date.parse(aValue.toString())) && !isNaN(Date.parse(bValue.toString()))) {
         const dateA = new Date(aValue.toString());
         const dateB = new Date(bValue.toString());
@@ -448,6 +460,7 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           : dateB.getTime() - dateA.getTime();
       }
       
+      // Default comparison
       return sortConfig.direction === 'asc'
         ? (aValue > bValue ? 1 : -1)
         : (bValue > aValue ? 1 : -1);

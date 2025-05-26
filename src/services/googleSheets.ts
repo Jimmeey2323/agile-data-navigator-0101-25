@@ -48,29 +48,6 @@ let currentLeads: Lead[] = [];
 let lastFetchTime = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
 
-// Column mapping for the Google Sheet
-const COLUMN_MAPPING = {
-  'id': 0,           // Column A
-  'fullName': 1,     // Column B
-  'phone': 2,        // Column C
-  'email': 3,        // Column D
-  'createdAt': 4,    // Column E
-  'source': 6,       // Column G
-  'stage': 9,        // Column J
-  'associate': 10,   // Column K
-  'remarks': 11,     // Column L
-  'followUp1Date': 12,     // Column M
-  'followUp1Comments': 13, // Column N
-  'followUp2Date': 14,     // Column O
-  'followUp2Comments': 15, // Column P
-  'followUp3Date': 16,     // Column Q
-  'followUp3Comments': 17, // Column R
-  'followUp4Date': 18,     // Column S
-  'followUp4Comments': 19, // Column T
-  'center': 20,      // Column U
-  'status': 23       // Column X
-};
-
 // Function to get a fresh access token
 const getAccessToken = async (): Promise<string> => {
   const now = Date.now();
@@ -302,7 +279,6 @@ export const fetchLeads = async (): Promise<Lead[]> => {
 // Function to find the row number of a lead in the sheet
 const findLeadRowInSheet = async (leadId: string): Promise<number> => {
   try {
-    console.log('Finding row for lead ID:', leadId);
     const accessToken = await getAccessToken();
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_RANGE}`;
     
@@ -324,7 +300,6 @@ const findLeadRowInSheet = async (leadId: string): Promise<number> => {
     // Find the row with matching ID (column A)
     for (let i = 1; i < rows.length; i++) { // Start from 1 to skip header
       if (rows[i][0] === leadId) {
-        console.log(`Found lead ${leadId} at row ${i + 1}`);
         return i + 1; // Return 1-based row number for Google Sheets
       }
     }
@@ -338,7 +313,7 @@ const findLeadRowInSheet = async (leadId: string): Promise<number> => {
 
 // Function to update a lead
 export const updateLead = async (lead: Lead): Promise<Lead> => {
-  console.log('Updating lead in Google Sheets:', lead.id, lead);
+  console.log('Updating lead in Google Sheets:', lead.id);
   
   try {
     // Get access token
@@ -346,50 +321,47 @@ export const updateLead = async (lead: Lead): Promise<Lead> => {
     
     // Find the row number for this lead
     const rowNumber = await findLeadRowInSheet(lead.id);
-    console.log(`Updating lead ${lead.id} at row ${rowNumber}`);
+    console.log(`Found lead ${lead.id} at row ${rowNumber}`);
     
-    // Create an array of 32 columns (A to AF) with proper values
-    const updateValues = new Array(32).fill('');
-    
-    // Map lead fields to their corresponding column positions
-    updateValues[0] = lead.id || '';                    // A: ID
-    updateValues[1] = lead.fullName || '';              // B: Full Name
-    updateValues[2] = lead.phone || '';                 // C: Phone
-    updateValues[3] = lead.email || '';                 // D: Email
-    updateValues[4] = lead.createdAt || '';             // E: Created At
-    updateValues[5] = '';                               // F: Source ID (if available)
-    updateValues[6] = lead.source || '';                // G: Source
-    updateValues[7] = '';                               // H: Member ID (if available)
-    updateValues[8] = '';                               // I: Converted To Customer At
-    updateValues[9] = lead.stage || '';                 // J: Stage
-    updateValues[10] = lead.associate || '';            // K: Associate
-    updateValues[11] = lead.remarks || '';              // L: Remarks
-    updateValues[12] = lead.followUp1Date || '';        // M: Follow Up 1 Date
-    updateValues[13] = lead.followUp1Comments || '';    // N: Follow Up Comments (1)
-    updateValues[14] = lead.followUp2Date || '';        // O: Follow Up 2 Date
-    updateValues[15] = lead.followUp2Comments || '';    // P: Follow Up Comments (2)
-    updateValues[16] = lead.followUp3Date || '';        // Q: Follow Up 3 Date
-    updateValues[17] = lead.followUp3Comments || '';    // R: Follow Up Comments (3)
-    updateValues[18] = lead.followUp4Date || '';        // S: Follow Up 4 Date
-    updateValues[19] = lead.followUp4Comments || '';    // T: Follow Up Comments (4)
-    updateValues[20] = lead.center || '';               // U: Center
-    updateValues[21] = '';                              // V: Class Type
-    updateValues[22] = '';                              // W: Host ID
-    updateValues[23] = lead.status || '';               // X: Status
-    updateValues[24] = '';                              // Y: Channel
-    updateValues[25] = '';                              // Z: Period
-    updateValues[26] = '';                              // AA: Purchases Made
-    updateValues[27] = '';                              // AB: LTV
-    updateValues[28] = '';                              // AC: Visits
-    updateValues[29] = '';                              // AD: Trial Status
-    updateValues[30] = '';                              // AE: Conversion Status
-    updateValues[31] = '';                              // AF: Retention Status
-    
-    console.log('Update values prepared:', updateValues);
+    // Prepare the update data - map lead fields to sheet columns
+    const updateValues = [
+      lead.id,
+      lead.fullName,
+      lead.phone,
+      lead.email,
+      lead.createdAt,
+      '', // Source ID (if available)
+      lead.source,
+      '', // Member ID (if available)
+      '', // Converted To Customer At (if available)
+      lead.stage,
+      lead.associate,
+      lead.remarks,
+      lead.followUp1Date || '',
+      lead.followUp1Comments || '',
+      lead.followUp2Date || '',
+      lead.followUp2Comments || '',
+      lead.followUp3Date || '',
+      lead.followUp3Comments || '',
+      lead.followUp4Date || '',
+      lead.followUp4Comments || '',
+      lead.center,
+      '', // Class Type (if available)
+      '', // Host ID (if available)  
+      lead.status,
+      '', // Channel (if available)
+      '', // Period (if available)
+      '', // Purchases Made (if available)
+      '', // LTV (if available)
+      '', // Visits (if available)
+      '', // Trial Status (if available)
+      '', // Conversion Status (if available)
+      ''  // Retention Status (if available)
+    ];
     
     // Update the specific row in Google Sheets
     const range = `${SHEET_NAME}!A${rowNumber}:AF${rowNumber}`;
-    const updateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?valueInputOption=USER_ENTERED`;
+    const updateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?valueInputOption=RAW`;
     
     const updateResponse = await fetch(updateUrl, {
       method: 'PUT',
@@ -403,20 +375,15 @@ export const updateLead = async (lead: Lead): Promise<Lead> => {
     });
     
     if (!updateResponse.ok) {
-      const errorText = await updateResponse.text();
-      console.error('Update response error:', errorText);
-      throw new Error(`Failed to update sheet: ${updateResponse.statusText} - ${errorText}`);
+      throw new Error(`Failed to update sheet: ${updateResponse.statusText}`);
     }
     
-    const updateResult = await updateResponse.json();
-    console.log('Update result:', updateResult);
     console.log('Lead updated successfully in Google Sheets');
     
-    // Update the cached version immediately
+    // Update the cached version
     const indexInCache = currentLeads.findIndex(l => l.id === lead.id);
     if (indexInCache !== -1) {
       currentLeads[indexInCache] = { ...lead };
-      console.log('Updated lead in cache');
     }
     
     // Clear cache to force refresh on next fetch
@@ -458,6 +425,7 @@ export const addLead = async (lead: Lead): Promise<Lead> => {
   }
 };
 
+// Function to delete a lead
 export const deleteLead = async (leadId: string): Promise<void> => {
   console.log('Deleting lead from Google Sheets:', leadId);
   
@@ -486,6 +454,7 @@ export const deleteLead = async (leadId: string): Promise<void> => {
   }
 };
 
+// Function to parse CSV data using PapaParse
 export const parseCSV = (file: File): Promise<any[]> => {
   return new Promise((resolve, reject) => {
     Papa.parse(file, {
@@ -526,6 +495,7 @@ export const parseCSV = (file: File): Promise<any[]> => {
   });
 };
 
+// Function to import leads from CSV
 export const importLeadsFromCSV = async (csvString: string, columnMapping: Record<string, string>): Promise<void> => {
   try {
     console.log('Importing leads from CSV to Google Sheets');
@@ -575,6 +545,7 @@ export const importLeadsFromCSV = async (csvString: string, columnMapping: Recor
   }
 };
 
+// Helper function to get sample leads (used only as fallback if API fails)
 function getSampleLeads(): Lead[] {
   return [
     {
@@ -621,3 +592,4 @@ function getSampleLeads(): Lead[] {
     }
   ];
 }
+
