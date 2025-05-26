@@ -1,4 +1,3 @@
-
 import { Suspense, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,7 +22,9 @@ import {
   SlidersHorizontal,
   Eye,
   EyeOff,
-  ExternalLink
+  ExternalLink,
+  HelpCircle, 
+  Bell
 } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 import { SearchBar } from "@/components/SearchBar";
@@ -37,6 +38,7 @@ import { PivotView } from "@/components/PivotView";
 import { CSVUploadView } from "@/components/CSVUploadView";
 import { LeadAnalytics } from "@/components/LeadAnalytics";
 import { AIInsightsView } from "@/components/AIInsightsView";
+import { ThemeSelector } from "@/components/ThemeSelector";
 import { useLeads } from "@/contexts/LeadContext";
 import { PaginationControls } from "@/components/PaginationControls";
 import {
@@ -119,24 +121,28 @@ const Index = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900/80 dark:to-gray-900">
-      <header className="sticky top-0 z-20 bg-white dark:bg-gray-900 border-b backdrop-blur-sm bg-white/80 dark:bg-gray-900/80">
-        <div className="container py-3">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <header className="sticky top-0 z-20 bg-white/90 dark:bg-gray-900/90 border-b backdrop-blur-md shadow-sm">
+        <div className="container py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">Lead Management Portal</h1>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="gap-2">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+              Lead Management Portal
+            </h1>
+            <div className="flex items-center gap-3">
+              <ThemeSelector />
+              
+              <Button variant="outline" size="sm" className="gap-2 shadow-sm">
                 <Clock className="w-4 h-4" />
                 <span className="hidden sm:inline">Last updated 2 min ago</span>
               </Button>
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="w-9 h-9 p-0">
+                  <Button variant="outline" size="sm" className="w-10 h-10 p-0 shadow-sm">
                     <Settings className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem onClick={handleSettingsClick}>
                     <Users className="mr-2 h-4 w-4" />
                     <span>User Preferences</span>
@@ -160,32 +166,32 @@ const Index = () => {
         </div>
       </header>
 
-      <div className="container py-4">
+      <div className="container py-6">
         <div className="flex flex-col-reverse sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="flex gap-3 w-full sm:w-auto">
             <SearchBar />
             <Button 
               variant="outline" 
               size="sm" 
-              className={`gap-2 ${showFilters ? 'bg-primary/10 text-primary' : ''}`}
+              className={`gap-2 shadow-sm ${showFilters ? 'bg-primary/10 text-primary border-primary/30' : ''}`}
               onClick={() => setShowFilters(!showFilters)}
             >
               <Filter className="w-4 h-4" />
               <span>Filters</span>
             </Button>
           </div>
-          <div className="flex gap-2 w-full sm:w-auto">
-          <a 
-            href="https://expirations-manager.netlify.app/" 
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 w-full sm:w-auto gap-2"
-          >
-            <ExternalLink className="h-4 w-4 mr-1" />
-            Expirations Manager
-          </a>
+          <div className="flex gap-3 w-full sm:w-auto">
+            <a 
+              href="https://expirations-manager.netlify.app/" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 w-full sm:w-auto gap-2 shadow-sm"
+            >
+              <ExternalLink className="h-4 w-4 mr-1" />
+              Expirations Manager
+            </a>
             <Button 
-              className="w-full sm:w-auto gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 transition-all"
+              className="w-full sm:w-auto gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all shadow-lg hover:shadow-xl"
               onClick={handleAddNewLead}
             >
               <Plus className="h-4 w-4" />
@@ -193,57 +199,56 @@ const Index = () => {
             </Button>
           </div>
         </div>
-
       </div>
 
       {showFilters && (
-        <div className="container py-2 mb-4">
+        <div className="container py-2 mb-6">
           <FilterPanel />
         </div>
       )}
 
-      <div className="container py-2">
+      <div className="container py-2 mb-6">
         <MetricsPanel />
       </div>
 
       <div className="container flex-1 py-4 pb-8">
         <Tabs defaultValue="leads-main" className="w-full">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-            <TabsList className="grid grid-cols-4 md:grid-cols-7 w-full sm:w-auto bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-1 rounded-xl shadow-sm">
-              <TabsTrigger value="leads-main" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500/20 data-[state=active]:to-purple-500/20 rounded-lg">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <TabsList className="grid grid-cols-4 md:grid-cols-7 w-full sm:w-auto bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-1.5 rounded-xl shadow-lg border">
+              <TabsTrigger value="leads-main" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-primary/10 data-[state=active]:text-primary rounded-lg transition-all">
                 <Table className="w-4 h-4" />
                 <span className="hidden md:inline">Leads</span>
               </TabsTrigger>
-              <TabsTrigger value="card-view" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500/20 data-[state=active]:to-purple-500/20 rounded-lg">
+              <TabsTrigger value="card-view" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-primary/10 data-[state=active]:text-primary rounded-lg transition-all">
                 <Grid3X3 className="w-4 h-4" />
                 <span className="hidden md:inline">Cards</span>
               </TabsTrigger>
-              <TabsTrigger value="kanban-view" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500/20 data-[state=active]:to-purple-500/20 rounded-lg">
+              <TabsTrigger value="kanban-view" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-primary/10 data-[state=active]:text-primary rounded-lg transition-all">
                 <Kanban className="w-4 h-4" />
                 <span className="hidden md:inline">Kanban</span>
               </TabsTrigger>
-              <TabsTrigger value="pivot-view" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500/20 data-[state=active]:to-purple-500/20 rounded-lg">
+              <TabsTrigger value="pivot-view" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-primary/10 data-[state=active]:text-primary rounded-lg transition-all">
                 <FileSpreadsheet className="w-4 h-4" />
                 <span className="hidden md:inline">Pivot</span>
               </TabsTrigger>
-              <TabsTrigger value="csv-upload" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500/20 data-[state=active]:to-purple-500/20 rounded-lg">
+              <TabsTrigger value="csv-upload" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-primary/10 data-[state=active]:text-primary rounded-lg transition-all">
                 <Upload className="w-4 h-4" />
                 <span className="hidden md:inline">CSV Upload</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500/20 data-[state=active]:to-purple-500/20 rounded-lg">
+              <TabsTrigger value="analytics" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-primary/10 data-[state=active]:text-primary rounded-lg transition-all">
                 <BarChart3 className="w-4 h-4" />
                 <span className="hidden md:inline">Analytics</span>
               </TabsTrigger>
-              <TabsTrigger value="ai-insights" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500/20 data-[state=active]:to-purple-500/20 rounded-lg">
+              <TabsTrigger value="ai-insights" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-primary/10 data-[state=active]:text-primary rounded-lg transition-all">
                 <BrainCircuit className="w-4 h-4" />
                 <span className="hidden md:inline">AI Insights</span>
               </TabsTrigger>
             </TabsList>
 
-            <div className="flex gap-2 w-full sm:w-auto">
+            <div className="flex gap-3 w-full sm:w-auto">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button variant="outline" size="sm" className="gap-2 shadow-sm">
                     <SlidersHorizontal className="w-4 h-4" />
                     <span>Display</span>
                   </Button>
@@ -297,14 +302,14 @@ const Index = () => {
               </Popover>
               
               {selectedLeads.length > 0 && (
-                <Button size="sm" className="gap-2" onClick={handleBulkEdit}>
+                <Button size="sm" className="gap-2 shadow-sm" onClick={handleBulkEdit}>
                   <Users className="w-4 h-4" />
                   <span>Bulk Edit ({selectedLeads.length})</span>
                 </Button>
               )}
               <Button 
                 size="sm" 
-                className="gap-2"
+                className="gap-2 shadow-sm"
                 onClick={refreshData}
                 disabled={isRefreshing}
               >
@@ -315,18 +320,18 @@ const Index = () => {
           </div>
 
           <TabsContent value="leads-main" className="mt-0">
-            <Card className="shadow-md border-border/30 mb-4 glass-card">
-              <CardHeader className="pb-3">
+            <Card className="shadow-lg border-2 border-primary/20 mb-6 bg-gradient-to-r from-primary/5 to-primary/10">
+              <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">Lead Management</CardTitle>
+                  <CardTitle className="text-2xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Lead Management</CardTitle>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className={`gap-2 ${selectedView === "table" ? "bg-primary/10 text-primary" : ""}`} onClick={() => handleViewChange("table")}>
+                    <Button variant="outline" size="sm" className={`gap-2 shadow-sm ${selectedView === "table" ? "bg-primary/10 text-primary border-primary/30" : ""}`} onClick={() => handleViewChange("table")}>
                       <Table className={`h-4 w-4`} />
                       <span>Table</span>
                     </Button>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-2">
                   View and manage all leads with advanced filtering, sorting, and editing options.
                 </p>
               </CardHeader>
@@ -339,36 +344,36 @@ const Index = () => {
                 setSelectedLeads={setSelectedLeads}
                 compactMode={compactMode}
               />
-              <div className="mt-4">
+              <div className="mt-6">
                 <PaginationControls />
               </div>
             </Suspense>
           </TabsContent>
 
           <TabsContent value="card-view" className="mt-0">
-            <Card className="shadow-md border-border/30 mb-4 glass-card">
-              <CardHeader className="pb-3">
+            <Card className="shadow-lg border-2 border-primary/20 mb-6 bg-gradient-to-r from-primary/5 to-primary/10">
+              <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">Card View</CardTitle>
+                  <CardTitle className="text-2xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Card View</CardTitle>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-2">
                   View leads in a card layout for a more visual experience.
                 </p>
               </CardHeader>
             </Card>
             <LeadsCardView onLeadClick={handleLeadClick} />
-            <div className="mt-4">
+            <div className="mt-6">
               <PaginationControls />
             </div>
           </TabsContent>
 
           <TabsContent value="kanban-view" className="mt-0">
-            <Card className="shadow-md border-border/30 mb-4 glass-card">
-              <CardHeader className="pb-3">
+            <Card className="shadow-lg border-2 border-primary/20 mb-6 bg-gradient-to-r from-primary/5 to-primary/10">
+              <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">Kanban View</CardTitle>
+                  <CardTitle className="text-2xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Kanban View</CardTitle>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-2">
                   View and manage leads in a kanban board layout.
                 </p>
               </CardHeader>
@@ -377,12 +382,12 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="pivot-view" className="mt-0">
-            <Card className="shadow-md border-border/30 mb-4 glass-card">
-              <CardHeader className="pb-3">
+            <Card className="shadow-lg border-2 border-primary/20 mb-6 bg-gradient-to-r from-primary/5 to-primary/10">
+              <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">Pivot Analysis</CardTitle>
+                  <CardTitle className="text-2xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Pivot Analysis</CardTitle>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-2">
                   Analyze your lead data with customizable pivot tables.
                 </p>
               </CardHeader>
@@ -391,12 +396,12 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="csv-upload" className="mt-0">
-            <Card className="shadow-md border-border/30 mb-4 glass-card">
-              <CardHeader className="pb-3">
+            <Card className="shadow-lg border-2 border-primary/20 mb-6 bg-gradient-to-r from-primary/5 to-primary/10">
+              <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">CSV Upload</CardTitle>
+                  <CardTitle className="text-2xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">CSV Upload</CardTitle>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-2">
                   Import leads from CSV files with custom mapping and processing.
                 </p>
               </CardHeader>
@@ -405,12 +410,12 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="analytics" className="mt-0">
-            <Card className="shadow-md border-border/30 mb-4 glass-card">
-              <CardHeader className="pb-3">
+            <Card className="shadow-lg border-2 border-primary/20 mb-6 bg-gradient-to-r from-primary/5 to-primary/10">
+              <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">Analytics</CardTitle>
+                  <CardTitle className="text-2xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Analytics</CardTitle>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-2">
                   Visualize your lead data with interactive charts and reports.
                 </p>
               </CardHeader>
@@ -419,12 +424,12 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="ai-insights" className="mt-0">
-            <Card className="shadow-md border-border/30 mb-4 glass-card">
-              <CardHeader className="pb-3">
+            <Card className="shadow-lg border-2 border-primary/20 mb-6 bg-gradient-to-r from-primary/5 to-primary/10">
+              <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">AI Insights</CardTitle>
+                  <CardTitle className="text-2xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">AI Insights</CardTitle>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-2">
                   Gain AI-powered insights from your lead data.
                 </p>
               </CardHeader>
@@ -442,8 +447,8 @@ const Index = () => {
         clearSelection={() => setSelectedLeads([])}
       />
 
-      <footer className="border-t bg-white dark:bg-gray-900">
-        <div className="container py-3">
+      <footer className="border-t bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-sm">
+        <div className="container py-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">© 2023 Lead Management Portal</p>
             <p className="text-sm text-muted-foreground">Auto-refreshes every 15 minutes</p>

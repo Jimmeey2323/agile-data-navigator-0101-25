@@ -24,7 +24,7 @@ export function MetricsPanel() {
     conversionRate 
   } = useLeads();
 
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -71,34 +71,37 @@ export function MetricsPanel() {
   ];
 
   return (
-    <Card className="shadow-md border-border/30 animate-fade-in">
-      <Collapsible open={!isCollapsed} onOpenChange={setIsCollapsed}>
+    <Card className="shadow-lg border-2 border-primary/20 animate-fade-in bg-gradient-to-r from-primary/5 to-primary/10">
+      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CollapsibleTrigger asChild>
-          <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-            <div className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              <h3 className="font-medium text-base">Key Metrics Overview</h3>
+          <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-primary/10 transition-colors rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/20 rounded-lg">
+                <BarChart3 className="h-5 w-5 text-primary" />
+              </div>
+              <h3 className="font-semibold text-lg">Key Metrics Overview</h3>
             </div>
-            {isCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+            {isExpanded ? <ChevronUp className="h-5 w-5 text-primary" /> : <ChevronDown className="h-5 w-5 text-primary" />}
           </div>
         </CollapsibleTrigger>
         
         <CollapsibleContent className="px-4 pb-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {metrics.map((metric, index) => (
-              <Card key={index} className="relative overflow-hidden border-0 shadow-sm hover:shadow-md transition-all duration-200">
+              <Card key={index} className="relative overflow-hidden border-2 border-primary/10 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                 <div className={`absolute inset-0 bg-gradient-to-br ${metric.color} opacity-10`} />
                 <CardContent className="p-6 relative">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">{metric.title}</p>
-                      <p className="text-2xl font-bold mt-1">{metric.value}</p>
-                      <p className={`text-xs mt-1 ${metric.changeType === 'positive' ? 'text-green-600' : 'text-red-600'}`}>
+                      <p className="text-sm font-medium text-muted-foreground mb-1">{metric.title}</p>
+                      <p className="text-3xl font-bold mt-1 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">{metric.value}</p>
+                      <p className={`text-xs mt-2 flex items-center gap-1 ${metric.changeType === 'positive' ? 'text-green-600' : 'text-red-600'}`}>
+                        <TrendingUp className="h-3 w-3" />
                         {metric.change} from last period
                       </p>
                     </div>
-                    <div className={`p-3 rounded-full bg-gradient-to-br ${metric.color}`}>
-                      <metric.icon className="h-6 w-6 text-white" />
+                    <div className={`p-4 rounded-full bg-gradient-to-br ${metric.color} shadow-lg`}>
+                      <metric.icon className="h-8 w-8 text-white" />
                     </div>
                   </div>
                 </CardContent>

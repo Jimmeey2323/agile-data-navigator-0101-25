@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Check, 
@@ -50,7 +49,7 @@ export function FilterPanel() {
   } = useLeads();
   
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   
   // Multi-select state management
   const [sourceOpen, setSourceOpen] = useState(false);
@@ -105,7 +104,8 @@ export function FilterPanel() {
     onSelectionChange, 
     placeholder, 
     open, 
-    onOpenChange 
+    onOpenChange,
+    colorScheme = 'primary'
   }: {
     options: string[];
     selected: string[];
@@ -113,14 +113,15 @@ export function FilterPanel() {
     placeholder: string;
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    colorScheme?: string;
   }) => (
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="justify-between min-w-[200px]">
+        <Button variant="outline" size="sm" className={`justify-between min-w-[200px] border-2 ${selected.length > 0 ? 'border-primary/50 bg-primary/5' : 'border-gray-200'}`}>
           {selected.length > 0 ? (
-            <div className="flex items-center gap-1">
-              <span>{placeholder}</span>
-              <Badge variant="secondary" className="ml-1">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{placeholder}</span>
+              <Badge variant="secondary" className="bg-primary/20 text-primary">
                 {selected.length}
               </Badge>
             </div>
@@ -130,7 +131,7 @@ export function FilterPanel() {
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0" align="start">
+      <PopoverContent className="w-[350px] p-0" align="start">
         <Command>
           <CommandInput placeholder={`Search ${placeholder.toLowerCase()}...`} />
           <CommandEmpty>No options found.</CommandEmpty>
@@ -144,14 +145,15 @@ export function FilterPanel() {
                     : [...selected, option];
                   onSelectionChange(newSelected);
                 }}
+                className="cursor-pointer"
               >
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    selected.includes(option) ? "opacity-100" : "opacity-0"
+                    selected.includes(option) ? "opacity-100 text-primary" : "opacity-0"
                   )}
                 />
-                {option}
+                <span className={selected.includes(option) ? "font-medium text-primary" : ""}>{option}</span>
               </CommandItem>
             ))}
           </CommandGroup>
@@ -171,25 +173,27 @@ export function FilterPanel() {
     (filters.dateRange.end ? 1 : 0);
 
   return (
-    <Card className="shadow-md border-border/30 animate-fade-in">
-      <Collapsible open={!isCollapsed} onOpenChange={setIsCollapsed}>
+    <Card className="shadow-lg border-2 border-primary/20 animate-fade-in bg-gradient-to-r from-primary/5 to-primary/10">
+      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CollapsibleTrigger asChild>
-          <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-            <div className="flex items-center gap-2">
-              <Filter className="h-5 w-5" />
-              <h3 className="font-medium text-base">Filters & Quick Actions</h3>
+          <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-primary/10 transition-colors rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/20 rounded-lg">
+                <Filter className="h-5 w-5 text-primary" />
+              </div>
+              <h3 className="font-semibold text-lg">Filters & Quick Actions</h3>
               {activeFilterCount > 0 && (
-                <Badge className="bg-primary">{activeFilterCount}</Badge>
+                <Badge className="bg-primary text-primary-foreground">{activeFilterCount}</Badge>
               )}
             </div>
-            {isCollapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+            {isExpanded ? <ChevronUp className="h-5 w-5 text-primary" /> : <ChevronDown className="h-5 w-5 text-primary" />}
           </div>
         </CollapsibleTrigger>
         
         <CollapsibleContent className="px-4 pb-4">
           {/* Quick Filter Buttons */}
-          <div className="mb-4">
-            <h4 className="text-sm font-medium mb-2">Quick Filters</h4>
+          <div className="mb-6">
+            <h4 className="text-sm font-semibold mb-3 text-primary">Quick Date Filters</h4>
             <div className="flex flex-wrap gap-2">
               {[
                 { key: 'this-week', label: 'This Week' },
@@ -204,7 +208,7 @@ export function FilterPanel() {
                   variant="outline"
                   size="sm"
                   onClick={() => handleQuickFilter(period.key)}
-                  className="text-xs"
+                  className="text-xs border-2 border-primary/20 hover:bg-primary/10 hover:border-primary/40"
                 >
                   {period.label}
                 </Button>
@@ -256,7 +260,7 @@ export function FilterPanel() {
                 value={filters.center.length > 0 ? filters.center[0] : ""}
                 onValueChange={(value) => setFilters({ ...filters, center: value ? [value] : [] })}
               >
-                <SelectTrigger className="min-w-[200px]">
+                <SelectTrigger className={`min-w-[200px] border-2 ${filters.center.length > 0 ? 'border-primary/50 bg-primary/5' : 'border-gray-200'}`}>
                   <SelectValue placeholder="Select Center" />
                 </SelectTrigger>
                 <SelectContent>
@@ -272,7 +276,7 @@ export function FilterPanel() {
               {/* Date Range Filter */}
               <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="min-w-[200px] justify-start">
+                  <Button variant="outline" size="sm" className={`min-w-[200px] justify-start border-2 ${filters.dateRange.start ? 'border-primary/50 bg-primary/5' : 'border-gray-200'}`}>
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {filters.dateRange.start ? (
                       filters.dateRange.end ? (
@@ -311,13 +315,13 @@ export function FilterPanel() {
             </div>
 
             {/* Clear Filters Button */}
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-4 border-t border-primary/20">
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={clearFilters}
                 disabled={activeFilterCount === 0}
-                className="gap-2"
+                className="gap-2 border-2 border-destructive/20 text-destructive hover:bg-destructive/10"
               >
                 <X className="h-4 w-4" />
                 Clear All Filters
@@ -326,25 +330,40 @@ export function FilterPanel() {
 
             {/* Active Filters Display */}
             {activeFilterCount > 0 && (
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t">
-                <span className="text-sm font-medium text-muted-foreground">Active:</span>
+              <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-primary/20">
+                <span className="text-sm font-semibold text-primary">Active Filters:</span>
                 {filters.source.map(source => (
-                  <Badge key={source} variant="outline" className="gap-1">
+                  <Badge key={source} variant="outline" className="gap-1 border-primary/30 text-primary">
                     Source: {source}
-                    <X className="h-3 w-3 cursor-pointer" onClick={() => 
+                    <X className="h-3 w-3 cursor-pointer hover:text-destructive" onClick={() => 
                       setFilters({ ...filters, source: filters.source.filter(s => s !== source) })
                     } />
                   </Badge>
                 ))}
                 {filters.associate.map(associate => (
-                  <Badge key={associate} variant="outline" className="gap-1">
+                  <Badge key={associate} variant="outline" className="gap-1 border-primary/30 text-primary">
                     Associate: {associate}
-                    <X className="h-3 w-3 cursor-pointer" onClick={() => 
+                    <X className="h-3 w-3 cursor-pointer hover:text-destructive" onClick={() => 
                       setFilters({ ...filters, associate: filters.associate.filter(a => a !== associate) })
                     } />
                   </Badge>
                 ))}
-                {/* Add similar for other filters */}
+                {filters.status.map(status => (
+                  <Badge key={status} variant="outline" className="gap-1 border-primary/30 text-primary">
+                    Status: {status}
+                    <X className="h-3 w-3 cursor-pointer hover:text-destructive" onClick={() => 
+                      setFilters({ ...filters, status: filters.status.filter(s => s !== status) })
+                    } />
+                  </Badge>
+                ))}
+                {filters.stage.map(stage => (
+                  <Badge key={stage} variant="outline" className="gap-1 border-primary/30 text-primary">
+                    Stage: {stage}
+                    <X className="h-3 w-3 cursor-pointer hover:text-destructive" onClick={() => 
+                      setFilters({ ...filters, stage: filters.stage.filter(s => s !== stage) })
+                    } />
+                  </Badge>
+                ))}
               </div>
             )}
           </div>

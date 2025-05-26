@@ -262,25 +262,25 @@ export function PivotView() {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="configuration" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="configuration">Configuration</TabsTrigger>
-          <TabsTrigger value="table">Pivot Table</TabsTrigger>
-          <TabsTrigger value="settings">Advanced Settings</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 bg-gradient-to-r from-primary/10 to-primary/5">
+          <TabsTrigger value="configuration" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Configuration</TabsTrigger>
+          <TabsTrigger value="table" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Pivot Table</TabsTrigger>
+          <TabsTrigger value="settings" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Advanced Settings</TabsTrigger>
         </TabsList>
         
         <TabsContent value="configuration" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Row Fields */}
-            <Card>
-              <CardHeader>
+            <Card className="shadow-lg border-2 border-primary/20">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
+                  <Settings className="h-5 w-5 text-primary" />
                   Row Fields
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3 p-6">
                 {rowFields.map((field, index) => (
-                  <div key={`row-${index}`} className="flex items-center justify-between p-2 bg-secondary/40 rounded-md">
+                  <div key={`row-${index}`} className="flex items-center justify-between p-3 bg-secondary/40 rounded-lg border">
                     <span className="text-sm font-medium">
                       {fieldOptions.find(f => f.value === field)?.label || field}
                     </span>
@@ -288,15 +288,15 @@ export function PivotView() {
                       variant="ghost" 
                       size="sm" 
                       onClick={() => removeField(field, 'row')}
-                      className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                      className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground rounded-full"
                     >
-                      <X className="h-3 w-3" />
+                      <X className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
                 <Select onValueChange={(value) => addField(value, 'row')}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Add row field" />
+                  <SelectTrigger className="border-2 border-dashed border-primary/30 hover:border-primary/60">
+                    <SelectValue placeholder="+ Add row field" />
                   </SelectTrigger>
                   <SelectContent>
                     {fieldOptions.map(option => (
@@ -310,16 +310,16 @@ export function PivotView() {
             </Card>
 
             {/* Column Fields */}
-            <Card>
-              <CardHeader>
+            <Card className="shadow-lg border-2 border-primary/20">
+              <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/50 dark:to-teal-950/50">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
+                  <Settings className="h-5 w-5 text-emerald-600" />
                   Column Fields
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3 p-6">
                 {colFields.map((field, index) => (
-                  <div key={`col-${index}`} className="flex items-center justify-between p-2 bg-secondary/40 rounded-md">
+                  <div key={`col-${index}`} className="flex items-center justify-between p-3 bg-secondary/40 rounded-lg border">
                     <span className="text-sm font-medium">
                       {fieldOptions.find(f => f.value === field)?.label || field}
                     </span>
@@ -327,15 +327,15 @@ export function PivotView() {
                       variant="ghost" 
                       size="sm" 
                       onClick={() => removeField(field, 'col')}
-                      className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                      className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground rounded-full"
                     >
-                      <X className="h-3 w-3" />
+                      <X className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
                 <Select onValueChange={(value) => addField(value, 'col')}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Add column field" />
+                  <SelectTrigger className="border-2 border-dashed border-emerald-300/30 hover:border-emerald-300/60">
+                    <SelectValue placeholder="+ Add column field" />
                   </SelectTrigger>
                   <SelectContent>
                     {fieldOptions.map(option => (
@@ -349,17 +349,17 @@ export function PivotView() {
             </Card>
 
             {/* Value Fields */}
-            <Card>
-              <CardHeader>
+            <Card className="shadow-lg border-2 border-primary/20">
+              <CardHeader className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/50 dark:to-violet-950/50">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Calculator className="h-5 w-5" />
+                  <Calculator className="h-5 w-5 text-purple-600" />
                   Value Fields
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3 p-6">
                 {valueFields.map((field, index) => (
                   <div key={`value-${index}`} className="space-y-2">
-                    <div className="flex items-center justify-between p-2 bg-secondary/40 rounded-md">
+                    <div className="flex items-center justify-between p-3 bg-secondary/40 rounded-lg border">
                       <span className="text-sm font-medium">
                         {fieldOptions.find(f => f.value === field)?.label || field}
                       </span>
@@ -367,9 +367,9 @@ export function PivotView() {
                         variant="ghost" 
                         size="sm" 
                         onClick={() => removeField(field, 'value')}
-                        className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                        className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground rounded-full"
                       >
-                        <X className="h-3 w-3" />
+                        <X className="h-4 w-4" />
                       </Button>
                     </div>
                     <Select 
@@ -379,7 +379,7 @@ export function PivotView() {
                         [field]: value
                       })}
                     >
-                      <SelectTrigger className="text-xs">
+                      <SelectTrigger className="text-xs border border-purple-200">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -393,8 +393,8 @@ export function PivotView() {
                   </div>
                 ))}
                 <Select onValueChange={(value) => addField(value, 'value')}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Add value field" />
+                  <SelectTrigger className="border-2 border-dashed border-purple-300/30 hover:border-purple-300/60">
+                    <SelectValue placeholder="+ Add value field" />
                   </SelectTrigger>
                   <SelectContent>
                     {fieldOptions.map(option => (
@@ -410,15 +410,15 @@ export function PivotView() {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
-          <Card>
-            <CardHeader>
+          <Card className="shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/50 dark:to-orange-950/50">
               <CardTitle>Display Settings</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="show-totals">Show Totals</Label>
+                  <div className="flex items-center justify-between p-4 bg-secondary/30 rounded-lg">
+                    <Label htmlFor="show-totals" className="font-medium">Show Totals</Label>
                     <Switch 
                       id="show-totals"
                       checked={showTotals} 
@@ -426,8 +426,8 @@ export function PivotView() {
                     />
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="show-subtotals">Show Subtotals</Label>
+                  <div className="flex items-center justify-between p-4 bg-secondary/30 rounded-lg">
+                    <Label htmlFor="show-subtotals" className="font-medium">Show Subtotals</Label>
                     <Switch 
                       id="show-subtotals"
                       checked={showSubtotals} 
@@ -437,8 +437,8 @@ export function PivotView() {
                 </div>
                 
                 <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="decimal-places">Decimal Places</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="decimal-places" className="font-medium">Decimal Places</Label>
                     <Input
                       id="decimal-places"
                       type="number"
@@ -446,18 +446,18 @@ export function PivotView() {
                       max="10"
                       value={decimalPlaces}
                       onChange={(e) => setDecimalPlaces(parseInt(e.target.value) || 0)}
-                      className="mt-1"
+                      className="border-2"
                     />
                   </div>
                   
-                  <div>
-                    <Label htmlFor="custom-formula">Custom Formula</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="custom-formula" className="font-medium">Custom Formula</Label>
                     <Input
                       id="custom-formula"
                       value={customFormula}
                       onChange={(e) => setCustomFormula(e.target.value)}
                       placeholder="e.g., SUM(field1) / COUNT(field2)"
-                      className="mt-1"
+                      className="border-2"
                     />
                   </div>
                 </div>
@@ -468,113 +468,153 @@ export function PivotView() {
 
         <TabsContent value="table">
           <div className="flex justify-end mb-4">
-            <Button onClick={handleRefresh} className="gap-2" disabled={isLoading}>
+            <Button onClick={handleRefresh} className="gap-2 bg-gradient-to-r from-primary to-primary/80" disabled={isLoading}>
               <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               Generate Pivot Table
             </Button>
           </div>
           
-          <Card className="border-border/40 bg-white dark:bg-gray-900">
+          <Card className="border-2 border-primary/20 bg-white dark:bg-gray-900 shadow-xl">
             <div className="p-4 overflow-x-auto">
               {isLoading ? (
                 <div className="p-8 flex items-center justify-center">
-                  <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <RefreshCw className="h-8 w-8 animate-spin text-primary" />
                 </div>
               ) : (
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead className="bg-muted/50 font-semibold min-w-[120px]">
+                    <TableRow className="bg-gradient-to-r from-primary/10 to-primary/5">
+                      <TableHead className="bg-primary/20 font-bold text-primary min-w-[150px] border-r-2 border-primary/30">
                         {fieldOptions.find(f => f.value === rowFields[0])?.label || rowFields[0]}
-                        {' / '}
+                        {' \\ '}
                         {fieldOptions.find(f => f.value === colFields[0])?.label || colFields[0]}
                       </TableHead>
                       {pivotResult.colValues.map((col) => (
-                        <TableHead key={col} className="bg-muted/50 font-semibold text-center min-w-[100px]">
+                        <TableHead key={col} className="bg-primary/10 font-bold text-center min-w-[120px] border-r border-primary/20">
                           {col}
                         </TableHead>
                       ))}
                       {showTotals && (
-                        <TableHead className="bg-muted/70 font-bold text-center">Total</TableHead>
+                        <TableHead className="bg-primary/30 font-bold text-center border-l-2 border-primary/50">Total</TableHead>
                       )}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {pivotResult.rowValues.map((row) => (
-                      <TableRow key={row} className="hover:bg-muted/30">
-                        <TableCell className="font-semibold bg-muted/30 sticky left-0">{row}</TableCell>
+                    {pivotResult.rowValues.map((row, rowIndex) => (
+                      <TableRow key={row} className={`hover:bg-primary/5 ${rowIndex % 2 === 0 ? 'bg-gray-50/50 dark:bg-gray-800/30' : ''}`}>
+                        <TableCell className="font-semibold bg-primary/10 sticky left-0 border-r-2 border-primary/30">{row}</TableCell>
                         {pivotResult.colValues.map((col) => (
-                          <TableCell key={`${row}-${col}`} className="text-center">
-                            <div className="space-y-1">
-                              {valueFields.map(field => (
-                                <div key={field} className="text-sm">
-                                  <Badge variant="outline" className="text-xs mb-1">
-                                    {fieldOptions.find(f => f.value === field)?.label}
-                                  </Badge>
-                                  <div className="font-medium">
-                                    {formatValue(pivotResult.data[row][col][field], field)}
+                          <TableCell key={`${row}-${col}`} className="text-center border-r border-gray-200 dark:border-gray-700">
+                            {valueFields.length === 1 ? (
+                              <div className="font-medium text-lg">
+                                {formatValue(pivotResult.data[row][col][valueFields[0]], valueFields[0])}
+                              </div>
+                            ) : (
+                              <div className="space-y-1">
+                                {valueFields.map(field => (
+                                  <div key={field} className="text-sm">
+                                    <div className="text-xs text-muted-foreground">
+                                      {fieldOptions.find(f => f.value === field)?.label}
+                                    </div>
+                                    <div className="font-medium">
+                                      {formatValue(pivotResult.data[row][col][field], field)}
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
-                            </div>
+                                ))}
+                              </div>
+                            )}
                           </TableCell>
                         ))}
                         {showTotals && (
-                          <TableCell className="font-bold bg-muted/30 text-center">
-                            <div className="space-y-1">
-                              {valueFields.map(field => (
-                                <div key={field} className="text-sm">
-                                  {formatValue(
-                                    pivotResult.colValues.reduce((sum, col) => 
-                                      sum + pivotResult.data[row][col][field], 0
-                                    ), 
-                                    field
-                                  )}
-                                </div>
-                              ))}
-                            </div>
+                          <TableCell className="font-bold bg-primary/20 text-center border-l-2 border-primary/50">
+                            {valueFields.length === 1 ? (
+                              <div className="font-bold text-lg">
+                                {formatValue(
+                                  pivotResult.colValues.reduce((sum, col) => 
+                                    sum + pivotResult.data[row][col][valueFields[0]], 0
+                                  ), 
+                                  valueFields[0]
+                                )}
+                              </div>
+                            ) : (
+                              <div className="space-y-1">
+                                {valueFields.map(field => (
+                                  <div key={field} className="text-sm">
+                                    {formatValue(
+                                      pivotResult.colValues.reduce((sum, col) => 
+                                        sum + pivotResult.data[row][col][field], 0
+                                      ), 
+                                      field
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </TableCell>
                         )}
                       </TableRow>
                     ))}
                     {showTotals && (
-                      <TableRow className="border-t-2 bg-muted/50">
-                        <TableCell className="font-bold">Total</TableCell>
+                      <TableRow className="border-t-4 border-primary/50 bg-primary/20">
+                        <TableCell className="font-bold text-primary">Total</TableCell>
                         {pivotResult.colValues.map((col) => (
-                          <TableCell key={`total-${col}`} className="font-semibold text-center">
+                          <TableCell key={`total-${col}`} className="font-semibold text-center border-r border-primary/30">
+                            {valueFields.length === 1 ? (
+                              <div className="font-bold text-lg">
+                                {formatValue(
+                                  pivotResult.rowValues.reduce((sum, row) => 
+                                    sum + pivotResult.data[row][col][valueFields[0]], 0
+                                  ), 
+                                  valueFields[0]
+                                )}
+                              </div>
+                            ) : (
+                              <div className="space-y-1">
+                                {valueFields.map(field => (
+                                  <div key={field} className="text-sm">
+                                    {formatValue(
+                                      pivotResult.rowValues.reduce((sum, row) => 
+                                        sum + pivotResult.data[row][col][field], 0
+                                      ), 
+                                      field
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </TableCell>
+                        ))}
+                        <TableCell className="font-bold bg-primary/40 text-center border-l-2 border-primary/70">
+                          {valueFields.length === 1 ? (
+                            <div className="font-bold text-lg text-primary">
+                              {formatValue(
+                                pivotResult.rowValues.reduce((rowSum, row) => 
+                                  rowSum + pivotResult.colValues.reduce((colSum, col) => 
+                                    colSum + pivotResult.data[row][col][valueFields[0]], 0
+                                  ), 0
+                                ), 
+                                valueFields[0]
+                              )}
+                            </div>
+                          ) : (
                             <div className="space-y-1">
                               {valueFields.map(field => (
-                                <div key={field} className="text-sm">
+                                <div key={field} className="text-sm font-bold text-primary">
                                   {formatValue(
-                                    pivotResult.rowValues.reduce((sum, row) => 
-                                      sum + pivotResult.data[row][col][field], 0
+                                    pivotResult.rowValues.reduce((rowSum, row) => 
+                                      rowSum + pivotResult.colValues.reduce((colSum, col) => 
+                                        colSum + pivotResult.data[row][col][field], 0
+                                      ), 0
                                     ), 
                                     field
                                   )}
                                 </div>
                               ))}
                             </div>
-                          </TableCell>
-                        ))}
-                        <TableCell className="font-bold bg-muted/70 text-center">
-                          <div className="space-y-1">
-                            {valueFields.map(field => (
-                              <div key={field} className="text-sm">
-                                {formatValue(
-                                  pivotResult.rowValues.reduce((rowSum, row) => 
-                                    rowSum + pivotResult.colValues.reduce((colSum, col) => 
-                                      colSum + pivotResult.data[row][col][field], 0
-                                    ), 0
-                                  ), 
-                                  field
-                                )}
-                              </div>
-                            ))}
-                          </div>
+                          )}
                         </TableCell>
-                      )}
-                    </TableRow>
-                  )}
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               )}
