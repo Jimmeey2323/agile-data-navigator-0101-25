@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Check, 
@@ -115,63 +114,69 @@ export function FilterPanel() {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     colorScheme?: string;
-  }) => (
-    <Popover open={open} onOpenChange={onOpenChange}>
-      <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className={`justify-between min-w-[200px] border-2 ${selected.length > 0 ? 'border-primary/50 bg-primary/5' : 'border-gray-200'}`}>
-          {selected.length > 0 ? (
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{placeholder}</span>
-              <Badge variant="secondary" className="bg-primary/20 text-primary">
-                {selected.length}
-              </Badge>
-            </div>
-          ) : (
-            placeholder
-          )}
-          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[350px] p-0" align="start">
-        <Command>
-          <CommandInput placeholder={`Search ${placeholder.toLowerCase()}...`} />
-          <CommandEmpty>No options found.</CommandEmpty>
-          <CommandGroup className="max-h-64 overflow-auto">
-            {options.map((option) => (
-              <CommandItem
-                key={option}
-                onSelect={() => {
-                  const newSelected = selected.includes(option)
-                    ? selected.filter(item => item !== option)
-                    : [...selected, option];
-                  onSelectionChange(newSelected);
-                }}
-                className="cursor-pointer"
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    selected.includes(option) ? "opacity-100 text-primary" : "opacity-0"
-                  )}
-                />
-                <span className={selected.includes(option) ? "font-medium text-primary" : ""}>{option}</span>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
+  }) => {
+    // Ensure options and selected are always arrays
+    const safeOptions = options || [];
+    const safeSelected = selected || [];
+    
+    return (
+      <Popover open={open} onOpenChange={onOpenChange}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size="sm" className={`justify-between min-w-[200px] border-2 ${safeSelected.length > 0 ? 'border-primary/50 bg-primary/5' : 'border-gray-200'}`}>
+            {safeSelected.length > 0 ? (
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{placeholder}</span>
+                <Badge variant="secondary" className="bg-primary/20 text-primary">
+                  {safeSelected.length}
+                </Badge>
+              </div>
+            ) : (
+              placeholder
+            )}
+            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[350px] p-0" align="start">
+          <Command>
+            <CommandInput placeholder={`Search ${placeholder.toLowerCase()}...`} />
+            <CommandEmpty>No options found.</CommandEmpty>
+            <CommandGroup className="max-h-64 overflow-auto">
+              {safeOptions.map((option) => (
+                <CommandItem
+                  key={option}
+                  onSelect={() => {
+                    const newSelected = safeSelected.includes(option)
+                      ? safeSelected.filter(item => item !== option)
+                      : [...safeSelected, option];
+                    onSelectionChange(newSelected);
+                  }}
+                  className="cursor-pointer"
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      safeSelected.includes(option) ? "opacity-100 text-primary" : "opacity-0"
+                    )}
+                  />
+                  <span className={safeSelected.includes(option) ? "font-medium text-primary" : ""}>{option}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    );
+  };
 
-  // Count active filters
+  // Count active filters - ensure all filter arrays exist
   const activeFilterCount = 
-    filters.source.length + 
-    filters.associate.length + 
-    filters.center.length + 
-    filters.stage.length + 
-    filters.status.length + 
-    (filters.dateRange.start ? 1 : 0) + 
-    (filters.dateRange.end ? 1 : 0);
+    (filters.source?.length || 0) + 
+    (filters.associate?.length || 0) + 
+    (filters.center?.length || 0) + 
+    (filters.stage?.length || 0) + 
+    (filters.status?.length || 0) + 
+    (filters.dateRange?.start ? 1 : 0) + 
+    (filters.dateRange?.end ? 1 : 0);
 
   return (
     <Card className="shadow-lg border-2 border-primary/20 animate-fade-in bg-gradient-to-r from-primary/5 to-primary/10">
@@ -221,8 +226,8 @@ export function FilterPanel() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <MultiSelectField
-                options={sourceOptions}
-                selected={filters.source}
+                options={sourceOptions || []}
+                selected={filters.source || []}
                 onSelectionChange={(values) => setFilters({ ...filters, source: values })}
                 placeholder="Sources"
                 open={sourceOpen}
@@ -230,8 +235,8 @@ export function FilterPanel() {
               />
 
               <MultiSelectField
-                options={associateOptions}
-                selected={filters.associate}
+                options={associateOptions || []}
+                selected={filters.associate || []}
                 onSelectionChange={(values) => setFilters({ ...filters, associate: values })}
                 placeholder="Associates"
                 open={associateOpen}
@@ -239,8 +244,8 @@ export function FilterPanel() {
               />
 
               <MultiSelectField
-                options={statusOptions}
-                selected={filters.status}
+                options={statusOptions || []}
+                selected={filters.status || []}
                 onSelectionChange={(values) => setFilters({ ...filters, status: values })}
                 placeholder="Status"
                 open={statusOpen}
@@ -248,8 +253,8 @@ export function FilterPanel() {
               />
 
               <MultiSelectField
-                options={stageOptions}
-                selected={filters.stage}
+                options={stageOptions || []}
+                selected={filters.stage || []}
                 onSelectionChange={(values) => setFilters({ ...filters, stage: values })}
                 placeholder="Stages"
                 open={stageOpen}
@@ -258,15 +263,15 @@ export function FilterPanel() {
 
               {/* Center Dropdown */}
               <Select
-                value={filters.center.length > 0 ? filters.center[0] : "all-centers"}
+                value={filters.center?.length > 0 ? filters.center[0] : "all-centers"}
                 onValueChange={(value) => setFilters({ ...filters, center: value === "all-centers" ? [] : [value] })}
               >
-                <SelectTrigger className={`min-w-[200px] border-2 ${filters.center.length > 0 ? 'border-primary/50 bg-primary/5' : 'border-gray-200'}`}>
+                <SelectTrigger className={`min-w-[200px] border-2 ${filters.center?.length > 0 ? 'border-primary/50 bg-primary/5' : 'border-gray-200'}`}>
                   <SelectValue placeholder="Select Center" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all-centers">All Centers</SelectItem>
-                  {centerOptions.map((center) => (
+                  {(centerOptions || []).map((center) => (
                     <SelectItem key={center} value={center}>
                       {center}
                     </SelectItem>
@@ -333,35 +338,35 @@ export function FilterPanel() {
             {activeFilterCount > 0 && (
               <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-primary/20">
                 <span className="text-sm font-semibold text-primary">Active Filters:</span>
-                {filters.source.map(source => (
+                {(filters.source || []).map(source => (
                   <Badge key={source} variant="outline" className="gap-1 border-primary/30 text-primary">
                     Source: {source}
                     <X className="h-3 w-3 cursor-pointer hover:text-destructive" onClick={() => 
-                      setFilters({ ...filters, source: filters.source.filter(s => s !== source) })
+                      setFilters({ ...filters, source: (filters.source || []).filter(s => s !== source) })
                     } />
                   </Badge>
                 ))}
-                {filters.associate.map(associate => (
+                {(filters.associate || []).map(associate => (
                   <Badge key={associate} variant="outline" className="gap-1 border-primary/30 text-primary">
                     Associate: {associate}
                     <X className="h-3 w-3 cursor-pointer hover:text-destructive" onClick={() => 
-                      setFilters({ ...filters, associate: filters.associate.filter(a => a !== associate) })
+                      setFilters({ ...filters, associate: (filters.associate || []).filter(a => a !== associate) })
                     } />
                   </Badge>
                 ))}
-                {filters.status.map(status => (
+                {(filters.status || []).map(status => (
                   <Badge key={status} variant="outline" className="gap-1 border-primary/30 text-primary">
                     Status: {status}
                     <X className="h-3 w-3 cursor-pointer hover:text-destructive" onClick={() => 
-                      setFilters({ ...filters, status: filters.status.filter(s => s !== status) })
+                      setFilters({ ...filters, status: (filters.status || []).filter(s => s !== status) })
                     } />
                   </Badge>
                 ))}
-                {filters.stage.map(stage => (
+                {(filters.stage || []).map(stage => (
                   <Badge key={stage} variant="outline" className="gap-1 border-primary/30 text-primary">
                     Stage: {stage}
                     <X className="h-3 w-3 cursor-pointer hover:text-destructive" onClick={() => 
-                      setFilters({ ...filters, stage: filters.stage.filter(s => s !== stage) })
+                      setFilters({ ...filters, stage: (filters.stage || []).filter(s => s !== stage) })
                     } />
                   </Badge>
                 ))}
