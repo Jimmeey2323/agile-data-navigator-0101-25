@@ -11,19 +11,19 @@ import { useLeads } from '@/contexts/LeadContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Card } from '@/components/ui/card';
-import { 
-  Popover, 
-  PopoverContent, 
-  PopoverTrigger 
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from '@/components/ui/popover';
+import { Card } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -41,6 +41,11 @@ export function FilterPanel() {
   } = useLeads();
   
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
+  const [sourceOpen, setSourceOpen] = useState(false);
+  const [associateOpen, setAssociateOpen] = useState(false);
+  const [centerOpen, setCenterOpen] = useState(false);
+  const [stageOpen, setStageOpen] = useState(false);
+  const [statusOpen, setStatusOpen] = useState(false);
   
   const handleSourceChange = (value: string) => {
     const currentValues = [...filters.source];
@@ -158,6 +163,66 @@ export function FilterPanel() {
     );
   };
   
+  const MultiSelectFilter = ({ 
+    title, 
+    options, 
+    selectedValues, 
+    onValueChange, 
+    open, 
+    setOpen,
+    icon 
+  }: {
+    title: string;
+    options: string[];
+    selectedValues: string[];
+    onValueChange: (value: string) => void;
+    open: boolean;
+    setOpen: (open: boolean) => void;
+    icon?: React.ReactNode;
+  }) => (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="flex items-center gap-2 h-9">
+          {icon}
+          {title}
+          {selectedValues.length > 0 && (
+            <Badge className="ml-1 bg-primary">{selectedValues.length}</Badge>
+          )}
+          <ChevronDown className="h-3 w-3 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-52 p-0" align="start">
+        <Command>
+          <CommandInput placeholder={`Search ${title.toLowerCase()}...`} />
+          <CommandList>
+            <CommandEmpty>No {title.toLowerCase()} found.</CommandEmpty>
+            <CommandGroup>
+              {options.map((option) => (
+                <CommandItem
+                  key={option}
+                  onSelect={() => onValueChange(option)}
+                  className="cursor-pointer"
+                >
+                  <div className="flex items-center space-x-2">
+                    <div className={cn(
+                      "flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                      selectedValues.includes(option)
+                        ? "bg-primary text-primary-foreground"
+                        : "opacity-50 [&_svg]:invisible"
+                    )}>
+                      <Check className="h-3 w-3" />
+                    </div>
+                    <span>{option}</span>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+  
   return (
     <Card className="p-4 shadow-md border-border/30 animate-fade-in">
       <div className="flex flex-col space-y-4">
@@ -185,109 +250,55 @@ export function FilterPanel() {
         
         <div className="flex flex-wrap items-center gap-2 pt-2">
           {/* Source Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                <Tag className="h-4 w-4" />
-                Source
-                {filters.source.length > 0 && (
-                  <Badge className="ml-1 bg-primary">{filters.source.length}</Badge>
-                )}
-                <ChevronDown className="h-3 w-3 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-52">
-              <DropdownMenuLabel>Select Sources</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {sourceOptions.map((source) => (
-                <DropdownMenuCheckboxItem
-                  key={source}
-                  checked={filters.source.includes(source)}
-                  onCheckedChange={() => handleSourceChange(source)}
-                >
-                  {source}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <MultiSelectFilter
+            title="Source"
+            options={sourceOptions}
+            selectedValues={filters.source}
+            onValueChange={handleSourceChange}
+            open={sourceOpen}
+            setOpen={setSourceOpen}
+            icon={<Tag className="h-4 w-4" />}
+          />
           
           {/* Associate Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                Associate
-                {filters.associate.length > 0 && (
-                  <Badge className="ml-1 bg-primary">{filters.associate.length}</Badge>
-                )}
-                <ChevronDown className="h-3 w-3 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-52">
-              <DropdownMenuLabel>Select Associates</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {associateOptions.map((associate) => (
-                <DropdownMenuCheckboxItem
-                  key={associate}
-                  checked={filters.associate.includes(associate)}
-                  onCheckedChange={() => handleAssociateChange(associate)}
-                >
-                  {associate}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <MultiSelectFilter
+            title="Associate"
+            options={associateOptions}
+            selectedValues={filters.associate}
+            onValueChange={handleAssociateChange}
+            open={associateOpen}
+            setOpen={setAssociateOpen}
+          />
+          
+          {/* Center Filter */}
+          <MultiSelectFilter
+            title="Center"
+            options={centerOptions}
+            selectedValues={filters.center}
+            onValueChange={handleCenterChange}
+            open={centerOpen}
+            setOpen={setCenterOpen}
+          />
           
           {/* Status Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                Status
-                {filters.status.length > 0 && (
-                  <Badge className="ml-1 bg-primary">{filters.status.length}</Badge>
-                )}
-                <ChevronDown className="h-3 w-3 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-52">
-              <DropdownMenuLabel>Select Status</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {statusOptions.map((status) => (
-                <DropdownMenuCheckboxItem
-                  key={status}
-                  checked={filters.status.includes(status)}
-                  onCheckedChange={() => handleStatusChange(status)}
-                >
-                  {status}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <MultiSelectFilter
+            title="Status"
+            options={statusOptions}
+            selectedValues={filters.status}
+            onValueChange={handleStatusChange}
+            open={statusOpen}
+            setOpen={setStatusOpen}
+          />
           
           {/* Stage Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                Stage
-                {filters.stage.length > 0 && (
-                  <Badge className="ml-1 bg-primary">{filters.stage.length}</Badge>
-                )}
-                <ChevronDown className="h-3 w-3 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-52">
-              <DropdownMenuLabel>Select Stages</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {stageOptions.map((stage) => (
-                <DropdownMenuCheckboxItem
-                  key={stage}
-                  checked={filters.stage.includes(stage)}
-                  onCheckedChange={() => handleStageChange(stage)}
-                >
-                  {stage}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <MultiSelectFilter
+            title="Stage"
+            options={stageOptions}
+            selectedValues={filters.stage}
+            onValueChange={handleStageChange}
+            open={stageOpen}
+            setOpen={setStageOpen}
+          />
           
           {/* Date Range Filter */}
           <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>

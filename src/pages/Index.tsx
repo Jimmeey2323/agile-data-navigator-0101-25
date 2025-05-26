@@ -1,4 +1,3 @@
-
 import { Suspense, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,7 +22,9 @@ import {
   SlidersHorizontal,
   Eye,
   EyeOff,
-  ExternalLink
+  ExternalLink,
+  HelpCircle,
+  Bell
 } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 import { SearchBar } from "@/components/SearchBar";
@@ -52,6 +53,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Lead } from "@/services/googleSheets";
+import { QuickFilters } from "@/components/QuickFilters";
 
 const Index = () => {
   const { refreshData, isRefreshing, settings, updateSettings, addLead } = useLeads();
@@ -331,6 +333,11 @@ const Index = () => {
                 </p>
               </CardHeader>
             </Card>
+
+            {/* Add QuickFilters component above the table */}
+            <div className="mb-4">
+              <QuickFilters />
+            </div>
 
             <Suspense fallback={<div className="py-8 text-center">Loading leads data...</div>}>
               <LeadsTable 
