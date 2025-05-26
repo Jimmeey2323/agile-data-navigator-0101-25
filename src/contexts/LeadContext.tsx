@@ -237,20 +237,36 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const handleUpdateLead = async (lead: Lead) => {
     try {
       console.log('Updating lead:', lead.id);
-      // Optimistic update
+      
+      // Show loading state
+      toast.info('Saving changes...');
+      
+      // Save to Google Sheets first
+      await updateLead(lead);
+      
+      // Optimistic update to local state
       setLeads(currentLeads =>
         currentLeads.map(l => (l.id === lead.id ? lead : l))
       );
       
-      // Save to Google Sheets
-      await updateLead(lead);
+      // Force a fresh fetch after a short delay to ensure data consistency
+      setTimeout(async () => {
+        try {
+          const freshData = await fetchLeads();
+          setLeads(freshData);
+          console.log('Data refreshed after update');
+        } catch (refreshError) {
+          console.error('Error refreshing data after update:', refreshError);
+        }
+      }, 1000);
+      
       toast.success('Lead updated successfully');
     } catch (err) {
       console.error('Error updating lead:', err);
       setError(err instanceof Error ? err : new Error('Failed to update lead'));
-      toast.error('Failed to update lead');
+      toast.error('Failed to update lead. Please try again.');
       
-      // Revert optimistic update
+      // Refresh data to get the current state
       await fetchData();
     }
   };

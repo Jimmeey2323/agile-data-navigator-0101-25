@@ -1,3 +1,4 @@
+
 import { delay } from '@/lib/utils';
 import Papa from 'papaparse';
 
@@ -275,6 +276,41 @@ export const fetchLeads = async (): Promise<Lead[]> => {
   }
 };
 
+// Function to find the row number of a lead in the sheet
+const findLeadRowInSheet = async (leadId: string): Promise<number> => {
+  try {
+    const accessToken = await getAccessToken();
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_RANGE}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch sheet data: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    const rows = data.values || [];
+    
+    // Find the row with matching ID (column A)
+    for (let i = 1; i < rows.length; i++) { // Start from 1 to skip header
+      if (rows[i][0] === leadId) {
+        return i + 1; // Return 1-based row number for Google Sheets
+      }
+    }
+    
+    throw new Error(`Lead with ID ${leadId} not found in sheet`);
+  } catch (error) {
+    console.error('Error finding lead row:', error);
+    throw error;
+  }
+};
+
 // Function to update a lead
 export const updateLead = async (lead: Lead): Promise<Lead> => {
   console.log('Updating lead in Google Sheets:', lead.id);
@@ -283,25 +319,76 @@ export const updateLead = async (lead: Lead): Promise<Lead> => {
     // Get access token
     const accessToken = await getAccessToken();
     
-    // First, we need to find the row number for this lead
-    const indexInCache = currentLeads.findIndex(l => l.id === lead.id);
+    // Find the row number for this lead
+    const rowNumber = await findLeadRowInSheet(lead.id);
+    console.log(`Found lead ${lead.id} at row ${rowNumber}`);
     
-    if (indexInCache === -1) {
-      throw new Error(`Lead with ID ${lead.id} not found in cache`);
+    // Prepare the update data - map lead fields to sheet columns
+    const updateValues = [
+      lead.id,
+      lead.fullName,
+      lead.phone,
+      lead.email,
+      lead.createdAt,
+      '', // Source ID (if available)
+      lead.source,
+      '', // Member ID (if available)
+      '', // Converted To Customer At (if available)
+      lead.stage,
+      lead.associate,
+      lead.remarks,
+      lead.followUp1Date || '',
+      lead.followUp1Comments || '',
+      lead.followUp2Date || '',
+      lead.followUp2Comments || '',
+      lead.followUp3Date || '',
+      lead.followUp3Comments || '',
+      lead.followUp4Date || '',
+      lead.followUp4Comments || '',
+      lead.center,
+      '', // Class Type (if available)
+      '', // Host ID (if available)  
+      lead.status,
+      '', // Channel (if available)
+      '', // Period (if available)
+      '', // Purchases Made (if available)
+      '', // LTV (if available)
+      '', // Visits (if available)
+      '', // Trial Status (if available)
+      '', // Conversion Status (if available)
+      ''  // Retention Status (if available)
+    ];
+    
+    // Update the specific row in Google Sheets
+    const range = `${SHEET_NAME}!A${rowNumber}:AF${rowNumber}`;
+    const updateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?valueInputOption=RAW`;
+    
+    const updateResponse = await fetch(updateUrl, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        values: [updateValues]
+      }),
+    });
+    
+    if (!updateResponse.ok) {
+      throw new Error(`Failed to update sheet: ${updateResponse.statusText}`);
     }
     
-    // Update the cached version first (optimistic update)
-    currentLeads[indexInCache] = { ...lead };
-    
-    // In a real implementation, you would update the Google Sheet
-    // This requires a more complex operation to find the row in the sheet
-    // and update it with the new values
-    
-    // We would need to know which row corresponds to this lead in the sheet
-    // For simplicity, we'll simulate the update to Google Sheets
-    await delay(600); // Simulate API delay
-    
     console.log('Lead updated successfully in Google Sheets');
+    
+    // Update the cached version
+    const indexInCache = currentLeads.findIndex(l => l.id === lead.id);
+    if (indexInCache !== -1) {
+      currentLeads[indexInCache] = { ...lead };
+    }
+    
+    // Clear cache to force refresh on next fetch
+    lastFetchTime = 0;
+    
     return lead;
   } catch (error) {
     console.error('Error updating lead in Google Sheets:', error);
