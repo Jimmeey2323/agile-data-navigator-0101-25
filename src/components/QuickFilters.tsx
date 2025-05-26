@@ -80,10 +80,26 @@ export function QuickFilters() {
 
   const handleQuickFilter = (type: string) => {
     const dateRange = getDateRange(type);
-    setFilters({
-      ...filters,
-      dateRange
-    });
+    
+    // Check if this filter is already active - if so, clear it
+    const isCurrentlyActive = (
+      filters.dateRange.start?.getTime() === dateRange.start?.getTime() &&
+      filters.dateRange.end?.getTime() === dateRange.end?.getTime()
+    );
+    
+    if (isCurrentlyActive) {
+      // Clear the filter
+      setFilters({
+        ...filters,
+        dateRange: { start: null, end: null }
+      });
+    } else {
+      // Apply the filter
+      setFilters({
+        ...filters,
+        dateRange
+      });
+    }
   };
 
   const isActiveFilter = (type: string) => {
