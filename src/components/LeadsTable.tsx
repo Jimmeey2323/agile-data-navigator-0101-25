@@ -125,7 +125,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
   const [bookmarkedLeads, setBookmarkedLeads] = useState<string[]>([]);
   const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
-  const [groupByField, setGroupByField] = useState<string>('');
+  const [groupByField, setGroupByField] = useState<string>('none');
   const [collapsedGroups, setCollapsedGroups] = useState<string[]>([]);
   const [visibleColumns, setVisibleColumns] = useState({
     name: true,
@@ -161,7 +161,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
   
   // Group leads if grouping is enabled
   const groupedLeads = useMemo(() => {
-    if (!groupByField) {
+    if (groupByField === 'none') {
       return { '': displayedLeads.slice(startIndex, startIndex + pageSize) };
     }
     
@@ -382,7 +382,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                 <SelectValue placeholder="Group by..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No grouping</SelectItem>
+                <SelectItem value="none">No grouping</SelectItem>
                 <SelectItem value="source">Source</SelectItem>
                 <SelectItem value="status">Status</SelectItem>
                 <SelectItem value="stage">Stage</SelectItem>
@@ -498,7 +498,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
             <TableBody>
               {Object.entries(groupedLeads).map(([groupKey, groupLeads]) => (
                 <React.Fragment key={groupKey}>
-                  {groupByField && groupKey && (
+                  {groupByField !== 'none' && groupKey && (
                     <TableRow className="bg-slate-50 hover:bg-slate-100 border-b-2 border-slate-200">
                       <TableCell colSpan={Object.values(visibleColumns).filter(Boolean).length + 2} className="h-[30px]">
                         <div className="flex items-center justify-between">
@@ -527,7 +527,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                     </TableRow>
                   )}
                   
-                  {(!groupByField || !collapsedGroups.includes(groupKey)) && groupLeads.map((lead) => (
+                  {(groupByField === 'none' || !collapsedGroups.includes(groupKey)) && groupLeads.map((lead) => (
                     <TableRow 
                       key={lead.id} 
                       className="h-[30px] hover:bg-slate-50/80 transition-colors cursor-pointer border-b border-slate-100"

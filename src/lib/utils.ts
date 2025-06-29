@@ -1,4 +1,3 @@
-
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -47,7 +46,7 @@ export function getUniqueValues<T>(items: T[], key: keyof T): string[] {
   
   items.forEach(item => {
     const value = item[key];
-    if (value && typeof value === 'string') {
+    if (value && typeof value === 'string' && value.trim() !== '') {
       uniqueValues.add(value);
     }
   });
@@ -60,7 +59,7 @@ export function countByKey<T>(items: T[], key: keyof T): Record<string, number> 
   
   items.forEach(item => {
     const value = item[key];
-    if (value && typeof value === 'string') {
+    if (value && typeof value === 'string' && value.trim() !== '') {
       counts[value] = (counts[value] || 0) + 1;
     }
   });
