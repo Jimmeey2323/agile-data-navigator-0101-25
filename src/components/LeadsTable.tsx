@@ -321,21 +321,21 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
 
   return (
     <Card className="shadow-xl border-border/30 overflow-hidden bg-white backdrop-blur-xl">
-      {/* Animated Title Section with Black Gradient */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-gray-900 via-purple-900 to-black border-b-8 border-purple-700 text-white uppercase text-3xl font-extrabold tracking-wide px-6 py-4 shadow-lg">
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/20 via-purple-900/20 to-black/20 animate-pulse"></div>
-        <div className="relative flex items-center justify-between">
+      {/* Sleek Title Section */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-b-4 border-slate-600">
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-800/20 via-slate-900/20 to-slate-800/20 animate-pulse"></div>
+        <div className="relative flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <div className="relative">
-              <Activity className="h-8 w-8 text-white animate-pulse" />
+              <Activity className="h-6 w-6 text-white animate-pulse" />
               <div className="absolute inset-0 bg-white/20 rounded-full animate-ping"></div>
             </div>
             <div>
-              <h2 className="text-2xl font-extrabold text-white tracking-wide font-mono">
-                PREMIUM LEAD MANAGEMENT SYSTEM
+              <h2 className="text-lg font-bold text-white tracking-wide font-mono">
+                LEAD MANAGEMENT SYSTEM
               </h2>
-              <p className="text-purple-200 mt-1 font-mono text-sm uppercase tracking-wider">
-                Advanced table with intelligent grouping & real-time analytics
+              <p className="text-slate-300 mt-1 font-mono text-xs uppercase tracking-wider">
+                Advanced table with intelligent grouping & analytics
               </p>
             </div>
           </div>
@@ -402,79 +402,79 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <Table className="font-mono text-sm">
-            <TableHeader className="bg-gradient-to-r from-gray-900 via-purple-900 to-black border-b-8 border-purple-700 text-white uppercase text-3xl font-extrabold tracking-wide px-6 py-4 shadow-lg sticky top-0 z-10">
-              <TableRow className="hover:bg-gradient-to-r hover:from-gray-800 hover:via-purple-800 hover:to-black border-b border-white/20">
-                <TableHead className="w-[50px] text-white h-[12px] font-bold text-center">
+            <TableHeader className="bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-b-4 border-slate-600 sticky top-0 z-10">
+              <TableRow className="hover:bg-gradient-to-r hover:from-slate-700 hover:via-slate-800 hover:to-slate-700 border-b border-white/10">
+                <TableHead className="w-[50px] text-white h-[35px] font-bold text-center text-xs">
                   <Checkbox 
                     checked={selectedLeads.length === Object.values(groupedLeads).flat().length && Object.values(groupedLeads).flat().length > 0}
                     onCheckedChange={handleSelectAllLeads}
-                    className="border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-purple-700"
+                    className="border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-slate-800"
                   />
                 </TableHead>
                 {visibleColumns.name && (
-                  <TableHead className="min-w-[280px] text-white h-[12px] font-bold">
+                  <TableHead className="min-w-[280px] text-white h-[35px] font-bold text-xs">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('fullName')}>
-                      <User className="h-4 w-4 mr-2" />
+                      <User className="h-3 w-3 mr-2" />
                       FULL NAME
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                      <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.source && (
-                  <TableHead className="min-w-[200px] text-white h-[12px] font-bold">
+                  <TableHead className="min-w-[200px] text-white h-[35px] font-bold text-xs">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('source')}>
-                      <Globe className="h-4 w-4 mr-2" />
+                      <Globe className="h-3 w-3 mr-2" />
                       SOURCE
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                      <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.created && (
-                  <TableHead className="min-w-[160px] text-white h-[12px] font-bold">
+                  <TableHead className="min-w-[160px] text-white h-[35px] font-bold text-xs">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('createdAt')}>
-                      <Calendar className="h-4 w-4 mr-2" />
+                      <Calendar className="h-3 w-3 mr-2" />
                       CREATED
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                      <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.associate && (
-                  <TableHead className="min-w-[200px] text-white h-[12px] font-bold">
+                  <TableHead className="min-w-[200px] text-white h-[35px] font-bold text-xs">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('associate')}>
-                      <User className="h-4 w-4 mr-2" />
+                      <User className="h-3 w-3 mr-2" />
                       ASSOCIATE
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                      <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.stage && (
-                  <TableHead className="min-w-[250px] text-white h-[12px] font-bold">
+                  <TableHead className="min-w-[250px] text-white h-[35px] font-bold text-xs">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('stage')}>
-                      <Target className="h-4 w-4 mr-2" />
+                      <Target className="h-3 w-3 mr-2" />
                       STAGE
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                      <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.status && (
-                  <TableHead className="min-w-[160px] text-white h-[12px] font-bold">
+                  <TableHead className="min-w-[160px] text-white h-[35px] font-bold text-xs">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('status')}>
-                      <Activity className="h-4 w-4 mr-2" />
+                      <Activity className="h-3 w-3 mr-2" />
                       STATUS
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                      <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.remarks && (
-                  <TableHead className="min-w-[250px] text-white h-[12px] font-bold">
+                  <TableHead className="min-w-[250px] text-white h-[35px] font-bold text-xs">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('remarks')}>
-                      <FileText className="h-4 w-4 mr-2" />
+                      <FileText className="h-3 w-3 mr-2" />
                       REMARKS
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                      <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>
                 )}
-                <TableHead className="text-right w-[120px] text-white h-[12px] font-bold">ACTIONS</TableHead>
+                <TableHead className="text-right w-[120px] text-white h-[35px] font-bold text-xs">ACTIONS</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="bg-white">
