@@ -262,472 +262,472 @@ export function EditLeadModal({ isOpen, onClose, lead, selectedLeads = [], clear
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] p-0 bg-white/95 backdrop-blur-xl border border-white/20 shadow-2xl">
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <DialogHeader className="px-8 py-6 bg-gradient-to-r from-slate-50/80 to-white/80 backdrop-blur-sm border-b border-white/20">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-12 w-12 border-2 border-white/50 shadow-lg">
-                  <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold">
-                    {formData.fullName ? formData.fullName.split(' ').map(n => n[0]).join('').toUpperCase() : 'NL'}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <DialogTitle className="text-2xl font-bold text-slate-800">
-                    {lead?.id && !lead.id.startsWith('new-') ? 'Edit Lead' : 'Create New Lead'}
-                  </DialogTitle>
-                  <p className="text-slate-600 mt-1">
-                    {formData.fullName || 'New Lead'} • {formData.source || 'No source'}
-                  </p>
+      <DialogContent className="max-w-6xl h-[95vh] p-0 bg-white/95 backdrop-blur-xl border border-white/20 shadow-2xl flex flex-col">
+        {/* Header - Fixed */}
+        <DialogHeader className="flex-shrink-0 px-8 py-6 bg-gradient-to-r from-slate-50/80 to-white/80 backdrop-blur-sm border-b border-white/20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-12 w-12 border-2 border-white/50 shadow-lg">
+                <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold">
+                  {formData.fullName ? formData.fullName.split(' ').map(n => n[0]).join('').toUpperCase() : 'NL'}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <DialogTitle className="text-2xl font-bold text-slate-800">
+                  {lead?.id && !lead.id.startsWith('new-') ? 'Edit Lead' : 'Create New Lead'}
+                </DialogTitle>
+                <p className="text-slate-600 mt-1">
+                  {formData.fullName || 'New Lead'} • {formData.source || 'No source'}
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              {/* Lead Score */}
+              <div className="text-center">
+                <div className="text-sm font-medium text-slate-600 mb-1">Lead Score</div>
+                <div className="flex items-center gap-2">
+                  <Progress value={leadScore} className="w-20 h-2" />
+                  <span className="text-lg font-bold text-slate-800">{leadScore}%</span>
                 </div>
               </div>
               
-              <div className="flex items-center gap-4">
-                {/* Lead Score */}
-                <div className="text-center">
-                  <div className="text-sm font-medium text-slate-600 mb-1">Lead Score</div>
-                  <div className="flex items-center gap-2">
-                    <Progress value={leadScore} className="w-20 h-2" />
-                    <span className="text-lg font-bold text-slate-800">{leadScore}%</span>
-                  </div>
-                </div>
-                
-                {/* Auto-save toggle */}
-                <div className="flex items-center gap-2">
-                  <Switch checked={autoSave} onCheckedChange={setAutoSave} />
-                  <span className="text-sm text-slate-600">Auto-save</span>
-                </div>
-                
-                <Button variant="ghost" size="icon" onClick={handleClose}>
-                  <X className="h-5 w-5" />
-                </Button>
+              {/* Auto-save toggle */}
+              <div className="flex items-center gap-2">
+                <Switch checked={autoSave} onCheckedChange={setAutoSave} />
+                <span className="text-sm text-slate-600">Auto-save</span>
               </div>
+              
+              <Button variant="ghost" size="icon" onClick={handleClose}>
+                <X className="h-5 w-5" />
+              </Button>
             </div>
-          </DialogHeader>
+          </div>
+        </DialogHeader>
 
-          {/* Content */}
-          <div className="flex-1 overflow-hidden">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <div className="px-8 py-4 bg-white/50 backdrop-blur-sm border-b border-white/20">
-                <TabsList className="grid grid-cols-5 w-full bg-white/70 backdrop-blur-sm">
-                  <TabsTrigger value="overview" className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    Overview
-                  </TabsTrigger>
-                  <TabsTrigger value="details" className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    Details
-                  </TabsTrigger>
-                  <TabsTrigger value="followups" className="flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4" />
-                    Follow-ups
-                  </TabsTrigger>
-                  <TabsTrigger value="insights" className="flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4" />
-                    Insights
-                  </TabsTrigger>
-                  <TabsTrigger value="activity" className="flex items-center gap-2">
-                    <Activity className="h-4 w-4" />
-                    Activity
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+        {/* Content - Scrollable */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+            {/* Tab Navigation - Fixed */}
+            <div className="flex-shrink-0 px-8 py-4 bg-white/50 backdrop-blur-sm border-b border-white/20">
+              <TabsList className="grid grid-cols-5 w-full bg-white/70 backdrop-blur-sm">
+                <TabsTrigger value="overview" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="details" className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Details
+                </TabsTrigger>
+                <TabsTrigger value="followups" className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  Follow-ups
+                </TabsTrigger>
+                <TabsTrigger value="insights" className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Insights
+                </TabsTrigger>
+                <TabsTrigger value="activity" className="flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  Activity
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-              <div className="flex-1 overflow-hidden">
-                <ScrollArea className="h-full">
-                  <div className="p-8">
-                    <TabsContent value="overview" className="mt-0 space-y-6">
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Basic Information */}
-                        <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                              <User className="h-5 w-5" />
-                              Basic Information
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="space-y-4">
-                            <div>
-                              <Label htmlFor="fullName">Full Name *</Label>
-                              <Input
-                                id="fullName"
-                                value={formData.fullName}
-                                onChange={(e) => handleInputChange('fullName', e.target.value)}
-                                className="bg-white/50 border-white/30"
-                                placeholder="Enter full name"
-                              />
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="email">Email Address</Label>
-                              <Input
-                                id="email"
-                                type="email"
-                                value={formData.email}
-                                onChange={(e) => handleInputChange('email', e.target.value)}
-                                className="bg-white/50 border-white/30"
-                                placeholder="Enter email address"
-                              />
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="phone">Phone Number</Label>
-                              <Input
-                                id="phone"
-                                value={formData.phone}
-                                onChange={(e) => handleInputChange('phone', e.target.value)}
-                                className="bg-white/50 border-white/30"
-                                placeholder="Enter phone number"
-                              />
-                            </div>
-                          </CardContent>
-                        </Card>
-
-                        {/* Lead Classification */}
-                        <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                              <Target className="h-5 w-5" />
-                              Lead Classification
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="space-y-4">
-                            <div>
-                              <Label htmlFor="source">Source</Label>
-                              <Select value={formData.source} onValueChange={(value) => handleInputChange('source', value)}>
-                                <SelectTrigger className="bg-white/50 border-white/30">
-                                  <SelectValue placeholder="Select source" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {sourceOptions.map(option => (
-                                    <SelectItem key={option} value={option}>{option}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="status">Status</Label>
-                              <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
-                                <SelectTrigger className="bg-white/50 border-white/30">
-                                  <SelectValue placeholder="Select status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {statusOptions.map(option => (
-                                    <SelectItem key={option} value={option}>{option}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="stage">Stage</Label>
-                              <Select value={formData.stage} onValueChange={(value) => handleInputChange('stage', value)}>
-                                <SelectTrigger className="bg-white/50 border-white/30">
-                                  <SelectValue placeholder="Select stage" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {stageOptions.map(option => (
-                                    <SelectItem key={option} value={option}>{option}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-
-                      {/* Engagement Chart */}
-                      {engagementData.length > 0 && (
-                        <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                              <LineChart className="h-5 w-5" />
-                              Engagement Timeline
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <ResponsiveContainer width="100%" height={200}>
-                              <RechartsLineChart data={engagementData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                                <XAxis dataKey="name" stroke="#64748b" />
-                                <YAxis stroke="#64748b" />
-                                <Tooltip 
-                                  contentStyle={{ 
-                                    backgroundColor: 'rgba(255, 255, 255, 0.9)', 
-                                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                                    borderRadius: '8px',
-                                    backdropFilter: 'blur(10px)'
-                                  }} 
-                                />
-                                <Line 
-                                  type="monotone" 
-                                  dataKey="engagement" 
-                                  stroke="#6366f1" 
-                                  strokeWidth={3}
-                                  dot={{ fill: '#6366f1', strokeWidth: 2, r: 6 }}
-                                />
-                              </RechartsLineChart>
-                            </ResponsiveContainer>
-                          </CardContent>
-                        </Card>
-                      )}
-                    </TabsContent>
-
-                    <TabsContent value="details" className="mt-0 space-y-6">
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                              <Building className="h-5 w-5" />
-                              Assignment & Location
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="space-y-4">
-                            <div>
-                              <Label htmlFor="associate">Associate</Label>
-                              <Select value={formData.associate} onValueChange={(value) => handleInputChange('associate', value)}>
-                                <SelectTrigger className="bg-white/50 border-white/30">
-                                  <SelectValue placeholder="Select associate" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {associateOptions.map(option => (
-                                    <SelectItem key={option} value={option}>{option}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="center">Center</Label>
-                              <Select value={formData.center} onValueChange={(value) => handleInputChange('center', value)}>
-                                <SelectTrigger className="bg-white/50 border-white/30">
-                                  <SelectValue placeholder="Select center" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {centerOptions.map(option => (
-                                    <SelectItem key={option} value={option}>{option}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="createdAt">Created Date</Label>
-                              <Input
-                                id="createdAt"
-                                type="date"
-                                value={formData.createdAt}
-                                onChange={(e) => handleInputChange('createdAt', e.target.value)}
-                                className="bg-white/50 border-white/30"
-                              />
-                            </div>
-                          </CardContent>
-                        </Card>
-
-                        <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                              <FileText className="h-5 w-5" />
-                              Notes & Remarks
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div>
-                              <Label htmlFor="remarks">Remarks</Label>
-                              <Textarea
-                                id="remarks"
-                                value={formData.remarks}
-                                onChange={(e) => handleInputChange('remarks', e.target.value)}
-                                className="bg-white/50 border-white/30 min-h-[120px]"
-                                placeholder="Add any additional notes or remarks about this lead..."
-                              />
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="followups" className="mt-0 space-y-6">
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {[1, 2, 3, 4].map(num => (
-                          <Card key={num} className="bg-white/70 backdrop-blur-sm border border-white/30">
-                            <CardHeader>
-                              <CardTitle className="flex items-center gap-2">
-                                <MessageSquare className="h-5 w-5" />
-                                Follow-up {num}
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                              <div>
-                                <Label htmlFor={`followUp${num}Date`}>Date</Label>
-                                <Input
-                                  id={`followUp${num}Date`}
-                                  type="date"
-                                  value={formData[`followUp${num}Date` as keyof Lead] as string || ''}
-                                  onChange={(e) => handleInputChange(`followUp${num}Date` as keyof Lead, e.target.value)}
-                                  className="bg-white/50 border-white/30"
-                                />
-                              </div>
-                              
-                              <div>
-                                <Label htmlFor={`followUp${num}Comments`}>Comments</Label>
-                                <Textarea
-                                  id={`followUp${num}Comments`}
-                                  value={formData[`followUp${num}Comments` as keyof Lead] as string || ''}
-                                  onChange={(e) => handleInputChange(`followUp${num}Comments` as keyof Lead, e.target.value)}
-                                  className="bg-white/50 border-white/30"
-                                  placeholder={`Add comments for follow-up ${num}...`}
-                                />
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="insights" className="mt-0 space-y-6">
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Source Distribution Chart */}
-                        <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                              <PieChart className="h-5 w-5" />
-                              Source Distribution
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <ResponsiveContainer width="100%" height={250}>
-                              <RechartsPieChart>
-                                <Pie
-                                  data={sourceDistribution}
-                                  cx="50%"
-                                  cy="50%"
-                                  outerRadius={80}
-                                  dataKey="value"
-                                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                >
-                                  {sourceDistribution.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                                  ))}
-                                </Pie>
-                                <Tooltip />
-                              </RechartsPieChart>
-                            </ResponsiveContainer>
-                          </CardContent>
-                        </Card>
-
-                        {/* Similar Leads */}
-                        <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                              <Users className="h-5 w-5" />
-                              Similar Leads
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            {similarLeads.length > 0 ? (
-                              <div className="space-y-3">
-                                {similarLeads.map(similarLead => (
-                                  <div key={similarLead.id} className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
-                                    <Avatar className="h-8 w-8">
-                                      <AvatarFallback className="bg-gradient-to-br from-slate-500 to-slate-600 text-white text-xs">
-                                        {similarLead.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex-1">
-                                      <p className="font-medium text-sm">{similarLead.fullName}</p>
-                                      <p className="text-xs text-slate-600">{similarLead.source} • {similarLead.status}</p>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <p className="text-slate-600 text-center py-8">No similar leads found</p>
-                            )}
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="activity" className="mt-0 space-y-6">
+            {/* Tab Content - Scrollable */}
+            <div className="flex-1 overflow-hidden">
+              <ScrollArea className="h-full">
+                <div className="p-8">
+                  <TabsContent value="overview" className="mt-0 space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Basic Information */}
                       <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
-                            <Activity className="h-5 w-5" />
-                            Activity Timeline
+                            <User className="h-5 w-5" />
+                            Basic Information
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div>
+                            <Label htmlFor="fullName">Full Name *</Label>
+                            <Input
+                              id="fullName"
+                              value={formData.fullName}
+                              onChange={(e) => handleInputChange('fullName', e.target.value)}
+                              className="bg-white/50 border-white/30"
+                              placeholder="Enter full name"
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="email">Email Address</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              value={formData.email}
+                              onChange={(e) => handleInputChange('email', e.target.value)}
+                              className="bg-white/50 border-white/30"
+                              placeholder="Enter email address"
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="phone">Phone Number</Label>
+                            <Input
+                              id="phone"
+                              value={formData.phone}
+                              onChange={(e) => handleInputChange('phone', e.target.value)}
+                              className="bg-white/50 border-white/30"
+                              placeholder="Enter phone number"
+                            />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Lead Classification */}
+                      <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Target className="h-5 w-5" />
+                            Lead Classification
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div>
+                            <Label htmlFor="source">Source</Label>
+                            <Select value={formData.source} onValueChange={(value) => handleInputChange('source', value)}>
+                              <SelectTrigger className="bg-white/50 border-white/30">
+                                <SelectValue placeholder="Select source" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {sourceOptions.map(option => (
+                                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="status">Status</Label>
+                            <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+                              <SelectTrigger className="bg-white/50 border-white/30">
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {statusOptions.map(option => (
+                                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="stage">Stage</Label>
+                            <Select value={formData.stage} onValueChange={(value) => handleInputChange('stage', value)}>
+                              <SelectTrigger className="bg-white/50 border-white/30">
+                                <SelectValue placeholder="Select stage" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {stageOptions.map(option => (
+                                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Engagement Chart */}
+                    {engagementData.length > 0 && (
+                      <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <LineChart className="h-5 w-5" />
+                            Engagement Timeline
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          {timelineData.length > 0 ? (
-                            <div className="space-y-6">
-                              {timelineData.map((activity, index) => (
-                                <div key={index} className="flex items-start gap-4">
-                                  <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white">
-                                    {activity.icon}
-                                  </div>
+                          <ResponsiveContainer width="100%" height={200}>
+                            <RechartsLineChart data={engagementData}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                              <XAxis dataKey="name" stroke="#64748b" />
+                              <YAxis stroke="#64748b" />
+                              <Tooltip 
+                                contentStyle={{ 
+                                  backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+                                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                                  borderRadius: '8px',
+                                  backdropFilter: 'blur(10px)'
+                                }} 
+                              />
+                              <Line 
+                                type="monotone" 
+                                dataKey="engagement" 
+                                stroke="#6366f1" 
+                                strokeWidth={3}
+                                dot={{ fill: '#6366f1', strokeWidth: 2, r: 6 }}
+                              />
+                            </RechartsLineChart>
+                          </ResponsiveContainer>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="details" className="mt-0 space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Building className="h-5 w-5" />
+                            Assignment & Location
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div>
+                            <Label htmlFor="associate">Associate</Label>
+                            <Select value={formData.associate} onValueChange={(value) => handleInputChange('associate', value)}>
+                              <SelectTrigger className="bg-white/50 border-white/30">
+                                <SelectValue placeholder="Select associate" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {associateOptions.map(option => (
+                                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="center">Center</Label>
+                            <Select value={formData.center} onValueChange={(value) => handleInputChange('center', value)}>
+                              <SelectTrigger className="bg-white/50 border-white/30">
+                                <SelectValue placeholder="Select center" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {centerOptions.map(option => (
+                                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="createdAt">Created Date</Label>
+                            <Input
+                              id="createdAt"
+                              type="date"
+                              value={formData.createdAt}
+                              onChange={(e) => handleInputChange('createdAt', e.target.value)}
+                              className="bg-white/50 border-white/30"
+                            />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <FileText className="h-5 w-5" />
+                            Notes & Remarks
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div>
+                            <Label htmlFor="remarks">Remarks</Label>
+                            <Textarea
+                              id="remarks"
+                              value={formData.remarks}
+                              onChange={(e) => handleInputChange('remarks', e.target.value)}
+                              className="bg-white/50 border-white/30 min-h-[120px]"
+                              placeholder="Add any additional notes or remarks about this lead..."
+                            />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="followups" className="mt-0 space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {[1, 2, 3, 4].map(num => (
+                        <Card key={num} className="bg-white/70 backdrop-blur-sm border border-white/30">
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <MessageSquare className="h-5 w-5" />
+                              Follow-up {num}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div>
+                              <Label htmlFor={`followUp${num}Date`}>Date</Label>
+                              <Input
+                                id={`followUp${num}Date`}
+                                type="date"
+                                value={formData[`followUp${num}Date` as keyof Lead] as string || ''}
+                                onChange={(e) => handleInputChange(`followUp${num}Date` as keyof Lead, e.target.value)}
+                                className="bg-white/50 border-white/30"
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label htmlFor={`followUp${num}Comments`}>Comments</Label>
+                              <Textarea
+                                id={`followUp${num}Comments`}
+                                value={formData[`followUp${num}Comments` as keyof Lead] as string || ''}
+                                onChange={(e) => handleInputChange(`followUp${num}Comments` as keyof Lead, e.target.value)}
+                                className="bg-white/50 border-white/30"
+                                placeholder={`Add comments for follow-up ${num}...`}
+                              />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="insights" className="mt-0 space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Source Distribution Chart */}
+                      <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <PieChart className="h-5 w-5" />
+                            Source Distribution
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ResponsiveContainer width="100%" height={250}>
+                            <RechartsPieChart>
+                              <Pie
+                                data={sourceDistribution}
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={80}
+                                dataKey="value"
+                                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                              >
+                                {sourceDistribution.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                                ))}
+                              </Pie>
+                              <Tooltip />
+                            </RechartsPieChart>
+                          </ResponsiveContainer>
+                        </CardContent>
+                      </Card>
+
+                      {/* Similar Leads */}
+                      <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Users className="h-5 w-5" />
+                            Similar Leads
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {similarLeads.length > 0 ? (
+                            <div className="space-y-3">
+                              {similarLeads.map(similarLead => (
+                                <div key={similarLead.id} className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
+                                  <Avatar className="h-8 w-8">
+                                    <AvatarFallback className="bg-gradient-to-br from-slate-500 to-slate-600 text-white text-xs">
+                                      {similarLead.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                                    </AvatarFallback>
+                                  </Avatar>
                                   <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <h4 className="font-semibold text-slate-800">{activity.title}</h4>
-                                      <Badge variant="outline" className="text-xs">
-                                        {formatDate(activity.date)}
-                                      </Badge>
-                                    </div>
-                                    <p className="text-slate-600 text-sm">{activity.description}</p>
+                                    <p className="font-medium text-sm">{similarLead.fullName}</p>
+                                    <p className="text-xs text-slate-600">{similarLead.source} • {similarLead.status}</p>
                                   </div>
                                 </div>
                               ))}
                             </div>
                           ) : (
-                            <div className="text-center py-12">
-                              <Activity className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                              <p className="text-slate-600">No activity recorded yet</p>
-                            </div>
+                            <p className="text-slate-600 text-center py-8">No similar leads found</p>
                           )}
                         </CardContent>
                       </Card>
-                    </TabsContent>
-                  </div>
-                </ScrollArea>
-              </div>
-            </Tabs>
-          </div>
+                    </div>
+                  </TabsContent>
 
-          {/* Footer */}
-          <div className="px-8 py-4 bg-gradient-to-r from-slate-50/80 to-white/80 backdrop-blur-sm border-t border-white/20">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-slate-600">
-                {hasUnsavedChanges && (
+                  <TabsContent value="activity" className="mt-0 space-y-6">
+                    <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Activity className="h-5 w-5" />
+                          Activity Timeline
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {timelineData.length > 0 ? (
+                          <div className="space-y-6">
+                            {timelineData.map((activity, index) => (
+                              <div key={index} className="flex items-start gap-4">
+                                <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white">
+                                  {activity.icon}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="font-semibold text-slate-800">{activity.title}</h4>
+                                    <Badge variant="outline" className="text-xs">
+                                      {formatDate(activity.date)}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-slate-600 text-sm">{activity.description}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-12">
+                            <Activity className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                            <p className="text-slate-600">No activity recorded yet</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </div>
+              </ScrollArea>
+            </div>
+          </Tabs>
+        </div>
+
+        {/* Footer - Fixed */}
+        <div className="flex-shrink-0 px-8 py-4 bg-gradient-to-r from-slate-50/80 to-white/80 backdrop-blur-sm border-t border-white/20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-slate-600">
+              {hasUnsavedChanges && (
+                <>
+                  <AlertCircle className="h-4 w-4 text-amber-500" />
+                  <span>You have unsaved changes</span>
+                </>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <Button variant="outline" onClick={handleClose} disabled={isLoading}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSave} 
+                disabled={isLoading || !formData.fullName.trim()}
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+              >
+                {isLoading ? (
                   <>
-                    <AlertCircle className="h-4 w-4 text-amber-500" />
-                    <span>You have unsaved changes</span>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    {lead?.id && !lead.id.startsWith('new-') ? 'Update Lead' : 'Create Lead'}
                   </>
                 )}
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <Button variant="outline" onClick={handleClose} disabled={isLoading}>
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleSave} 
-                  disabled={isLoading || !formData.fullName.trim()}
-                  className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
-                >
-                  {isLoading ? (
-                    <>
-                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 mr-2" />
-                      {lead?.id && !lead.id.startsWith('new-') ? 'Update Lead' : 'Create Lead'}
-                    </>
-                  )}
-                </Button>
-              </div>
+              </Button>
             </div>
           </div>
         </div>
