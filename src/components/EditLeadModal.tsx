@@ -262,72 +262,77 @@ export function EditLeadModal({ isOpen, onClose, lead, selectedLeads = [], clear
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-6xl h-[95vh] p-0 bg-white/95 backdrop-blur-xl border border-white/20 shadow-2xl flex flex-col">
-        {/* Header - Fixed */}
-        <DialogHeader className="flex-shrink-0 px-8 py-6 bg-gradient-to-r from-slate-50/80 to-white/80 backdrop-blur-sm border-b border-white/20">
+      <DialogContent className="max-w-7xl h-[95vh] p-0 bg-gradient-to-br from-slate-50/95 via-white/95 to-slate-100/95 backdrop-blur-2xl border border-white/30 shadow-2xl rounded-2xl flex flex-col overflow-hidden">
+        {/* Header - Fixed with glassmorphic design */}
+        <DialogHeader className="flex-shrink-0 px-8 py-6 bg-gradient-to-r from-white/80 via-slate-50/80 to-white/80 backdrop-blur-xl border-b border-white/30 shadow-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Avatar className="h-12 w-12 border-2 border-white/50 shadow-lg">
-                <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold">
-                  {formData.fullName ? formData.fullName.split(' ').map(n => n[0]).join('').toUpperCase() : 'NL'}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative">
+                <Avatar className="h-16 w-16 border-4 border-white/60 shadow-2xl ring-4 ring-indigo-100/50">
+                  <AvatarFallback className="bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 text-white font-bold text-lg">
+                    {formData.fullName ? formData.fullName.split(' ').map(n => n[0]).join('').toUpperCase() : 'NL'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center">
+                  <CheckCircle className="h-3 w-3 text-white" />
+                </div>
+              </div>
               <div>
-                <DialogTitle className="text-2xl font-bold text-slate-800">
-                  {lead?.id && !lead.id.startsWith('new-') ? 'Edit Lead' : 'Create New Lead'}
+                <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent">
+                  {lead?.id && !lead.id.startsWith('new-') ? 'Edit Lead Profile' : 'Create New Lead'}
                 </DialogTitle>
-                <p className="text-slate-600 mt-1">
-                  {formData.fullName || 'New Lead'} • {formData.source || 'No source'}
+                <p className="text-slate-600 mt-2 font-medium">
+                  {formData.fullName || 'New Lead'} • {formData.source || 'No source'} • {formData.status || 'No status'}
                 </p>
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
-              {/* Lead Score */}
-              <div className="text-center">
-                <div className="text-sm font-medium text-slate-600 mb-1">Lead Score</div>
-                <div className="flex items-center gap-2">
-                  <Progress value={leadScore} className="w-20 h-2" />
-                  <span className="text-lg font-bold text-slate-800">{leadScore}%</span>
+            <div className="flex items-center gap-6">
+              {/* Lead Score with glassmorphic design */}
+              <div className="text-center bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/40 shadow-lg">
+                <div className="text-sm font-semibold text-slate-700 mb-2">Lead Score</div>
+                <div className="flex items-center gap-3">
+                  <Progress value={leadScore} className="w-24 h-3 bg-slate-200" />
+                  <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">{leadScore}%</span>
                 </div>
               </div>
               
               {/* Auto-save toggle */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-white/40 shadow-lg">
                 <Switch checked={autoSave} onCheckedChange={setAutoSave} />
-                <span className="text-sm text-slate-600">Auto-save</span>
+                <span className="text-sm font-medium text-slate-700">Auto-save</span>
               </div>
               
-              <Button variant="ghost" size="icon" onClick={handleClose}>
-                <X className="h-5 w-5" />
+              <Button variant="ghost" size="icon" onClick={handleClose} className="hover:bg-white/60 rounded-full">
+                <X className="h-6 w-6" />
               </Button>
             </div>
           </div>
         </DialogHeader>
 
-        {/* Content - Scrollable */}
+        {/* Content - Scrollable with glassmorphic design */}
         <div className="flex-1 flex flex-col min-h-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-            {/* Tab Navigation - Fixed */}
-            <div className="flex-shrink-0 px-8 py-4 bg-white/50 backdrop-blur-sm border-b border-white/20">
-              <TabsList className="grid grid-cols-5 w-full bg-white/70 backdrop-blur-sm">
-                <TabsTrigger value="overview" className="flex items-center gap-2">
+            {/* Tab Navigation - Fixed with glassmorphic design */}
+            <div className="flex-shrink-0 px-8 py-4 bg-white/50 backdrop-blur-xl border-b border-white/30">
+              <TabsList className="grid grid-cols-5 w-full bg-white/70 backdrop-blur-sm shadow-lg rounded-xl border border-white/40">
+                <TabsTrigger value="overview" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-purple-600 data-[state=active]:text-white">
                   <User className="h-4 w-4" />
                   Overview
                 </TabsTrigger>
-                <TabsTrigger value="details" className="flex items-center gap-2">
+                <TabsTrigger value="details" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-purple-600 data-[state=active]:text-white">
                   <FileText className="h-4 w-4" />
                   Details
                 </TabsTrigger>
-                <TabsTrigger value="followups" className="flex items-center gap-2">
+                <TabsTrigger value="followups" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-purple-600 data-[state=active]:text-white">
                   <MessageSquare className="h-4 w-4" />
                   Follow-ups
                 </TabsTrigger>
-                <TabsTrigger value="insights" className="flex items-center gap-2">
+                <TabsTrigger value="insights" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-purple-600 data-[state=active]:text-white">
                   <BarChart3 className="h-4 w-4" />
                   Insights
                 </TabsTrigger>
-                <TabsTrigger value="activity" className="flex items-center gap-2">
+                <TabsTrigger value="activity" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-purple-600 data-[state=active]:text-white">
                   <Activity className="h-4 w-4" />
                   Activity
                 </TabsTrigger>
@@ -340,64 +345,64 @@ export function EditLeadModal({ isOpen, onClose, lead, selectedLeads = [], clear
                 <div className="p-8">
                   <TabsContent value="overview" className="mt-0 space-y-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Basic Information */}
-                      <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
+                      {/* Basic Information with glassmorphic design */}
+                      <Card className="bg-white/70 backdrop-blur-xl border border-white/40 shadow-xl rounded-2xl overflow-hidden">
+                        <CardHeader className="bg-gradient-to-r from-indigo-50/80 to-purple-50/80 backdrop-blur-sm">
+                          <CardTitle className="flex items-center gap-2 text-slate-800">
                             <User className="h-5 w-5" />
                             Basic Information
                           </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-4 p-6">
                           <div>
-                            <Label htmlFor="fullName">Full Name *</Label>
+                            <Label htmlFor="fullName" className="text-sm font-semibold text-slate-700">Full Name *</Label>
                             <Input
                               id="fullName"
                               value={formData.fullName}
                               onChange={(e) => handleInputChange('fullName', e.target.value)}
-                              className="bg-white/50 border-white/30"
+                              className="bg-white/60 border-white/40 backdrop-blur-sm mt-1 focus:ring-2 focus:ring-indigo-500/50"
                               placeholder="Enter full name"
                             />
                           </div>
                           
                           <div>
-                            <Label htmlFor="email">Email Address</Label>
+                            <Label htmlFor="email" className="text-sm font-semibold text-slate-700">Email Address</Label>
                             <Input
                               id="email"
                               type="email"
                               value={formData.email}
                               onChange={(e) => handleInputChange('email', e.target.value)}
-                              className="bg-white/50 border-white/30"
+                              className="bg-white/60 border-white/40 backdrop-blur-sm mt-1 focus:ring-2 focus:ring-indigo-500/50"
                               placeholder="Enter email address"
                             />
                           </div>
                           
                           <div>
-                            <Label htmlFor="phone">Phone Number</Label>
+                            <Label htmlFor="phone" className="text-sm font-semibold text-slate-700">Phone Number</Label>
                             <Input
                               id="phone"
                               value={formData.phone}
                               onChange={(e) => handleInputChange('phone', e.target.value)}
-                              className="bg-white/50 border-white/30"
+                              className="bg-white/60 border-white/40 backdrop-blur-sm mt-1 focus:ring-2 focus:ring-indigo-500/50"
                               placeholder="Enter phone number"
                             />
                           </div>
                         </CardContent>
                       </Card>
 
-                      {/* Lead Classification */}
-                      <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
+                      {/* Lead Classification with glassmorphic design */}
+                      <Card className="bg-white/70 backdrop-blur-xl border border-white/40 shadow-xl rounded-2xl overflow-hidden">
+                        <CardHeader className="bg-gradient-to-r from-purple-50/80 to-pink-50/80 backdrop-blur-sm">
+                          <CardTitle className="flex items-center gap-2 text-slate-800">
                             <Target className="h-5 w-5" />
                             Lead Classification
                           </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-4 p-6">
                           <div>
-                            <Label htmlFor="source">Source</Label>
+                            <Label htmlFor="source" className="text-sm font-semibold text-slate-700">Source</Label>
                             <Select value={formData.source} onValueChange={(value) => handleInputChange('source', value)}>
-                              <SelectTrigger className="bg-white/50 border-white/30">
+                              <SelectTrigger className="bg-white/60 border-white/40 backdrop-blur-sm mt-1">
                                 <SelectValue placeholder="Select source" />
                               </SelectTrigger>
                               <SelectContent>
@@ -409,9 +414,9 @@ export function EditLeadModal({ isOpen, onClose, lead, selectedLeads = [], clear
                           </div>
                           
                           <div>
-                            <Label htmlFor="status">Status</Label>
+                            <Label htmlFor="status" className="text-sm font-semibold text-slate-700">Status</Label>
                             <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
-                              <SelectTrigger className="bg-white/50 border-white/30">
+                              <SelectTrigger className="bg-white/60 border-white/40 backdrop-blur-sm mt-1">
                                 <SelectValue placeholder="Select status" />
                               </SelectTrigger>
                               <SelectContent>
@@ -423,9 +428,9 @@ export function EditLeadModal({ isOpen, onClose, lead, selectedLeads = [], clear
                           </div>
                           
                           <div>
-                            <Label htmlFor="stage">Stage</Label>
+                            <Label htmlFor="stage" className="text-sm font-semibold text-slate-700">Stage</Label>
                             <Select value={formData.stage} onValueChange={(value) => handleInputChange('stage', value)}>
-                              <SelectTrigger className="bg-white/50 border-white/30">
+                              <SelectTrigger className="bg-white/60 border-white/40 backdrop-blur-sm mt-1">
                                 <SelectValue placeholder="Select stage" />
                               </SelectTrigger>
                               <SelectContent>
@@ -439,16 +444,16 @@ export function EditLeadModal({ isOpen, onClose, lead, selectedLeads = [], clear
                       </Card>
                     </div>
 
-                    {/* Engagement Chart */}
+                    {/* Engagement Chart with glassmorphic design */}
                     {engagementData.length > 0 && (
-                      <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
+                      <Card className="bg-white/70 backdrop-blur-xl border border-white/40 shadow-xl rounded-2xl overflow-hidden">
+                        <CardHeader className="bg-gradient-to-r from-emerald-50/80 to-teal-50/80 backdrop-blur-sm">
+                          <CardTitle className="flex items-center gap-2 text-slate-800">
                             <LineChart className="h-5 w-5" />
                             Engagement Timeline
                           </CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="p-6">
                           <ResponsiveContainer width="100%" height={200}>
                             <RechartsLineChart data={engagementData}>
                               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -458,8 +463,9 @@ export function EditLeadModal({ isOpen, onClose, lead, selectedLeads = [], clear
                                 contentStyle={{ 
                                   backgroundColor: 'rgba(255, 255, 255, 0.9)', 
                                   border: '1px solid rgba(255, 255, 255, 0.3)',
-                                  borderRadius: '8px',
-                                  backdropFilter: 'blur(10px)'
+                                  borderRadius: '12px',
+                                  backdropFilter: 'blur(10px)',
+                                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
                                 }} 
                               />
                               <Line 
@@ -478,18 +484,18 @@ export function EditLeadModal({ isOpen, onClose, lead, selectedLeads = [], clear
 
                   <TabsContent value="details" className="mt-0 space-y-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
+                      <Card className="bg-white/70 backdrop-blur-xl border border-white/40 shadow-xl rounded-2xl overflow-hidden">
+                        <CardHeader className="bg-gradient-to-r from-blue-50/80 to-indigo-50/80 backdrop-blur-sm">
+                          <CardTitle className="flex items-center gap-2 text-slate-800">
                             <Building className="h-5 w-5" />
                             Assignment & Location
                           </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-4 p-6">
                           <div>
-                            <Label htmlFor="associate">Associate</Label>
+                            <Label htmlFor="associate" className="text-sm font-semibold text-slate-700">Associate</Label>
                             <Select value={formData.associate} onValueChange={(value) => handleInputChange('associate', value)}>
-                              <SelectTrigger className="bg-white/50 border-white/30">
+                              <SelectTrigger className="bg-white/60 border-white/40 backdrop-blur-sm mt-1">
                                 <SelectValue placeholder="Select associate" />
                               </SelectTrigger>
                               <SelectContent>
@@ -501,9 +507,9 @@ export function EditLeadModal({ isOpen, onClose, lead, selectedLeads = [], clear
                           </div>
                           
                           <div>
-                            <Label htmlFor="center">Center</Label>
+                            <Label htmlFor="center" className="text-sm font-semibold text-slate-700">Center</Label>
                             <Select value={formData.center} onValueChange={(value) => handleInputChange('center', value)}>
-                              <SelectTrigger className="bg-white/50 border-white/30">
+                              <SelectTrigger className="bg-white/60 border-white/40 backdrop-blur-sm mt-1">
                                 <SelectValue placeholder="Select center" />
                               </SelectTrigger>
                               <SelectContent>
@@ -515,33 +521,33 @@ export function EditLeadModal({ isOpen, onClose, lead, selectedLeads = [], clear
                           </div>
                           
                           <div>
-                            <Label htmlFor="createdAt">Created Date</Label>
+                            <Label htmlFor="createdAt" className="text-sm font-semibold text-slate-700">Created Date</Label>
                             <Input
                               id="createdAt"
                               type="date"
                               value={formData.createdAt}
                               onChange={(e) => handleInputChange('createdAt', e.target.value)}
-                              className="bg-white/50 border-white/30"
+                              className="bg-white/60 border-white/40 backdrop-blur-sm mt-1 focus:ring-2 focus:ring-indigo-500/50"
                             />
                           </div>
                         </CardContent>
                       </Card>
 
-                      <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
+                      <Card className="bg-white/70 backdrop-blur-xl border border-white/40 shadow-xl rounded-2xl overflow-hidden">
+                        <CardHeader className="bg-gradient-to-r from-amber-50/80 to-orange-50/80 backdrop-blur-sm">
+                          <CardTitle className="flex items-center gap-2 text-slate-800">
                             <FileText className="h-5 w-5" />
                             Notes & Remarks
                           </CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="p-6">
                           <div>
-                            <Label htmlFor="remarks">Remarks</Label>
+                            <Label htmlFor="remarks" className="text-sm font-semibold text-slate-700">Remarks</Label>
                             <Textarea
                               id="remarks"
                               value={formData.remarks}
                               onChange={(e) => handleInputChange('remarks', e.target.value)}
-                              className="bg-white/50 border-white/30 min-h-[120px]"
+                              className="bg-white/60 border-white/40 backdrop-blur-sm min-h-[120px] mt-1 focus:ring-2 focus:ring-indigo-500/50"
                               placeholder="Add any additional notes or remarks about this lead..."
                             />
                           </div>
@@ -553,32 +559,32 @@ export function EditLeadModal({ isOpen, onClose, lead, selectedLeads = [], clear
                   <TabsContent value="followups" className="mt-0 space-y-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       {[1, 2, 3, 4].map(num => (
-                        <Card key={num} className="bg-white/70 backdrop-blur-sm border border-white/30">
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
+                        <Card key={num} className="bg-white/70 backdrop-blur-xl border border-white/40 shadow-xl rounded-2xl overflow-hidden">
+                          <CardHeader className="bg-gradient-to-r from-green-50/80 to-emerald-50/80 backdrop-blur-sm">
+                            <CardTitle className="flex items-center gap-2 text-slate-800">
                               <MessageSquare className="h-5 w-5" />
                               Follow-up {num}
                             </CardTitle>
                           </CardHeader>
-                          <CardContent className="space-y-4">
+                          <CardContent className="space-y-4 p-6">
                             <div>
-                              <Label htmlFor={`followUp${num}Date`}>Date</Label>
+                              <Label htmlFor={`followUp${num}Date`} className="text-sm font-semibold text-slate-700">Date</Label>
                               <Input
                                 id={`followUp${num}Date`}
                                 type="date"
                                 value={formData[`followUp${num}Date` as keyof Lead] as string || ''}
                                 onChange={(e) => handleInputChange(`followUp${num}Date` as keyof Lead, e.target.value)}
-                                className="bg-white/50 border-white/30"
+                                className="bg-white/60 border-white/40 backdrop-blur-sm mt-1 focus:ring-2 focus:ring-indigo-500/50"
                               />
                             </div>
                             
                             <div>
-                              <Label htmlFor={`followUp${num}Comments`}>Comments</Label>
+                              <Label htmlFor={`followUp${num}Comments`} className="text-sm font-semibold text-slate-700">Comments</Label>
                               <Textarea
                                 id={`followUp${num}Comments`}
                                 value={formData[`followUp${num}Comments` as keyof Lead] as string || ''}
                                 onChange={(e) => handleInputChange(`followUp${num}Comments` as keyof Lead, e.target.value)}
-                                className="bg-white/50 border-white/30"
+                                className="bg-white/60 border-white/40 backdrop-blur-sm mt-1 focus:ring-2 focus:ring-indigo-500/50"
                                 placeholder={`Add comments for follow-up ${num}...`}
                               />
                             </div>
@@ -591,14 +597,14 @@ export function EditLeadModal({ isOpen, onClose, lead, selectedLeads = [], clear
                   <TabsContent value="insights" className="mt-0 space-y-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       {/* Source Distribution Chart */}
-                      <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
+                      <Card className="bg-white/70 backdrop-blur-xl border border-white/40 shadow-xl rounded-2xl overflow-hidden">
+                        <CardHeader className="bg-gradient-to-r from-violet-50/80 to-purple-50/80 backdrop-blur-sm">
+                          <CardTitle className="flex items-center gap-2 text-slate-800">
                             <PieChart className="h-5 w-5" />
                             Source Distribution
                           </CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="p-6">
                           <ResponsiveContainer width="100%" height={250}>
                             <RechartsPieChart>
                               <Pie
@@ -620,18 +626,18 @@ export function EditLeadModal({ isOpen, onClose, lead, selectedLeads = [], clear
                       </Card>
 
                       {/* Similar Leads */}
-                      <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
+                      <Card className="bg-white/70 backdrop-blur-xl border border-white/40 shadow-xl rounded-2xl overflow-hidden">
+                        <CardHeader className="bg-gradient-to-r from-rose-50/80 to-pink-50/80 backdrop-blur-sm">
+                          <CardTitle className="flex items-center gap-2 text-slate-800">
                             <Users className="h-5 w-5" />
                             Similar Leads
                           </CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="p-6">
                           {similarLeads.length > 0 ? (
                             <div className="space-y-3">
                               {similarLeads.map(similarLead => (
-                                <div key={similarLead.id} className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
+                                <div key={similarLead.id} className="flex items-center gap-3 p-3 bg-white/50 rounded-lg backdrop-blur-sm border border-white/30">
                                   <Avatar className="h-8 w-8">
                                     <AvatarFallback className="bg-gradient-to-br from-slate-500 to-slate-600 text-white text-xs">
                                       {similarLead.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}
@@ -653,25 +659,25 @@ export function EditLeadModal({ isOpen, onClose, lead, selectedLeads = [], clear
                   </TabsContent>
 
                   <TabsContent value="activity" className="mt-0 space-y-6">
-                    <Card className="bg-white/70 backdrop-blur-sm border border-white/30">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
+                    <Card className="bg-white/70 backdrop-blur-xl border border-white/40 shadow-xl rounded-2xl overflow-hidden">
+                      <CardHeader className="bg-gradient-to-r from-cyan-50/80 to-blue-50/80 backdrop-blur-sm">
+                        <CardTitle className="flex items-center gap-2 text-slate-800">
                           <Activity className="h-5 w-5" />
                           Activity Timeline
                         </CardTitle>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="p-6">
                         {timelineData.length > 0 ? (
                           <div className="space-y-6">
                             {timelineData.map((activity, index) => (
                               <div key={index} className="flex items-start gap-4">
-                                <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white">
+                                <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white shadow-lg">
                                   {activity.icon}
                                 </div>
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-1">
                                     <h4 className="font-semibold text-slate-800">{activity.title}</h4>
-                                    <Badge variant="outline" className="text-xs">
+                                    <Badge variant="outline" className="text-xs bg-white/60 backdrop-blur-sm">
                                       {formatDate(activity.date)}
                                     </Badge>
                                   </div>
@@ -695,26 +701,26 @@ export function EditLeadModal({ isOpen, onClose, lead, selectedLeads = [], clear
           </Tabs>
         </div>
 
-        {/* Footer - Fixed */}
-        <div className="flex-shrink-0 px-8 py-4 bg-gradient-to-r from-slate-50/80 to-white/80 backdrop-blur-sm border-t border-white/20">
+        {/* Footer - Fixed with glassmorphic design */}
+        <div className="flex-shrink-0 px-8 py-6 bg-gradient-to-r from-white/80 via-slate-50/80 to-white/80 backdrop-blur-xl border-t border-white/30 shadow-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-slate-600">
               {hasUnsavedChanges && (
                 <>
                   <AlertCircle className="h-4 w-4 text-amber-500" />
-                  <span>You have unsaved changes</span>
+                  <span className="font-medium">You have unsaved changes</span>
                 </>
               )}
             </div>
             
-            <div className="flex items-center gap-3">
-              <Button variant="outline" onClick={handleClose} disabled={isLoading}>
+            <div className="flex items-center gap-4">
+              <Button variant="outline" onClick={handleClose} disabled={isLoading} className="bg-white/60 backdrop-blur-sm border-white/40 hover:bg-white/80">
                 Cancel
               </Button>
               <Button 
                 onClick={handleSave} 
                 disabled={isLoading || !formData.fullName.trim()}
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg"
               >
                 {isLoading ? (
                   <>

@@ -247,51 +247,51 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
 
   const getSourceIcon = (source: string) => {
     const sourceIconMap: Record<string, JSX.Element> = {
-      'Website': <Globe className="h-3.5 w-3.5 text-blue-600" />,
-      'Website Form': <FilePlus2 className="h-3.5 w-3.5 text-blue-600" />,
-      'Social Media': <Twitter className="h-3.5 w-3.5 text-sky-600" />,
-      'Social - Instagram': <Instagram className="h-3.5 w-3.5 text-pink-600" />,
-      'Social - Facebook': <FacebookIcon className="h-3.5 w-3.5 text-blue-700" />,
-      'Referral': <UserPlus className="h-3.5 w-3.5 text-green-600" />,
-      'Event': <Locate className="h-3.5 w-3.5 text-purple-600" />,
-      'Cold Call': <PhoneCall className="h-3.5 w-3.5 text-orange-600" />,
-      'Email Campaign': <Mail className="h-3.5 w-3.5 text-purple-600" />,
-      'Other': <HelpCircle className="h-3.5 w-3.5 text-gray-600" />
+      'Website': <Globe className="h-3.5 w-3.5" />,
+      'Website Form': <FilePlus2 className="h-3.5 w-3.5" />,
+      'Social Media': <Twitter className="h-3.5 w-3.5" />,
+      'Social - Instagram': <Instagram className="h-3.5 w-3.5" />,
+      'Social - Facebook': <FacebookIcon className="h-3.5 w-3.5" />,
+      'Referral': <UserPlus className="h-3.5 w-3.5" />,
+      'Event': <Locate className="h-3.5 w-3.5" />,
+      'Cold Call': <PhoneCall className="h-3.5 w-3.5" />,
+      'Email Campaign': <Mail className="h-3.5 w-3.5" />,
+      'Other': <HelpCircle className="h-3.5 w-3.5" />
     };
     
-    return sourceIconMap[source] || <Globe className="h-3.5 w-3.5 text-gray-600" />;
+    return sourceIconMap[source] || <Globe className="h-3.5 w-3.5" />;
   };
 
   const getStageIcon = (stage: string) => {
     const stageIconMap: Record<string, JSX.Element> = {
-      'New Enquiry': <Zap className="h-3.5 w-3.5 text-blue-600" />,
-      'Initial Contact': <PhoneCall className="h-3.5 w-3.5 text-blue-600" />,
-      'Trial Scheduled': <Calendar className="h-3.5 w-3.5 text-purple-600" />,
-      'Trial Completed': <CheckCircle className="h-3.5 w-3.5 text-green-700" />,
-      'Membership Sold': <ShoppingCart className="h-3.5 w-3.5 text-green-800" />,
-      'Not Interested': <BookX className="h-3.5 w-3.5 text-gray-600" />,
-      'Lost': <UserX className="h-3.5 w-3.5 text-red-600" />
+      'New Enquiry': <Zap className="h-3.5 w-3.5" />,
+      'Initial Contact': <PhoneCall className="h-3.5 w-3.5" />,
+      'Trial Scheduled': <Calendar className="h-3.5 w-3.5" />,
+      'Trial Completed': <CheckCircle className="h-3.5 w-3.5" />,
+      'Membership Sold': <ShoppingCart className="h-3.5 w-3.5" />,
+      'Not Interested': <BookX className="h-3.5 w-3.5" />,
+      'Lost': <UserX className="h-3.5 w-3.5" />
     };
     
-    return stageIconMap[stage] || <HelpCircle className="h-3.5 w-3.5 text-gray-600" />;
+    return stageIconMap[stage] || <HelpCircle className="h-3.5 w-3.5" />;
   };
 
   const getStatusIcon = (status: string) => {
     switch(status) {
       case 'Won':
-        return <CheckCircle className="h-3.5 w-3.5 text-green-700" />;
+        return <CheckCircle className="h-3.5 w-3.5" />;
       case 'Lost':
-        return <XCircle className="h-3.5 w-3.5 text-red-600" />;
+        return <XCircle className="h-3.5 w-3.5" />;
       case 'Hot':
-        return <Star className="h-3.5 w-3.5 text-amber-600" fill="currentColor" />;
+        return <Star className="h-3.5 w-3.5" fill="currentColor" />;
       case 'Warm':
-        return <TrendingUp className="h-3.5 w-3.5 text-orange-600" />;
+        return <TrendingUp className="h-3.5 w-3.5" />;
       case 'Cold':
-        return <Clock className="h-3.5 w-3.5 text-blue-600" />;
+        return <Clock className="h-3.5 w-3.5" />;
       case 'Converted':
-        return <Award className="h-3.5 w-3.5 text-green-700" />;
+        return <Award className="h-3.5 w-3.5" />;
       default:
-        return <HelpCircle className="h-3.5 w-3.5 text-gray-600" />;
+        return <HelpCircle className="h-3.5 w-3.5" />;
     }
   };
 
@@ -321,9 +321,9 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
 
   return (
     <Card className="shadow-xl border-border/30 overflow-hidden bg-white backdrop-blur-xl">
-      {/* Animated Title Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-6">
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/20 via-slate-800/20 to-slate-900/20 animate-pulse"></div>
+      {/* Animated Title Section with Black Gradient */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-gray-900 via-purple-900 to-black border-b-8 border-purple-700 text-white uppercase text-3xl font-extrabold tracking-wide px-6 py-4 shadow-lg">
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/20 via-purple-900/20 to-black/20 animate-pulse"></div>
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="relative">
@@ -331,11 +331,11 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
               <div className="absolute inset-0 bg-white/20 rounded-full animate-ping"></div>
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white tracking-tight font-mono">
-                Premium Lead Management System
+              <h2 className="text-2xl font-extrabold text-white tracking-wide font-mono">
+                PREMIUM LEAD MANAGEMENT SYSTEM
               </h2>
-              <p className="text-slate-300 mt-1 font-mono text-sm">
-                Advanced table with intelligent grouping, filtering, and real-time analytics
+              <p className="text-purple-200 mt-1 font-mono text-sm uppercase tracking-wider">
+                Advanced table with intelligent grouping & real-time analytics
               </p>
             </div>
           </div>
@@ -401,80 +401,80 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
 
       <CardContent className="p-0">
         <div className="overflow-x-auto">
-          <Table className="font-mono">
-            <TableHeader className="bg-gradient-to-r from-emerald-700 to-blue-800 sticky top-0 z-10 border-b-4 border-emerald-600">
-              <TableRow className="hover:bg-gradient-to-r hover:from-emerald-800 hover:to-blue-900 border-b border-white/20">
-                <TableHead className="w-[50px] text-white h-[40px] font-semibold">
+          <Table className="font-mono text-sm">
+            <TableHeader className="bg-gradient-to-r from-gray-900 via-purple-900 to-black border-b-8 border-purple-700 text-white uppercase text-3xl font-extrabold tracking-wide px-6 py-4 shadow-lg sticky top-0 z-10">
+              <TableRow className="hover:bg-gradient-to-r hover:from-gray-800 hover:via-purple-800 hover:to-black border-b border-white/20">
+                <TableHead className="w-[50px] text-white h-[40px] font-bold text-center">
                   <Checkbox 
                     checked={selectedLeads.length === Object.values(groupedLeads).flat().length && Object.values(groupedLeads).flat().length > 0}
                     onCheckedChange={handleSelectAllLeads}
-                    className="border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-emerald-700"
+                    className="border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-purple-700"
                   />
                 </TableHead>
                 {visibleColumns.name && (
-                  <TableHead className="min-w-[250px] text-white h-[40px] font-semibold">
+                  <TableHead className="min-w-[280px] text-white h-[40px] font-bold">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('fullName')}>
                       <User className="h-4 w-4 mr-2" />
-                      Full Name
+                      FULL NAME
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.source && (
-                  <TableHead className="min-w-[180px] text-white h-[40px] font-semibold">
+                  <TableHead className="min-w-[200px] text-white h-[40px] font-bold">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('source')}>
                       <Globe className="h-4 w-4 mr-2" />
-                      Source
+                      SOURCE
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.created && (
-                  <TableHead className="min-w-[140px] text-white h-[40px] font-semibold">
+                  <TableHead className="min-w-[160px] text-white h-[40px] font-bold">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('createdAt')}>
                       <Calendar className="h-4 w-4 mr-2" />
-                      Created
+                      CREATED
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.associate && (
-                  <TableHead className="min-w-[180px] text-white h-[40px] font-semibold">
+                  <TableHead className="min-w-[200px] text-white h-[40px] font-bold">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('associate')}>
                       <User className="h-4 w-4 mr-2" />
-                      Associate
+                      ASSOCIATE
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.stage && (
-                  <TableHead className="min-w-[220px] text-white h-[40px] font-semibold">
+                  <TableHead className="min-w-[250px] text-white h-[40px] font-bold">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('stage')}>
                       <Target className="h-4 w-4 mr-2" />
-                      Stage
+                      STAGE
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.status && (
-                  <TableHead className="min-w-[140px] text-white h-[40px] font-semibold">
+                  <TableHead className="min-w-[160px] text-white h-[40px] font-bold">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('status')}>
                       <Activity className="h-4 w-4 mr-2" />
-                      Status
+                      STATUS
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.remarks && (
-                  <TableHead className="min-w-[220px] text-white h-[40px] font-semibold">
+                  <TableHead className="min-w-[250px] text-white h-[40px] font-bold">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('remarks')}>
                       <FileText className="h-4 w-4 mr-2" />
-                      Remarks
+                      REMARKS
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </div>
                   </TableHead>
                 )}
-                <TableHead className="text-right w-[120px] text-white h-[40px] font-semibold">Actions</TableHead>
+                <TableHead className="text-right w-[120px] text-white h-[40px] font-bold">ACTIONS</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="bg-white">
@@ -512,7 +512,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                   {(groupByField === 'none' || !collapsedGroups.includes(groupKey)) && groupLeads.map((lead) => (
                     <TableRow 
                       key={lead.id} 
-                      className="h-[40px] hover:bg-slate-50/80 transition-colors cursor-pointer border-b border-slate-100 font-mono text-xs"
+                      className="h-[40px] hover:bg-slate-50/80 transition-colors cursor-pointer border-b border-slate-100 font-mono"
                       onClick={() => onLeadClick(lead)}
                     >
                       <TableCell className="h-[40px] py-2 text-center align-middle" onClick={(e) => e.stopPropagation()}>
@@ -552,7 +552,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="font-bold text-sm text-slate-800 truncate max-w-[180px] cursor-pointer">
+                                    <span className="font-bold text-sm text-gray-700 truncate max-w-[200px] cursor-pointer">
                                       {lead.fullName}
                                     </span>
                                   </TooltipTrigger>
@@ -563,11 +563,11 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                                   </TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
-                              <div className="flex items-center gap-2 text-xs text-slate-500">
+                              <div className="flex items-center gap-2 text-xs text-gray-600">
                                 {lead.email && (
                                   <div className="flex items-center gap-1">
                                     <Mail className="h-3 w-3" />
-                                    <span className="truncate max-w-[120px]">{lead.email}</span>
+                                    <span className="truncate max-w-[140px]">{lead.email}</span>
                                   </div>
                                 )}
                               </div>
@@ -583,10 +583,12 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                               <TooltipTrigger asChild>
                                 <Badge 
                                   variant="outline" 
-                                  className="bg-gray-800/80 text-white border-gray-600 flex items-center gap-1.5 w-[140px] justify-center h-6 font-mono text-xs cursor-pointer"
+                                  className="bg-gray-800/80 text-white border-gray-600 flex items-center gap-1.5 w-[160px] justify-center h-6 font-mono text-xs cursor-pointer"
                                 >
-                                  {getSourceIcon(lead.source)}
-                                  <span className="truncate">{lead.source}</span>
+                                  <span className="text-white flex items-center justify-center">
+                                    {React.cloneElement(getSourceIcon(lead.source), { className: "h-3.5 w-3.5 text-white" })}
+                                  </span>
+                                  <span className="truncate text-white">{lead.source}</span>
                                 </Badge>
                               </TooltipTrigger>
                               <TooltipContent className="bg-slate-800 text-white">
@@ -602,7 +604,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <span className="text-sm text-slate-700 font-semibold cursor-pointer">
+                                <span className="text-sm text-gray-700 font-semibold cursor-pointer">
                                   {formatDate(lead.createdAt)}
                                 </span>
                               </TooltipTrigger>
@@ -625,7 +627,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <span className="truncate text-sm font-semibold text-slate-700 max-w-[120px] cursor-pointer">
+                                  <span className="truncate text-sm font-semibold text-gray-700 max-w-[140px] cursor-pointer">
                                     {lead.associate}
                                   </span>
                                 </TooltipTrigger>
@@ -645,10 +647,12 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                               <TooltipTrigger asChild>
                                 <Badge 
                                   variant="outline" 
-                                  className="bg-gray-800/80 text-white border-gray-600 flex items-center gap-1.5 w-[180px] justify-center h-6 font-mono text-xs cursor-pointer"
+                                  className="bg-gray-800/80 text-white border-gray-600 flex items-center gap-1.5 w-[200px] justify-center h-6 font-mono text-xs cursor-pointer"
                                 >
-                                  {getStageIcon(lead.stage)}
-                                  <span className="truncate">{lead.stage}</span>
+                                  <span className="text-white flex items-center justify-center">
+                                    {React.cloneElement(getStageIcon(lead.stage), { className: "h-3.5 w-3.5 text-white" })}
+                                  </span>
+                                  <span className="truncate text-white">{lead.stage}</span>
                                 </Badge>
                               </TooltipTrigger>
                               <TooltipContent className="bg-slate-800 text-white max-w-xs">
@@ -665,10 +669,12 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Badge 
-                                  className="bg-gray-800/80 text-white border-gray-600 flex items-center gap-1.5 w-[100px] justify-center h-6 font-mono text-xs cursor-pointer"
+                                  className="bg-gray-800/80 text-white border-gray-600 flex items-center gap-1.5 w-[120px] justify-center h-6 font-mono text-xs cursor-pointer"
                                 >
-                                  {getStatusIcon(lead.status)}
-                                  <span className="text-xs">{lead.status}</span>
+                                  <span className="text-white flex items-center justify-center">
+                                    {React.cloneElement(getStatusIcon(lead.status), { className: "h-3.5 w-3.5 text-white" })}
+                                  </span>
+                                  <span className="text-xs text-white">{lead.status}</span>
                                 </Badge>
                               </TooltipTrigger>
                               <TooltipContent className="bg-slate-800 text-white">
@@ -684,7 +690,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <span className="text-sm text-slate-700 truncate max-w-[180px] block cursor-pointer">
+                                <span className="text-sm text-gray-700 truncate max-w-[200px] block cursor-pointer">
                                   {lead.remarks || 'No remarks'}
                                 </span>
                               </TooltipTrigger>
