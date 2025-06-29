@@ -247,52 +247,97 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
 
   const getSourceIcon = (source: string) => {
     const sourceIconMap: Record<string, JSX.Element> = {
-      'Website': <Globe className="h-3.5 w-3.5" />,
-      'Website Form': <FilePlus2 className="h-3.5 w-3.5" />,
-      'Social Media': <Twitter className="h-3.5 w-3.5" />,
-      'Social - Instagram': <Instagram className="h-3.5 w-3.5" />,
-      'Social - Facebook': <FacebookIcon className="h-3.5 w-3.5" />,
-      'Referral': <UserPlus className="h-3.5 w-3.5" />,
-      'Event': <Locate className="h-3.5 w-3.5" />,
-      'Cold Call': <PhoneCall className="h-3.5 w-3.5" />,
-      'Email Campaign': <Mail className="h-3.5 w-3.5" />,
-      'Other': <HelpCircle className="h-3.5 w-3.5" />
+      'Website': <Globe className="h-3.5 w-3.5 text-white" />,
+      'Website Form': <FilePlus2 className="h-3.5 w-3.5 text-white" />,
+      'Social Media': <Twitter className="h-3.5 w-3.5 text-white" />,
+      'Social - Instagram': <Instagram className="h-3.5 w-3.5 text-white" />,
+      'Social - Facebook': <FacebookIcon className="h-3.5 w-3.5 text-white" />,
+      'Referral': <UserPlus className="h-3.5 w-3.5 text-white" />,
+      'Event': <Locate className="h-3.5 w-3.5 text-white" />,
+      'Cold Call': <PhoneCall className="h-3.5 w-3.5 text-white" />,
+      'Email Campaign': <Mail className="h-3.5 w-3.5 text-white" />,
+      'Other': <HelpCircle className="h-3.5 w-3.5 text-white" />
     };
     
-    return sourceIconMap[source] || <Globe className="h-3.5 w-3.5" />;
+    return sourceIconMap[source] || <Globe className="h-3.5 w-3.5 text-white" />;
   };
 
   const getStageIcon = (stage: string) => {
     const stageIconMap: Record<string, JSX.Element> = {
-      'New Enquiry': <Zap className="h-3.5 w-3.5" />,
-      'Initial Contact': <PhoneCall className="h-3.5 w-3.5" />,
-      'Trial Scheduled': <Calendar className="h-3.5 w-3.5" />,
-      'Trial Completed': <CheckCircle className="h-3.5 w-3.5" />,
-      'Membership Sold': <ShoppingCart className="h-3.5 w-3.5" />,
-      'Not Interested': <BookX className="h-3.5 w-3.5" />,
-      'Lost': <UserX className="h-3.5 w-3.5" />
+      'New Enquiry': <Zap className="h-3.5 w-3.5 text-white" />,
+      'Initial Contact': <PhoneCall className="h-3.5 w-3.5 text-white" />,
+      'Trial Scheduled': <Calendar className="h-3.5 w-3.5 text-white" />,
+      'Trial Completed': <CheckCircle className="h-3.5 w-3.5 text-white" />,
+      'Membership Sold': <ShoppingCart className="h-3.5 w-3.5 text-white" />,
+      'Not Interested': <BookX className="h-3.5 w-3.5 text-white" />,
+      'Lost': <UserX className="h-3.5 w-3.5 text-white" />
     };
     
-    return stageIconMap[stage] || <HelpCircle className="h-3.5 w-3.5" />;
+    return stageIconMap[stage] || <HelpCircle className="h-3.5 w-3.5 text-white" />;
   };
 
   const getStatusIcon = (status: string) => {
     switch(status) {
       case 'Won':
-        return <CheckCircle className="h-3.5 w-3.5" />;
+        return <CheckCircle className="h-3.5 w-3.5 text-white" />;
       case 'Lost':
-        return <XCircle className="h-3.5 w-3.5" />;
+        return <XCircle className="h-3.5 w-3.5 text-white" />;
       case 'Hot':
-        return <Star className="h-3.5 w-3.5" fill="currentColor" />;
+        return <Star className="h-3.5 w-3.5 text-white" fill="currentColor" />;
       case 'Warm':
-        return <TrendingUp className="h-3.5 w-3.5" />;
+        return <TrendingUp className="h-3.5 w-3.5 text-white" />;
       case 'Cold':
-        return <Clock className="h-3.5 w-3.5" />;
+        return <Clock className="h-3.5 w-3.5 text-white" />;
       case 'Converted':
-        return <Award className="h-3.5 w-3.5" />;
+        return <Award className="h-3.5 w-3.5 text-white" />;
       default:
-        return <HelpCircle className="h-3.5 w-3.5" />;
+        return <HelpCircle className="h-3.5 w-3.5 text-white" />;
     }
+  };
+
+  // Get colored badge styles for different categories
+  const getSourceBadgeStyle = (source: string) => {
+    const sourceColors: Record<string, string> = {
+      'Website': 'bg-blue-700 text-white border-blue-800',
+      'Website Form': 'bg-blue-600 text-white border-blue-700',
+      'Social Media': 'bg-purple-700 text-white border-purple-800',
+      'Social - Instagram': 'bg-pink-700 text-white border-pink-800',
+      'Social - Facebook': 'bg-blue-800 text-white border-blue-900',
+      'Referral': 'bg-green-700 text-white border-green-800',
+      'Event': 'bg-orange-700 text-white border-orange-800',
+      'Cold Call': 'bg-indigo-700 text-white border-indigo-800',
+      'Email Campaign': 'bg-teal-700 text-white border-teal-800',
+      'Other': 'bg-gray-700 text-white border-gray-800'
+    };
+    
+    return sourceColors[source] || 'bg-gray-700 text-white border-gray-800';
+  };
+
+  const getStageBadgeStyle = (stage: string) => {
+    const stageColors: Record<string, string> = {
+      'New Enquiry': 'bg-emerald-700 text-white border-emerald-800',
+      'Initial Contact': 'bg-blue-700 text-white border-blue-800',
+      'Trial Scheduled': 'bg-purple-700 text-white border-purple-800',
+      'Trial Completed': 'bg-green-700 text-white border-green-800',
+      'Membership Sold': 'bg-green-800 text-white border-green-900',
+      'Not Interested': 'bg-red-700 text-white border-red-800',
+      'Lost': 'bg-red-800 text-white border-red-900'
+    };
+    
+    return stageColors[stage] || 'bg-gray-700 text-white border-gray-800';
+  };
+
+  const getStatusBadgeStyle = (status: string) => {
+    const statusColors: Record<string, string> = {
+      'Won': 'bg-green-800 text-white border-green-900',
+      'Lost': 'bg-red-800 text-white border-red-900',
+      'Hot': 'bg-red-700 text-white border-red-800',
+      'Warm': 'bg-orange-700 text-white border-orange-800',
+      'Cold': 'bg-blue-700 text-white border-blue-800',
+      'Converted': 'bg-emerald-800 text-white border-emerald-900'
+    };
+    
+    return statusColors[status] || 'bg-gray-700 text-white border-gray-800';
   };
 
   const getInitials = (name: string) => {
@@ -582,13 +627,10 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Badge 
-                                  variant="outline" 
-                                  className="bg-gray-800/80 text-white border-gray-600 flex items-center gap-1.5 w-[160px] justify-center h-6 font-mono text-xs cursor-pointer"
+                                  className={`${getSourceBadgeStyle(lead.source)} flex items-center gap-1.5 w-[160px] justify-center h-6 font-mono text-xs cursor-pointer border`}
                                 >
-                                  <span className="text-white flex items-center justify-center">
-                                    {React.cloneElement(getSourceIcon(lead.source), { className: "h-3.5 w-3.5 text-white" })}
-                                  </span>
-                                  <span className="truncate text-white">{lead.source}</span>
+                                  {getSourceIcon(lead.source)}
+                                  <span className="truncate text-white font-semibold">{lead.source}</span>
                                 </Badge>
                               </TooltipTrigger>
                               <TooltipContent className="bg-slate-800 text-white">
@@ -646,13 +688,10 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Badge 
-                                  variant="outline" 
-                                  className="bg-gray-800/80 text-white border-gray-600 flex items-center gap-1.5 w-[200px] justify-center h-6 font-mono text-xs cursor-pointer"
+                                  className={`${getStageBadgeStyle(lead.stage)} flex items-center gap-1.5 w-[200px] justify-center h-6 font-mono text-xs cursor-pointer border`}
                                 >
-                                  <span className="text-white flex items-center justify-center">
-                                    {React.cloneElement(getStageIcon(lead.stage), { className: "h-3.5 w-3.5 text-white" })}
-                                  </span>
-                                  <span className="truncate text-white">{lead.stage}</span>
+                                  {getStageIcon(lead.stage)}
+                                  <span className="truncate text-white font-semibold">{lead.stage}</span>
                                 </Badge>
                               </TooltipTrigger>
                               <TooltipContent className="bg-slate-800 text-white max-w-xs">
@@ -669,12 +708,10 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Badge 
-                                  className="bg-gray-800/80 text-white border-gray-600 flex items-center gap-1.5 w-[120px] justify-center h-6 font-mono text-xs cursor-pointer"
+                                  className={`${getStatusBadgeStyle(lead.status)} flex items-center gap-1.5 w-[120px] justify-center h-6 font-mono text-xs cursor-pointer border`}
                                 >
-                                  <span className="text-white flex items-center justify-center">
-                                    {React.cloneElement(getStatusIcon(lead.status), { className: "h-3.5 w-3.5 text-white" })}
-                                  </span>
-                                  <span className="text-xs text-white">{lead.status}</span>
+                                  {getStatusIcon(lead.status)}
+                                  <span className="text-xs text-white font-semibold">{lead.status}</span>
                                 </Badge>
                               </TooltipTrigger>
                               <TooltipContent className="bg-slate-800 text-white">
