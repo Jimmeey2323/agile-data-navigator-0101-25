@@ -404,7 +404,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
           <Table className="font-mono text-sm">
             <TableHeader className="bg-gradient-to-r from-gray-900 via-purple-900 to-black border-b-8 border-purple-700 text-white uppercase text-3xl font-extrabold tracking-wide px-6 py-4 shadow-lg sticky top-0 z-10">
               <TableRow className="hover:bg-gradient-to-r hover:from-gray-800 hover:via-purple-800 hover:to-black border-b border-white/20">
-                <TableHead className="w-[50px] text-white h-[16px] font-bold text-center">
+                <TableHead className="w-[50px] text-white h-[12px] font-bold text-center">
                   <Checkbox 
                     checked={selectedLeads.length === Object.values(groupedLeads).flat().length && Object.values(groupedLeads).flat().length > 0}
                     onCheckedChange={handleSelectAllLeads}
@@ -412,7 +412,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                   />
                 </TableHead>
                 {visibleColumns.name && (
-                  <TableHead className="min-w-[280px] text-white h-[16px] font-bold">
+                  <TableHead className="min-w-[280px] text-white h-[12px] font-bold">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('fullName')}>
                       <User className="h-4 w-4 mr-2" />
                       FULL NAME
@@ -421,7 +421,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                   </TableHead>
                 )}
                 {visibleColumns.source && (
-                  <TableHead className="min-w-[200px] text-white h-[16px] font-bold">
+                  <TableHead className="min-w-[200px] text-white h-[12px] font-bold">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('source')}>
                       <Globe className="h-4 w-4 mr-2" />
                       SOURCE
@@ -430,7 +430,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                   </TableHead>
                 )}
                 {visibleColumns.created && (
-                  <TableHead className="min-w-[160px] text-white h-[16px] font-bold">
+                  <TableHead className="min-w-[160px] text-white h-[12px] font-bold">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('createdAt')}>
                       <Calendar className="h-4 w-4 mr-2" />
                       CREATED
@@ -439,7 +439,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                   </TableHead>
                 )}
                 {visibleColumns.associate && (
-                  <TableHead className="min-w-[200px] text-white h-[16px] font-bold">
+                  <TableHead className="min-w-[200px] text-white h-[12px] font-bold">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('associate')}>
                       <User className="h-4 w-4 mr-2" />
                       ASSOCIATE
@@ -448,7 +448,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                   </TableHead>
                 )}
                 {visibleColumns.stage && (
-                  <TableHead className="min-w-[250px] text-white h-[16px] font-bold">
+                  <TableHead className="min-w-[250px] text-white h-[12px] font-bold">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('stage')}>
                       <Target className="h-4 w-4 mr-2" />
                       STAGE
@@ -457,7 +457,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                   </TableHead>
                 )}
                 {visibleColumns.status && (
-                  <TableHead className="min-w-[160px] text-white h-[16px] font-bold">
+                  <TableHead className="min-w-[160px] text-white h-[12px] font-bold">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('status')}>
                       <Activity className="h-4 w-4 mr-2" />
                       STATUS
@@ -466,7 +466,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                   </TableHead>
                 )}
                 {visibleColumns.remarks && (
-                  <TableHead className="min-w-[250px] text-white h-[16px] font-bold">
+                  <TableHead className="min-w-[250px] text-white h-[12px] font-bold">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('remarks')}>
                       <FileText className="h-4 w-4 mr-2" />
                       REMARKS
@@ -474,7 +474,7 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                     </div>
                   </TableHead>
                 )}
-                <TableHead className="text-right w-[120px] text-white h-[16px] font-bold">ACTIONS</TableHead>
+                <TableHead className="text-right w-[120px] text-white h-[12px] font-bold">ACTIONS</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="bg-white">
