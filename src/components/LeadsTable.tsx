@@ -247,52 +247,97 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
 
   const getSourceIcon = (source: string) => {
     const sourceIconMap: Record<string, JSX.Element> = {
-      'Website': <Globe className="h-3.5 w-3.5" />,
-      'Website Form': <FilePlus2 className="h-3.5 w-3.5" />,
-      'Social Media': <Twitter className="h-3.5 w-3.5" />,
-      'Social - Instagram': <Instagram className="h-3.5 w-3.5" />,
-      'Social - Facebook': <FacebookIcon className="h-3.5 w-3.5" />,
-      'Referral': <UserPlus className="h-3.5 w-3.5" />,
-      'Event': <Locate className="h-3.5 w-3.5" />,
-      'Cold Call': <PhoneCall className="h-3.5 w-3.5" />,
-      'Email Campaign': <Mail className="h-3.5 w-3.5" />,
-      'Other': <HelpCircle className="h-3.5 w-3.5" />
+      'Website': <Globe className="h-3.5 w-3.5 text-white" />,
+      'Website Form': <FilePlus2 className="h-3.5 w-3.5 text-white" />,
+      'Social Media': <Twitter className="h-3.5 w-3.5 text-white" />,
+      'Social - Instagram': <Instagram className="h-3.5 w-3.5 text-white" />,
+      'Social - Facebook': <FacebookIcon className="h-3.5 w-3.5 text-white" />,
+      'Referral': <UserPlus className="h-3.5 w-3.5 text-white" />,
+      'Event': <Locate className="h-3.5 w-3.5 text-white" />,
+      'Cold Call': <PhoneCall className="h-3.5 w-3.5 text-white" />,
+      'Email Campaign': <Mail className="h-3.5 w-3.5 text-white" />,
+      'Other': <HelpCircle className="h-3.5 w-3.5 text-white" />
     };
     
-    return sourceIconMap[source] || <Globe className="h-3.5 w-3.5" />;
+    return sourceIconMap[source] || <Globe className="h-3.5 w-3.5 text-white" />;
   };
 
   const getStageIcon = (stage: string) => {
     const stageIconMap: Record<string, JSX.Element> = {
-      'New Enquiry': <Zap className="h-3.5 w-3.5" />,
-      'Initial Contact': <PhoneCall className="h-3.5 w-3.5" />,
-      'Trial Scheduled': <Calendar className="h-3.5 w-3.5" />,
-      'Trial Completed': <CheckCircle className="h-3.5 w-3.5" />,
-      'Membership Sold': <ShoppingCart className="h-3.5 w-3.5" />,
-      'Not Interested': <BookX className="h-3.5 w-3.5" />,
-      'Lost': <UserX className="h-3.5 w-3.5" />
+      'New Enquiry': <Zap className="h-3.5 w-3.5 text-white" />,
+      'Initial Contact': <PhoneCall className="h-3.5 w-3.5 text-white" />,
+      'Trial Scheduled': <Calendar className="h-3.5 w-3.5 text-white" />,
+      'Trial Completed': <CheckCircle className="h-3.5 w-3.5 text-white" />,
+      'Membership Sold': <ShoppingCart className="h-3.5 w-3.5 text-white" />,
+      'Not Interested': <BookX className="h-3.5 w-3.5 text-white" />,
+      'Lost': <UserX className="h-3.5 w-3.5 text-white" />
     };
     
-    return stageIconMap[stage] || <HelpCircle className="h-3.5 w-3.5" />;
+    return stageIconMap[stage] || <HelpCircle className="h-3.5 w-3.5 text-white" />;
   };
 
   const getStatusIcon = (status: string) => {
     switch(status) {
       case 'Won':
-        return <CheckCircle className="h-3.5 w-3.5" />;
+        return <CheckCircle className="h-3.5 w-3.5 text-white" />;
       case 'Lost':
-        return <XCircle className="h-3.5 w-3.5" />;
+        return <XCircle className="h-3.5 w-3.5 text-white" />;
       case 'Hot':
-        return <Star className="h-3.5 w-3.5" fill="currentColor" />;
+        return <Star className="h-3.5 w-3.5 text-white" fill="currentColor" />;
       case 'Warm':
-        return <TrendingUp className="h-3.5 w-3.5" />;
+        return <TrendingUp className="h-3.5 w-3.5 text-white" />;
       case 'Cold':
-        return <Clock className="h-3.5 w-3.5" />;
+        return <Clock className="h-3.5 w-3.5 text-white" />;
       case 'Converted':
-        return <Award className="h-3.5 w-3.5" />;
+        return <Award className="h-3.5 w-3.5 text-white" />;
       default:
-        return <HelpCircle className="h-3.5 w-3.5" />;
+        return <HelpCircle className="h-3.5 w-3.5 text-white" />;
     }
+  };
+
+  // Get colored badge styles for different categories
+  const getSourceBadgeStyle = (source: string) => {
+    const sourceColors: Record<string, string> = {
+      'Website': 'bg-blue-700 text-white border-blue-800',
+      'Website Form': 'bg-blue-600 text-white border-blue-700',
+      'Social Media': 'bg-purple-700 text-white border-purple-800',
+      'Social - Instagram': 'bg-pink-700 text-white border-pink-800',
+      'Social - Facebook': 'bg-blue-800 text-white border-blue-900',
+      'Referral': 'bg-green-700 text-white border-green-800',
+      'Event': 'bg-orange-700 text-white border-orange-800',
+      'Cold Call': 'bg-indigo-700 text-white border-indigo-800',
+      'Email Campaign': 'bg-teal-700 text-white border-teal-800',
+      'Other': 'bg-gray-700 text-white border-gray-800'
+    };
+    
+    return sourceColors[source] || 'bg-gray-700 text-white border-gray-800';
+  };
+
+  const getStageBadgeStyle = (stage: string) => {
+    const stageColors: Record<string, string> = {
+      'New Enquiry': 'bg-emerald-700 text-white border-emerald-800',
+      'Initial Contact': 'bg-blue-700 text-white border-blue-800',
+      'Trial Scheduled': 'bg-purple-700 text-white border-purple-800',
+      'Trial Completed': 'bg-green-700 text-white border-green-800',
+      'Membership Sold': 'bg-green-800 text-white border-green-900',
+      'Not Interested': 'bg-red-700 text-white border-red-800',
+      'Lost': 'bg-red-800 text-white border-red-900'
+    };
+    
+    return stageColors[stage] || 'bg-gray-700 text-white border-gray-800';
+  };
+
+  const getStatusBadgeStyle = (status: string) => {
+    const statusColors: Record<string, string> = {
+      'Won': 'bg-green-800 text-white border-green-900',
+      'Lost': 'bg-red-800 text-white border-red-900',
+      'Hot': 'bg-red-700 text-white border-red-800',
+      'Warm': 'bg-orange-700 text-white border-orange-800',
+      'Cold': 'bg-blue-700 text-white border-blue-800',
+      'Converted': 'bg-emerald-800 text-white border-emerald-900'
+    };
+    
+    return statusColors[status] || 'bg-gray-700 text-white border-gray-800';
   };
 
   const getInitials = (name: string) => {
@@ -321,21 +366,21 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
 
   return (
     <Card className="shadow-xl border-border/30 overflow-hidden bg-white backdrop-blur-xl">
-      {/* Animated Title Section with Black Gradient */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-gray-900 via-purple-900 to-black border-b-8 border-purple-700 text-white uppercase text-3xl font-extrabold tracking-wide px-6 py-4 shadow-lg">
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/20 via-purple-900/20 to-black/20 animate-pulse"></div>
-        <div className="relative flex items-center justify-between">
+      {/* Sleek Title Section */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-b-4 border-slate-600">
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-800/20 via-slate-900/20 to-slate-800/20 animate-pulse"></div>
+        <div className="relative flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <div className="relative">
-              <Activity className="h-8 w-8 text-white animate-pulse" />
+              <Activity className="h-6 w-6 text-white animate-pulse" />
               <div className="absolute inset-0 bg-white/20 rounded-full animate-ping"></div>
             </div>
             <div>
-              <h2 className="text-2xl font-extrabold text-white tracking-wide font-mono">
-                PREMIUM LEAD MANAGEMENT SYSTEM
+              <h2 className="text-lg font-bold text-white tracking-wide font-mono">
+                LEAD MANAGEMENT SYSTEM
               </h2>
-              <p className="text-purple-200 mt-1 font-mono text-sm uppercase tracking-wider">
-                Advanced table with intelligent grouping & real-time analytics
+              <p className="text-slate-300 mt-1 font-mono text-xs uppercase tracking-wider">
+                Advanced table with intelligent grouping & analytics
               </p>
             </div>
           </div>
@@ -402,79 +447,79 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <Table className="font-mono text-sm">
-            <TableHeader className="bg-gradient-to-r from-gray-900 via-purple-900 to-black border-b-8 border-purple-700 text-white uppercase text-3xl font-extrabold tracking-wide px-6 py-4 shadow-lg sticky top-0 z-10">
-              <TableRow className="hover:bg-gradient-to-r hover:from-gray-800 hover:via-purple-800 hover:to-black border-b border-white/20">
-                <TableHead className="w-[50px] text-white h-[12px] font-bold text-center">
+            <TableHeader className="bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-b-4 border-slate-600 sticky top-0 z-10">
+              <TableRow className="hover:bg-gradient-to-r hover:from-slate-700 hover:via-slate-800 hover:to-slate-700 border-b border-white/10">
+                <TableHead className="w-[50px] text-white h-[35px] font-bold text-center text-xs">
                   <Checkbox 
                     checked={selectedLeads.length === Object.values(groupedLeads).flat().length && Object.values(groupedLeads).flat().length > 0}
                     onCheckedChange={handleSelectAllLeads}
-                    className="border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-purple-700"
+                    className="border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-slate-800"
                   />
                 </TableHead>
                 {visibleColumns.name && (
-                  <TableHead className="min-w-[280px] text-white h-[12px] font-bold">
+                  <TableHead className="min-w-[280px] text-white h-[35px] font-bold text-xs">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('fullName')}>
-                      <User className="h-4 w-4 mr-2" />
+                      <User className="h-3 w-3 mr-2" />
                       FULL NAME
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                      <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.source && (
-                  <TableHead className="min-w-[200px] text-white h-[12px] font-bold">
+                  <TableHead className="min-w-[200px] text-white h-[35px] font-bold text-xs">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('source')}>
-                      <Globe className="h-4 w-4 mr-2" />
+                      <Globe className="h-3 w-3 mr-2" />
                       SOURCE
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                      <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.created && (
-                  <TableHead className="min-w-[160px] text-white h-[12px] font-bold">
+                  <TableHead className="min-w-[160px] text-white h-[35px] font-bold text-xs">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('createdAt')}>
-                      <Calendar className="h-4 w-4 mr-2" />
+                      <Calendar className="h-3 w-3 mr-2" />
                       CREATED
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                      <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.associate && (
-                  <TableHead className="min-w-[200px] text-white h-[12px] font-bold">
+                  <TableHead className="min-w-[200px] text-white h-[35px] font-bold text-xs">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('associate')}>
-                      <User className="h-4 w-4 mr-2" />
+                      <User className="h-3 w-3 mr-2" />
                       ASSOCIATE
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                      <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.stage && (
-                  <TableHead className="min-w-[250px] text-white h-[12px] font-bold">
+                  <TableHead className="min-w-[250px] text-white h-[35px] font-bold text-xs">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('stage')}>
-                      <Target className="h-4 w-4 mr-2" />
+                      <Target className="h-3 w-3 mr-2" />
                       STAGE
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                      <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.status && (
-                  <TableHead className="min-w-[160px] text-white h-[12px] font-bold">
+                  <TableHead className="min-w-[160px] text-white h-[35px] font-bold text-xs">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('status')}>
-                      <Activity className="h-4 w-4 mr-2" />
+                      <Activity className="h-3 w-3 mr-2" />
                       STATUS
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                      <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>
                 )}
                 {visibleColumns.remarks && (
-                  <TableHead className="min-w-[250px] text-white h-[12px] font-bold">
+                  <TableHead className="min-w-[250px] text-white h-[35px] font-bold text-xs">
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('remarks')}>
-                      <FileText className="h-4 w-4 mr-2" />
+                      <FileText className="h-3 w-3 mr-2" />
                       REMARKS
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                      <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>
                 )}
-                <TableHead className="text-right w-[120px] text-white h-[12px] font-bold">ACTIONS</TableHead>
+                <TableHead className="text-right w-[120px] text-white h-[35px] font-bold text-xs">ACTIONS</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="bg-white">
@@ -582,13 +627,10 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Badge 
-                                  variant="outline" 
-                                  className="bg-gray-800/80 text-white border-gray-600 flex items-center gap-1.5 w-[160px] justify-center h-6 font-mono text-xs cursor-pointer"
+                                  className={`${getSourceBadgeStyle(lead.source)} flex items-center gap-1.5 w-[160px] justify-center h-6 font-mono text-xs cursor-pointer border`}
                                 >
-                                  <span className="text-white flex items-center justify-center">
-                                    {React.cloneElement(getSourceIcon(lead.source), { className: "h-3.5 w-3.5 text-white" })}
-                                  </span>
-                                  <span className="truncate text-white">{lead.source}</span>
+                                  {getSourceIcon(lead.source)}
+                                  <span className="truncate text-white font-semibold">{lead.source}</span>
                                 </Badge>
                               </TooltipTrigger>
                               <TooltipContent className="bg-slate-800 text-white">
@@ -646,13 +688,10 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Badge 
-                                  variant="outline" 
-                                  className="bg-gray-800/80 text-white border-gray-600 flex items-center gap-1.5 w-[200px] justify-center h-6 font-mono text-xs cursor-pointer"
+                                  className={`${getStageBadgeStyle(lead.stage)} flex items-center gap-1.5 w-[200px] justify-center h-6 font-mono text-xs cursor-pointer border`}
                                 >
-                                  <span className="text-white flex items-center justify-center">
-                                    {React.cloneElement(getStageIcon(lead.stage), { className: "h-3.5 w-3.5 text-white" })}
-                                  </span>
-                                  <span className="truncate text-white">{lead.stage}</span>
+                                  {getStageIcon(lead.stage)}
+                                  <span className="truncate text-white font-semibold">{lead.stage}</span>
                                 </Badge>
                               </TooltipTrigger>
                               <TooltipContent className="bg-slate-800 text-white max-w-xs">
@@ -669,12 +708,10 @@ export const LeadsTable = ({ onLeadClick, selectedLeads, setSelectedLeads, compa
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Badge 
-                                  className="bg-gray-800/80 text-white border-gray-600 flex items-center gap-1.5 w-[120px] justify-center h-6 font-mono text-xs cursor-pointer"
+                                  className={`${getStatusBadgeStyle(lead.status)} flex items-center gap-1.5 w-[120px] justify-center h-6 font-mono text-xs cursor-pointer border`}
                                 >
-                                  <span className="text-white flex items-center justify-center">
-                                    {React.cloneElement(getStatusIcon(lead.status), { className: "h-3.5 w-3.5 text-white" })}
-                                  </span>
-                                  <span className="text-xs text-white">{lead.status}</span>
+                                  {getStatusIcon(lead.status)}
+                                  <span className="text-xs text-white font-semibold">{lead.status}</span>
                                 </Badge>
                               </TooltipTrigger>
                               <TooltipContent className="bg-slate-800 text-white">

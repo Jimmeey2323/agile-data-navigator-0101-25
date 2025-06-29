@@ -24,7 +24,9 @@ import {
   EyeOff,
   ExternalLink,
   HelpCircle,
-  Bell
+  Bell,
+  TrendingUp,
+  Activity
 } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 import { SearchBar } from "@/components/SearchBar";
@@ -38,6 +40,8 @@ import { PivotView } from "@/components/PivotView";
 import { CSVUploadView } from "@/components/CSVUploadView";
 import { LeadAnalytics } from "@/components/LeadAnalytics";
 import { AIInsightsView } from "@/components/AIInsightsView";
+import { LeadPerformanceView } from "@/components/LeadPerformanceView";
+import { LeadTrendsView } from "@/components/LeadTrendsView";
 import { useLeads } from "@/contexts/LeadContext";
 import { PaginationControls } from "@/components/PaginationControls";
 import {
@@ -211,7 +215,7 @@ const Index = () => {
       <div className="container flex-1 py-4 pb-8">
         <Tabs defaultValue="leads-main" className="w-full">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-            <TabsList className="grid grid-cols-4 md:grid-cols-7 w-full sm:w-auto bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-1 rounded-xl shadow-sm">
+            <TabsList className="grid grid-cols-4 md:grid-cols-9 w-full sm:w-auto bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-1 rounded-xl shadow-sm">
               <TabsTrigger value="leads-main" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500/20 data-[state=active]:to-purple-500/20 rounded-lg">
                 <Table className="w-4 h-4" />
                 <span className="hidden md:inline">Leads</span>
@@ -239,6 +243,14 @@ const Index = () => {
               <TabsTrigger value="ai-insights" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500/20 data-[state=active]:to-purple-500/20 rounded-lg">
                 <BrainCircuit className="w-4 h-4" />
                 <span className="hidden md:inline">AI Insights</span>
+              </TabsTrigger>
+              <TabsTrigger value="performance" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500/20 data-[state=active]:to-purple-500/20 rounded-lg">
+                <TrendingUp className="w-4 h-4" />
+                <span className="hidden md:inline">Performance</span>
+              </TabsTrigger>
+              <TabsTrigger value="trends" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500/20 data-[state=active]:to-purple-500/20 rounded-lg">
+                <Activity className="w-4 h-4" />
+                <span className="hidden md:inline">Trends</span>
               </TabsTrigger>
             </TabsList>
 
@@ -437,6 +449,34 @@ const Index = () => {
               </CardHeader>
             </Card>
             <AIInsightsView />
+          </TabsContent>
+
+          <TabsContent value="performance" className="mt-0">
+            <Card className="shadow-md border-border/30 mb-4 glass-card">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl">Lead Performance Analytics</CardTitle>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Month-on-month performance comparison across different metrics and channels.
+                </p>
+              </CardHeader>
+            </Card>
+            <LeadPerformanceView />
+          </TabsContent>
+
+          <TabsContent value="trends" className="mt-0">
+            <Card className="shadow-md border-border/30 mb-4 glass-card">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl">Lead Trends & Insights</CardTitle>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Comprehensive trend analysis and performance comparisons over time.
+                </p>
+              </CardHeader>
+            </Card>
+            <LeadTrendsView />
           </TabsContent>
         </Tabs>
       </div>
