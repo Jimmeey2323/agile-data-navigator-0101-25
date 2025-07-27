@@ -415,7 +415,7 @@ export const LeadsTable = ({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="badge flex items-center gap-1 justify-center whitespace-nowrap">
+          <span className="badge flex items-left gap-1 justify-center whitespace-nowrap text-left">
             <Globe className="h-3 w-3" />
             {lead.source}
           </span>
