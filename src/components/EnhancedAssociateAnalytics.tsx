@@ -1,379 +1,444 @@
 
 import React, { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLeads } from '@/contexts/LeadContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { EnhancedBadge } from '@/components/ui/enhanced-badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { 
   Users, 
-  Trophy, 
-  Target, 
   TrendingUp, 
+  Target, 
+  Award, 
   Calendar,
   Phone,
   Mail,
-  Star,
-  Award,
-  BarChart3,
-  PieChart,
-  Activity,
-  Zap
+  CheckCircle,
+  XCircle,
+  Clock,
+  DollarSign,
+  Zap,
+  Eye,
+  UserCheck,
+  Activity
 } from 'lucide-react';
-import { formatRevenue, formatDate } from '@/lib/utils';
 
-export function EnhancedAssociateAnalytics() {
+export const EnhancedAssociateAnalytics = () => {
   const { filteredLeads, associateOptions } = useLeads();
   const [selectedAssociates, setSelectedAssociates] = useState<string[]>([]);
-  const [comparisonMetric, setComparisonMetric] = useState<string>('conversions');
+  const [comparisonMode, setComparisonMode] = useState<'overview' | 'detailed' | 'performance'>('overview');
+  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
 
-  const comparisonMetrics = [
-    { value: 'conversions', label: 'Conversions', icon: Trophy },
-    { value: 'leads', label: 'Total Leads', icon: Users },
-    { value: 'trials', label: 'Trials', icon: Calendar },
-    { value: 'revenue', label: 'Revenue', icon: TrendingUp },
-    { value: 'conversionRate', label: 'Conversion Rate', icon: Target }
-  ];
-
-  const associateStats = useMemo(() => {
-    const stats: Record<string, any> = {};
+  // Calculate metrics for each associate
+  const associateMetrics = useMemo(() => {
+    const metrics: Record<string, any> = {};
     
     associateOptions.forEach(associate => {
       const associateLeads = filteredLeads.filter(lead => lead.associate === associate);
-      const conversions = associateLeads.filter(lead => lead.stage === 'Membership Sold').length;
-      const trials = associateLeads.filter(lead => 
-        lead.stage === 'Trial Scheduled' || lead.stage === 'Trial Completed'
-      ).length;
-      const revenue = conversions * 75000;
-      const conversionRate = associateLeads.length > 0 ? (conversions / associateLeads.length) * 100 : 0;
       
-      // Source breakdown
-      const sourceBreakdown = associateLeads.reduce((acc, lead) => {
+      const totalLeads = associateLeads.length;
+      const convertedLeads = associateLeads.filter(lead => lead.stage === 'Membership Sold').length;
+      const hotLeads = associateLeads.filter(lead => lead.status === 'Hot').length;
+      const warmLeads = associateLeads.filter(lead => lead.status === 'Warm').length;
+      const coldLeads = associateLeads.filter(lead => lead.status === 'Cold').length;
+      const lostLeads = associateLeads.filter(lead => lead.status === 'Lost').length;
+      
+      const conversionRate = totalLeads > 0 ? (convertedLeads / totalLeads) * 100 : 0;
+      const avgLeadValue = 75000; // ₹75,000 per conversion
+      const revenue = convertedLeads * avgLeadValue;
+      
+      // Source distribution
+      const sourceDistribution = associateLeads.reduce((acc, lead) => {
         acc[lead.source] = (acc[lead.source] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
       
-      // Status breakdown
-      const statusBreakdown = associateLeads.reduce((acc, lead) => {
-        acc[lead.status] = (acc[lead.status] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-      
-      // Stage breakdown
-      const stageBreakdown = associateLeads.reduce((acc, lead) => {
+      // Stage distribution
+      const stageDistribution = associateLeads.reduce((acc, lead) => {
         acc[lead.stage] = (acc[lead.stage] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
       
-      // Recent activity
-      const recentLeads = associateLeads
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 5);
+      // Recent activity (last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const recentLeads = associateLeads.filter(lead => 
+        new Date(lead.createdAt) >= thirtyDaysAgo
+      );
       
-      stats[associate] = {
-        totalLeads: associateLeads.length,
-        conversions,
-        trials,
-        revenue,
+      metrics[associate] = {
+        totalLeads,
+        convertedLeads,
+        hotLeads,
+        warmLeads,
+        coldLeads,
+        lostLeads,
         conversionRate,
-        sourceBreakdown,
-        statusBreakdown,
-        stageBreakdown,
-        recentLeads,
-        avgFollowUps: associateLeads.reduce((acc, lead) => {
-          let followUps = 0;
-          if (lead.followUp1Date) followUps++;
-          if (lead.followUp2Date) followUps++;
-          if (lead.followUp3Date) followUps++;
-          if (lead.followUp4Date) followUps++;
-          return acc + followUps;
-        }, 0) / associateLeads.length || 0
+        revenue,
+        sourceDistribution,
+        stageDistribution,
+        recentActivity: recentLeads.length,
+        avgResponseTime: '2.5h', // Mock data
+        followUpRate: 85, // Mock data
+        qualificationRate: (hotLeads + warmLeads) / totalLeads * 100 || 0
       };
     });
     
-    return stats;
+    return metrics;
   }, [filteredLeads, associateOptions]);
 
-  const handleAssociateToggle = (associate: string) => {
+  const handleAssociateSelect = (associate: string) => {
     setSelectedAssociates(prev => 
       prev.includes(associate) 
         ? prev.filter(a => a !== associate)
-        : [...prev, associate].slice(0, 3) // Max 3 associates
+        : [...prev, associate]
     );
   };
 
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  const getPerformanceColor = (rate: number) => {
+    if (rate >= 80) return 'text-green-600';
+    if (rate >= 60) return 'text-yellow-600';
+    return 'text-red-600';
   };
 
-  const getMetricValue = (associate: string, metric: string) => {
-    const stats = associateStats[associate];
-    if (!stats) return 0;
-    
-    switch (metric) {
-      case 'conversions':
-        return stats.conversions;
-      case 'leads':
-        return stats.totalLeads;
-      case 'trials':
-        return stats.trials;
-      case 'revenue':
-        return stats.revenue;
-      case 'conversionRate':
-        return stats.conversionRate;
-      default:
-        return 0;
-    }
+  const getPerformanceLevel = (rate: number) => {
+    if (rate >= 80) return 'Excellent';
+    if (rate >= 60) return 'Good';
+    if (rate >= 40) return 'Average';
+    return 'Needs Improvement';
   };
 
-  const formatMetricValue = (value: number, metric: string) => {
-    switch (metric) {
-      case 'revenue':
-        return formatRevenue(value);
-      case 'conversionRate':
-        return `${value.toFixed(1)}%`;
-      default:
-        return value;
-    }
-  };
+  // Chart colors
+  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
   return (
     <div className="space-y-6">
+      {/* Header and Controls */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Associate Analytics</h2>
+          <p className="text-sm text-gray-600">Compare performance across associates</p>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <Select value={timeRange} onValueChange={(value: typeof timeRange) => setTimeRange(value)}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7d">Last 7 days</SelectItem>
+              <SelectItem value="30d">Last 30 days</SelectItem>
+              <SelectItem value="90d">Last 90 days</SelectItem>
+              <SelectItem value="1y">Last year</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={comparisonMode} onValueChange={(value: typeof comparisonMode) => setComparisonMode(value)}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="overview">Overview</SelectItem>
+              <SelectItem value="detailed">Detailed</SelectItem>
+              <SelectItem value="performance">Performance</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
       {/* Associate Selection */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <Users className="h-5 w-5 mr-2" />
-            Associate Comparison Dashboard
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Select Associates to Compare
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Select Associates (Max 3)</label>
-              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
-                {associateOptions.map(associate => (
-                  <Button
-                    key={associate}
-                    variant={selectedAssociates.includes(associate) ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleAssociateToggle(associate)}
-                    disabled={!selectedAssociates.includes(associate) && selectedAssociates.length >= 3}
-                    className="justify-start"
-                  >
-                    <Avatar className="h-4 w-4 mr-2">
-                      <AvatarFallback className="text-xs">
-                        {getInitials(associate)}
-                      </AvatarFallback>
-                    </Avatar>
-                    {associate}
-                  </Button>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium mb-2 block">Comparison Metric</label>
-              <Select value={comparisonMetric} onValueChange={setComparisonMetric}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {comparisonMetrics.map(metric => (
-                    <SelectItem key={metric.value} value={metric.value}>
-                      <div className="flex items-center">
-                        <metric.icon className="h-4 w-4 mr-2" />
-                        {metric.label}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="flex flex-wrap gap-2">
+            {associateOptions.map(associate => (
+              <Button
+                key={associate}
+                variant={selectedAssociates.includes(associate) ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleAssociateSelect(associate)}
+                className="flex items-center gap-2"
+              >
+                <UserCheck className="h-4 w-4" />
+                {associate}
+                {selectedAssociates.includes(associate) && (
+                  <Badge variant="secondary" className="ml-2">
+                    {associateMetrics[associate]?.totalLeads || 0}
+                  </Badge>
+                )}
+              </Button>
+            ))}
           </div>
+          
+          {selectedAssociates.length > 0 && (
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-700">
+                Selected {selectedAssociates.length} associate(s) for comparison
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Comparison View */}
+      {/* Comparison Content */}
       {selectedAssociates.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {selectedAssociates.map(associate => {
-            const stats = associateStats[associate];
-            if (!stats) return null;
+        <Tabs value={comparisonMode} onValueChange={(value: typeof comparisonMode) => setComparisonMode(value)}>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="detailed">Detailed</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
+          </TabsList>
 
-            return (
-              <Card key={associate} className="shadow-lg">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center space-x-3">
-                    <Avatar className="h-12 w-12">
-                      <AvatarFallback className="bg-primary text-primary-foreground">
-                        {getInitials(associate)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <CardTitle className="text-lg">{associate}</CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        {stats.totalLeads} leads • {stats.conversions} conversions
-                      </p>
-                    </div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="space-y-4">
-                  {/* Key Metrics */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-blue-50 p-3 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <Users className="h-4 w-4 text-blue-600" />
-                        <span className="text-lg font-semibold">{stats.totalLeads}</span>
+          <TabsContent value="overview" className="space-y-6">
+            {/* Key Metrics Comparison */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {selectedAssociates.map(associate => {
+                const metrics = associateMetrics[associate];
+                return (
+                  <Card key={associate} className="border-2 hover:shadow-lg transition-shadow">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <UserCheck className="h-5 w-5 text-blue-500" />
+                        {associate}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-blue-600">{metrics.totalLeads}</div>
+                          <div className="text-xs text-gray-600">Total Leads</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-600">{metrics.convertedLeads}</div>
+                          <div className="text-xs text-gray-600">Converted</div>
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">Total Leads</p>
-                    </div>
-                    
-                    <div className="bg-green-50 p-3 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <Trophy className="h-4 w-4 text-green-600" />
-                        <span className="text-lg font-semibold">{stats.conversions}</span>
+                      
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Conversion Rate</span>
+                          <span className={getPerformanceColor(metrics.conversionRate)}>
+                            {metrics.conversionRate.toFixed(1)}%
+                          </span>
+                        </div>
+                        <Progress value={metrics.conversionRate} className="h-2" />
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">Conversions</p>
-                    </div>
-                    
-                    <div className="bg-orange-50 p-3 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <Calendar className="h-4 w-4 text-orange-600" />
-                        <span className="text-lg font-semibold">{stats.trials}</span>
+                      
+                      <div className="pt-2 border-t">
+                        <div className="flex justify-between text-sm">
+                          <span>Revenue</span>
+                          <span className="font-semibold">₹{(metrics.revenue / 1000).toFixed(0)}K</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-600">
+                          <span>Performance</span>
+                          <span>{getPerformanceLevel(metrics.conversionRate)}</span>
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">Trials</p>
-                    </div>
-                    
-                    <div className="bg-purple-50 p-3 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <Target className="h-4 w-4 text-purple-600" />
-                        <span className="text-lg font-semibold">{stats.conversionRate.toFixed(1)}%</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">Conv. Rate</p>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
 
-                  {/* Revenue */}
-                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-4 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <TrendingUp className="h-5 w-5 text-emerald-600 mr-2" />
-                        <span className="font-medium">Revenue Generated</span>
-                      </div>
-                      <span className="text-xl font-bold text-emerald-600">
-                        {formatRevenue(stats.revenue)}
-                      </span>
-                    </div>
-                  </div>
+            {/* Performance Comparison Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Performance Comparison</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={selectedAssociates.map(associate => ({
+                    associate,
+                    totalLeads: associateMetrics[associate].totalLeads,
+                    converted: associateMetrics[associate].convertedLeads,
+                    conversionRate: associateMetrics[associate].conversionRate
+                  }))}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="associate" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="totalLeads" fill="#3b82f6" name="Total Leads" />
+                    <Bar dataKey="converted" fill="#10b981" name="Converted" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                  {/* Top Sources */}
-                  <div>
-                    <h4 className="font-medium mb-2 flex items-center">
-                      <BarChart3 className="h-4 w-4 mr-2" />
-                      Top Sources
-                    </h4>
-                    <div className="space-y-1">
-                      {Object.entries(stats.sourceBreakdown)
-                        .sort(([,a], [,b]) => b - a)
-                        .slice(0, 3)
-                        .map(([source, count]) => (
-                          <div key={source} className="flex items-center justify-between">
-                            <span className="text-sm">{source}</span>
-                            <Badge variant="outline">{count}</Badge>
+          <TabsContent value="detailed" className="space-y-6">
+            {/* Detailed Breakdown */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {selectedAssociates.map(associate => {
+                const metrics = associateMetrics[associate];
+                return (
+                  <Card key={associate} className="border-2">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <UserCheck className="h-5 w-5" />
+                        {associate} - Detailed Breakdown
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {/* Status Distribution */}
+                      <div>
+                        <h4 className="font-semibold mb-2">Lead Status Distribution</h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <EnhancedBadge variant="hot" size="sm">Hot</EnhancedBadge>
+                            <span className="font-semibold">{metrics.hotLeads}</span>
                           </div>
-                        ))}
-                    </div>
-                  </div>
-
-                  {/* Status Breakdown */}
-                  <div>
-                    <h4 className="font-medium mb-2 flex items-center">
-                      <Activity className="h-4 w-4 mr-2" />
-                      Status Breakdown
-                    </h4>
-                    <div className="flex flex-wrap gap-1">
-                      {Object.entries(stats.statusBreakdown).map(([status, count]) => (
-                        <Badge key={status} variant="secondary" className="text-xs">
-                          {status}: {count}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Performance Indicators */}
-                  <div className="border-t pt-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Avg Follow-ups</span>
-                      <span className="font-medium">{stats.avgFollowUps.toFixed(1)}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm mt-1">
-                      <span className="text-muted-foreground">Performance</span>
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <Star 
-                            key={i} 
-                            className={`h-3 w-3 ${
-                              i < Math.floor(stats.conversionRate / 20) 
-                                ? 'text-yellow-400 fill-current' 
-                                : 'text-gray-300'
-                            }`} 
-                          />
-                        ))}
+                          <div className="flex justify-between items-center">
+                            <EnhancedBadge variant="warm" size="sm">Warm</EnhancedBadge>
+                            <span className="font-semibold">{metrics.warmLeads}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <EnhancedBadge variant="cold" size="sm">Cold</EnhancedBadge>
+                            <span className="font-semibold">{metrics.coldLeads}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <EnhancedBadge variant="lost" size="sm">Lost</EnhancedBadge>
+                            <span className="font-semibold">{metrics.lostLeads}</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+
+                      {/* Source Distribution */}
+                      <div>
+                        <h4 className="font-semibold mb-2">Top Lead Sources</h4>
+                        <div className="space-y-2">
+                          {Object.entries(metrics.sourceDistribution)
+                            .sort(([,a], [,b]) => (b as number) - (a as number))
+                            .slice(0, 3)
+                            .map(([source, count]) => (
+                              <div key={source} className="flex justify-between items-center">
+                                <span className="text-sm">{source}</span>
+                                <Badge variant="secondary">{String(count)}</Badge>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+
+                      {/* Recent Activity */}
+                      <div>
+                        <h4 className="font-semibold mb-2">Recent Activity</h4>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Activity className="h-4 w-4 text-blue-500" />
+                            <span>New Leads: {metrics.recentActivity}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-orange-500" />
+                            <span>Avg Response: {String(metrics.avgResponseTime)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="performance" className="space-y-6">
+            {/* Performance Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5 text-blue-500" />
+                    Conversion Rates
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {selectedAssociates.map(associate => {
+                      const metrics = associateMetrics[associate];
+                      return (
+                        <div key={associate} className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-sm">{associate}</span>
+                            <span className="text-sm font-semibold">{metrics.conversionRate.toFixed(1)}%</span>
+                          </div>
+                          <Progress value={metrics.conversionRate} className="h-2" />
+                        </div>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
-            );
-          })}
-        </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-green-500" />
+                    Revenue Generated
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {selectedAssociates.map(associate => {
+                      const metrics = associateMetrics[associate];
+                      return (
+                        <div key={associate} className="flex justify-between items-center">
+                          <span className="text-sm">{associate}</span>
+                          <span className="text-sm font-semibold">₹{(metrics.revenue / 1000).toFixed(0)}K</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Award className="h-5 w-5 text-purple-500" />
+                    Qualification Rate
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {selectedAssociates.map(associate => {
+                      const metrics = associateMetrics[associate];
+                      return (
+                        <div key={associate} className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-sm">{associate}</span>
+                            <span className="text-sm font-semibold">{metrics.qualificationRate.toFixed(1)}%</span>
+                          </div>
+                          <Progress value={metrics.qualificationRate} className="h-2" />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
       )}
 
-      {/* Overall Ranking */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Award className="h-5 w-5 mr-2" />
-            Associate Leaderboard
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {associateOptions
-              .map(associate => ({
-                name: associate,
-                ...associateStats[associate]
-              }))
-              .sort((a, b) => b.conversions - a.conversions)
-              .slice(0, 10)
-              .map((associate, index) => (
-                <div key={associate.name} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold">
-                      {index + 1}
-                    </div>
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback>{getInitials(associate.name)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{associate.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {associate.totalLeads} leads • {associate.conversionRate.toFixed(1)}% rate
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold">{associate.conversions} conversions</p>
-                    <p className="text-xs text-muted-foreground">{formatRevenue(associate.revenue)}</p>
-                  </div>
-                </div>
-              ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* No Selection State */}
+      {selectedAssociates.length === 0 && (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <Users className="h-12 w-12 text-gray-400 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Select Associates to Compare</h3>
+            <p className="text-gray-600 text-center mb-6">
+              Choose one or more associates from the list above to see detailed performance analytics and comparisons.
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
-}
+};

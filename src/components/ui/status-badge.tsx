@@ -1,7 +1,8 @@
+
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
-import { DivideIcon as LucideIcon } from "lucide-react"
+import { LucideIcon } from "lucide-react"
 
 const statusBadgeVariants = cva(
   "inline-flex items-center gap-x-2.5 rounded-tremor-full bg-background px-2.5 py-1.5 text-tremor-label border shadow-sm transition-all duration-200 hover:shadow-md",

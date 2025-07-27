@@ -1,359 +1,327 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "@/components/ui/table"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
-import {
-  Edit,
-  Trash2,
-  ChevronDown,
-  ChevronUp,
-  ChevronsUpDown,
-  Copy,
-  MoreHorizontal,
-  FileText,
-  Filter,
-  Columns,
-  Eye,
-  EyeOff
-} from "lucide-react"
-import { formatDate } from '@/lib/utils';
+
+import React, { useState, useEffect } from 'react';
 import { useLeads } from '@/contexts/LeadContext';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { EnhancedBadge } from '@/components/ui/enhanced-badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowUpDown, ArrowUp, ArrowDown, Edit } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import type { Lead, SortConfig } from '@/contexts/LeadContext';
 
-interface DataTableColumnHeaderProps {
-  column: {
-    id: string;
-    title: string;
-  };
-  onSort: (columnId: string) => void;
-  sortable?: boolean;
-}
-
-interface Column {
-  key: string;
-  label: string;
-  width?: string;
-}
-
-export function LeadsTable() {
+export const LeadsTable = () => {
   const { 
-    leads, 
     filteredLeads, 
     loading, 
-    error, 
-    filters, 
-    setFilters, 
-    updateLead, 
-    deleteLead: handleDeleteLead, 
     page, 
     setPage, 
     pageSize, 
-    setPageSize, 
     totalPages, 
     sortConfig, 
-    setSortConfig, 
-    settings, 
-    updateSettings 
+    setSortConfig,
+    displayMode 
   } = useLeads();
-  
-  const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
-  const [columnFilter, setColumnFilter] = useState("");
-  const [visibleColumns, setVisibleColumns] = useState<Column[]>([]);
-  
-  const columns: Column[] = useMemo(() => [
-    { key: 'fullName', label: 'Full Name', width: 'w-[200px]' },
-    { key: 'email', label: 'Email', width: 'w-[240px]' },
-    { key: 'phone', label: 'Phone', width: 'w-[140px]' },
-    { key: 'source', label: 'Source', width: 'w-[160px]' },
-    { key: 'status', label: 'Status', width: 'w-[120px]' },
-    { key: 'stage', label: 'Stage', width: 'w-[160px]' },
-    { key: 'associate', label: 'Associate', width: 'w-[160px]' },
-    { key: 'center', label: 'Center', width: 'w-[160px]' },
-    { key: 'createdAt', label: 'Created At', width: 'w-[160px]' },
-  ], []);
-  
-  // Initialize visible columns from settings or use default columns
-  useEffect(() => {
-    if (settings.visibleColumns && settings.visibleColumns.length > 0) {
-      setVisibleColumns(columns.filter(col => settings.visibleColumns.includes(col.key)));
-    } else {
-      setVisibleColumns(columns);
-    }
-  }, [columns, settings.visibleColumns]);
-  
-  const handleVisibleColumnsChange = (newVisibleColumns: string[]) => {
-    const updatedColumns = columns.filter(col => newVisibleColumns.includes(col.key));
-    setVisibleColumns(updatedColumns);
-    updateSettings({ visibleColumns: newVisibleColumns });
-  };
-  
-  const paginatedLeads = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    const end = start + pageSize;
-    return filteredLeads.slice(start, end);
-  }, [filteredLeads, page, pageSize]);
-  
-  const handleSelectLead = (leadId: string) => {
-    setSelectedLeads(prev =>
-      prev.includes(leadId) ? prev.filter(id => id !== leadId) : [...prev, leadId]
-    );
-  };
-  
-  const handleSelectAll = (checked: boolean) => {
-    setSelectedLeads(checked ? paginatedLeads.map(lead => lead.id) : []);
-  };
-  
-  const handleSort = (key: string) => {
-    setSortConfig(prev => {
+
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // Calculate pagination
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedLeads = filteredLeads.slice(startIndex, endIndex);
+
+  const handleSort = (key: keyof Lead) => {
+    setSortConfig((prev: SortConfig | null) => {
       if (prev?.key === key) {
-        return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
-      } else {
-        return { key, direction: 'asc' };
+        return prev.direction === 'asc' 
+          ? { key, direction: 'desc' } 
+          : { key, direction: 'asc' };
       }
+      return { key, direction: 'asc' };
     });
   };
-  
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+
+  const getSortIcon = (key: keyof Lead) => {
+    if (!sortConfig || sortConfig.key !== key) {
+      return <ArrowUpDown className="ml-2 h-4 w-4" />;
+    }
+    return sortConfig.direction === 'asc' 
+      ? <ArrowUp className="ml-2 h-4 w-4" />
+      : <ArrowDown className="ml-2 h-4 w-4" />;
   };
 
+  const handleEditLead = (lead: Lead) => {
+    setSelectedLead(lead);
+    setIsEditModalOpen(true);
+  };
+
+  const getStatusVariant = (status: string) => {
+    const statusMap: Record<string, string> = {
+      'Hot': 'hot',
+      'Warm': 'warm',
+      'Cold': 'cold',
+      'Won': 'won',
+      'Converted': 'converted',
+      'Lost': 'lost',
+      'New': 'new',
+      'Contacted': 'contacted',
+      'Qualified': 'qualified',
+      'Nurturing': 'nurturing',
+      'Proposal': 'proposalStage',
+      'Negotiation': 'negotiation',
+      'Disqualified': 'disqualified',
+      'Unresponsive': 'unresponsive',
+      'Rejected': 'rejected'
+    };
+    return statusMap[status] || 'default';
+  };
+
+  const getSourceVariant = (source: string) => {
+    const sourceMap: Record<string, string> = {
+      'Website': 'website',
+      'Website Form': 'websiteform',
+      'Referral': 'referral',
+      'Social Media': 'social',
+      'Instagram': 'instagram',
+      'Facebook': 'facebook',
+      'Twitter': 'twitter',
+      'LinkedIn': 'linkedin',
+      'YouTube': 'youtube',
+      'Event': 'event',
+      'Cold Call': 'coldcall',
+      'Email Campaign': 'email',
+      'Partner': 'partner',
+      'Advertisement': 'advertisement',
+      'Walk-in': 'walkin'
+    };
+    return sourceMap[source] || 'other';
+  };
+
+  const getStageVariant = (stage: string) => {
+    const stageMap: Record<string, string> = {
+      'New Enquiry': 'newenquiry',
+      'Initial Contact': 'initialcontact',
+      'Follow-up': 'followup',
+      'Demo': 'demo',
+      'Trial Scheduled': 'trialscheduled',
+      'Trial Completed': 'trialcompleted',
+      'Proposal': 'proposal',
+      'Negotiation': 'negotiationStage',
+      'Membership Sold': 'membershipsold',
+      'Closed Won': 'closedwon',
+      'Not Interested': 'notinterested',
+      'Closed Lost': 'closedlost'
+    };
+    return stageMap[stage] || 'default';
+  };
+
+  // Auto-refresh data
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Trigger a refresh if needed
+    }, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Loading leads...</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="animate-pulse space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-16 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between py-2">
-        <Input
-          placeholder="Filter columns..."
-          value={columnFilter}
-          onChange={(event) => setColumnFilter(event.target.value)}
-          className="max-w-[200px]"
-        />
-        <div className="flex items-center space-x-2">
-          <Select value={String(pageSize)} onValueChange={(value) => setPageSize(Number(value))}>
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Page size" />
-            </SelectTrigger>
-            <SelectContent>
-              {[10, 20, 30, 50, 100].map((size) => (
-                <SelectItem key={size} value={String(size)}>
-                  {size}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="ml-auto">
-                <Columns className="h-4 w-4 mr-2" />
-                Columns
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-2">
-              {columns
-                .filter(column =>
-                  column.label.toLowerCase().includes(columnFilter.toLowerCase())
-                )
-                .map(column => {
-                  return (
-                    <div key={column.key} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={column.key}
-                        checked={visibleColumns.find(col => col.key === column.key) !== undefined}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            handleVisibleColumnsChange([...visibleColumns.map(col => col.key), column.key]);
-                          } else {
-                            handleVisibleColumnsChange(visibleColumns.filter(col => col.key !== column.key).map(col => col.key));
-                          }
-                        }}
-                      />
-                      <Label htmlFor={column.key} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                        {column.label}
-                      </Label>
-                    </div>
-                  )
-                })}
-            </PopoverContent>
-          </Popover>
-        </div>
-      </div>
-      
-      <div className="rounded-md border bg-background">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50px]">
-                <Checkbox
-                  checked={selectedLeads.length === paginatedLeads.length}
-                  onCheckedChange={handleSelectAll}
-                />
-              </TableHead>
-              {visibleColumns.map(column => (
-                <TableHead 
-                  key={column.key} 
-                  className={`${column.width} ${
-                    ['source', 'createdAt', 'associate', 'stage', 'status'].includes(column.key) 
-                      ? 'text-left' 
-                      : ''
-                  }`}
-                >
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleSort(column.key)}
-                    className="h-auto p-0 font-medium hover:bg-transparent"
+    <Card>
+      <CardHeader>
+        <CardTitle>Leads Table</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[200px]">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => handleSort('name')}
+                    className="h-auto p-0 font-semibold"
                   >
-                    {column.label}
-                    {sortConfig?.key === column.key && (
-                      sortConfig.direction === 'asc' ? (
-                        <ChevronUp className="ml-1 h-4 w-4" />
-                      ) : (
-                        <ChevronDown className="ml-1 h-4 w-4" />
-                      )
-                    )}
+                    Name
+                    {getSortIcon('name')}
                   </Button>
                 </TableHead>
-              ))}
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedLeads.map((lead, index) => (
-              <TableRow 
-                key={lead.id}
-                className={`${selectedLeads.includes(lead.id) ? 'bg-muted/50' : ''} hover:bg-muted/30`}
-              >
-                <TableCell>
-                  <Checkbox
-                    checked={selectedLeads.includes(lead.id)}
-                    onCheckedChange={() => handleSelectLead(lead.id)}
-                  />
-                </TableCell>
-                
-                {visibleColumns.map(column => (
-                  <TableCell 
-                    key={column.key} 
-                    className={`${
-                      ['source', 'createdAt', 'associate', 'stage', 'status'].includes(column.key) 
-                        ? 'text-left' 
-                        : ''
-                    }`}
+                <TableHead className="w-[200px]">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => handleSort('email')}
+                    className="h-auto p-0 font-semibold"
                   >
-                    {column.key === 'source' && (
-                      <div className="flex items-center space-x-2">
-                        <EnhancedBadge 
-                          badgeType="source" 
-                          value={lead.source} 
-                          size="sm"
-                        />
-                      </div>
-                    )}
-                    {column.key === 'status' && (
-                      <div className="flex items-center space-x-2">
-                        <EnhancedBadge 
-                          badgeType="status" 
-                          value={lead.status} 
-                          size="sm"
-                        />
-                      </div>
-                    )}
-                    {column.key === 'stage' && (
-                      <div className="flex items-center space-x-2">
-                        <EnhancedBadge 
-                          badgeType="stage" 
-                          value={lead.stage} 
-                          size="sm"
-                        />
-                      </div>
-                    )}
-                    {column.key === 'associate' && (
-                      <div className="flex items-center space-x-2 text-left">
-                        <Avatar className="h-6 w-6">
-                          <AvatarFallback className="text-xs">
-                            {getInitials(lead.associate)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span>{lead.associate}</span>
-                      </div>
-                    )}
-                    {column.key === 'createdAt' && (
-                      <div className="text-left">
-                        <span className="text-sm">{formatDate(lead.createdAt)}</span>
-                      </div>
-                    )}
-                    {!['source', 'status', 'stage', 'associate', 'createdAt'].includes(column.key) && (
-                      <span>{lead[column.key as keyof typeof lead]}</span>
-                    )}
-                  </TableCell>
-                ))}
-                
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end space-x-2">
-                    <Button
-                      variant="ghost"
+                    Email
+                    {getSortIcon('email')}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-[150px]">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => handleSort('phone')}
+                    className="h-auto p-0 font-semibold"
+                  >
+                    Phone
+                    {getSortIcon('phone')}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-[120px] text-left">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => handleSort('source')}
+                    className="h-auto p-0 font-semibold"
+                  >
+                    Source
+                    {getSortIcon('source')}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-[120px] text-left">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => handleSort('associate')}
+                    className="h-auto p-0 font-semibold"
+                  >
+                    Associate
+                    {getSortIcon('associate')}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-[120px] text-left">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => handleSort('stage')}
+                    className="h-auto p-0 font-semibold"
+                  >
+                    Stage
+                    {getSortIcon('stage')}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-[120px] text-left">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => handleSort('status')}
+                    className="h-auto p-0 font-semibold"
+                  >
+                    Status
+                    {getSortIcon('status')}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-[120px] text-left">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => handleSort('createdAt')}
+                    className="h-auto p-0 font-semibold"
+                  >
+                    Created At
+                    {getSortIcon('createdAt')}
+                  </Button>
+                </TableHead>
+                <TableHead className="w-[80px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedLeads.map((lead) => (
+                <TableRow key={lead.id} className="hover:bg-gray-50">
+                  <TableCell className="font-medium">{lead.name}</TableCell>
+                  <TableCell>{lead.email}</TableCell>
+                  <TableCell>{lead.phone}</TableCell>
+                  <TableCell className="text-left">
+                    <EnhancedBadge 
+                      variant={getSourceVariant(lead.source)}
+                      badgeType="source"
+                      value={lead.source}
                       size="sm"
-                      onClick={() => {}}
+                    />
+                  </TableCell>
+                  <TableCell className="text-left">{lead.associate}</TableCell>
+                  <TableCell className="text-left">
+                    <EnhancedBadge 
+                      variant={getStageVariant(lead.stage)}
+                      badgeType="stage"
+                      value={lead.stage}
+                      size="sm"
+                    />
+                  </TableCell>
+                  <TableCell className="text-left">
+                    <EnhancedBadge 
+                      variant={getStatusVariant(lead.status)}
+                      badgeType="status"
+                      value={lead.status}
+                      size="sm"
+                    />
+                  </TableCell>
+                  <TableCell className="text-left">
+                    {formatDistanceToNow(new Date(lead.createdAt), { addSuffix: true })}
+                  </TableCell>
+                  <TableCell>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleEditLead(lead)}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteLead(lead.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-      
-      <div className="flex items-center justify-between px-2">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {paginatedLeads.length} of {filteredLeads.length} lead(s)
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
-        <div className="space-x-2 py-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page === 1}
-            onClick={() => setPage(page - 1)}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page === totalPages}
-            onClick={() => setPage(page + 1)}
-          >
-            Next
-          </Button>
+        
+        {/* Pagination */}
+        <div className="flex items-center justify-between space-x-2 py-4">
+          <div className="text-sm text-muted-foreground">
+            Showing {startIndex + 1} to {Math.min(endIndex, filteredLeads.length)} of {filteredLeads.length} results
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(Math.max(1, page - 1))}
+              disabled={page === 1}
+            >
+              Previous
+            </Button>
+            <div className="flex items-center space-x-1">
+              {[...Array(totalPages)].map((_, i) => (
+                <Button
+                  key={i}
+                  variant={page === i + 1 ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setPage(i + 1)}
+                  className="w-8"
+                >
+                  {i + 1}
+                </Button>
+              ))}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(Math.min(totalPages, page + 1))}
+              disabled={page === totalPages}
+            >
+              Next
+            </Button>
+          </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
-}
+};

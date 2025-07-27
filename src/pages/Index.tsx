@@ -1,6 +1,6 @@
+
 import React, { useState, useCallback } from 'react';
-import { LeadEditModal } from '@/components/LeadEditModal';
-import { LeadAddModal } from '@/components/LeadAddModal';
+import { EditLeadModal } from '@/components/EditLeadModal';
 import { LeadsTable } from '@/components/LeadsTable';
 import { LeadsCardView } from '@/components/LeadsCardView';
 import { LeadTrendsView } from '@/components/LeadTrendsView';
@@ -18,9 +18,6 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { 
-  CalendarDateRangePicker 
-} from "@/components/ui/calendar-date-range-picker"
 import { 
   ArrowDown, 
   ArrowUp, 
@@ -70,7 +67,6 @@ export default function Index() {
   } = useLeads();
   
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
   
@@ -82,14 +78,6 @@ export default function Index() {
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
     setSelectedLead(null);
-  };
-  
-  const handleOpenAddModal = () => {
-    setIsAddModalOpen(true);
-  };
-  
-  const handleCloseAddModal = () => {
-    setIsAddModalOpen(false);
   };
   
   const handleSearchChange = (e) => {
@@ -105,27 +93,27 @@ export default function Index() {
     clearSearchHistory();
   };
   
-  const handleSourceFilterChange = (value) => {
+  const handleSourceFilterChange = (value: string[]) => {
     setFilters(prev => ({ ...prev, source: value }));
   };
   
-  const handleAssociateFilterChange = (value) => {
+  const handleAssociateFilterChange = (value: string[]) => {
     setFilters(prev => ({ ...prev, associate: value }));
   };
   
-  const handleCenterFilterChange = (value) => {
+  const handleCenterFilterChange = (value: string[]) => {
     setFilters(prev => ({ ...prev, center: value }));
   };
   
-  const handleStageFilterChange = (value) => {
+  const handleStageFilterChange = (value: string[]) => {
     setFilters(prev => ({ ...prev, stage: value }));
   };
   
-  const handleStatusFilterChange = (value) => {
+  const handleStatusFilterChange = (value: string[]) => {
     setFilters(prev => ({ ...prev, status: value }));
   };
   
-  const handleDateRangeChange = (date) => {
+  const handleDateRangeChange = (date: { start: Date | null; end: Date | null }) => {
     setFilters(prev => ({ ...prev, dateRange: date }));
   };
   
@@ -146,7 +134,7 @@ export default function Index() {
               Track and manage your leads effectively.
             </p>
           </div>
-          <Button variant="primary" onClick={handleOpenAddModal}>
+          <Button variant="default" onClick={() => setIsEditModalOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Add Lead
           </Button>
@@ -181,164 +169,120 @@ export default function Index() {
                     
                     <div className="space-y-2">
                       <Label htmlFor="source">Source:</Label>
-                      <Select
-                        id="source"
-                        multiple
-                        onValueChange={handleSourceFilterChange}
-                        defaultValue={filters.source}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select sources" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <ScrollArea className="max-h-60">
-                            {sourceOptions.map(source => (
-                              <SelectItem key={source} value={source}>
-                                <div className="flex items-center">
-                                  <Checkbox
-                                    checked={filters.source.includes(source)}
-                                    className="mr-2"
-                                  />
-                                  {source}
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </ScrollArea>
-                        </SelectContent>
-                      </Select>
+                      <div className="space-y-2">
+                        {sourceOptions.map(source => (
+                          <div key={source} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={source}
+                              checked={filters.source.includes(source)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  handleSourceFilterChange([...filters.source, source]);
+                                } else {
+                                  handleSourceFilterChange(filters.source.filter(s => s !== source));
+                                }
+                              }}
+                            />
+                            <Label htmlFor={source} className="text-sm">{source}</Label>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                     
                     <Separator className="my-2" />
                     
                     <div className="space-y-2">
                       <Label htmlFor="associate">Associate:</Label>
-                      <Select
-                        id="associate"
-                        multiple
-                        onValueChange={handleAssociateFilterChange}
-                        defaultValue={filters.associate}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select associates" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <ScrollArea className="max-h-60">
-                            {associateOptions.map(associate => (
-                              <SelectItem key={associate} value={associate}>
-                                <div className="flex items-center">
-                                  <Checkbox
-                                    checked={filters.associate.includes(associate)}
-                                    className="mr-2"
-                                  />
-                                  {associate}
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </ScrollArea>
-                        </SelectContent>
-                      </Select>
+                      <div className="space-y-2">
+                        {associateOptions.map(associate => (
+                          <div key={associate} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={associate}
+                              checked={filters.associate.includes(associate)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  handleAssociateFilterChange([...filters.associate, associate]);
+                                } else {
+                                  handleAssociateFilterChange(filters.associate.filter(a => a !== associate));
+                                }
+                              }}
+                            />
+                            <Label htmlFor={associate} className="text-sm">{associate}</Label>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                     
                     <Separator className="my-2" />
                     
                     <div className="space-y-2">
                       <Label htmlFor="center">Center:</Label>
-                      <Select
-                        id="center"
-                        multiple
-                        onValueChange={handleCenterFilterChange}
-                        defaultValue={filters.center}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select centers" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <ScrollArea className="max-h-60">
-                            {centerOptions.map(center => (
-                              <SelectItem key={center} value={center}>
-                                <div className="flex items-center">
-                                  <Checkbox
-                                    checked={filters.center.includes(center)}
-                                    className="mr-2"
-                                  />
-                                  {center}
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </ScrollArea>
-                        </SelectContent>
-                      </Select>
+                      <div className="space-y-2">
+                        {centerOptions.map(center => (
+                          <div key={center} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={center}
+                              checked={filters.center.includes(center)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  handleCenterFilterChange([...filters.center, center]);
+                                } else {
+                                  handleCenterFilterChange(filters.center.filter(c => c !== center));
+                                }
+                              }}
+                            />
+                            <Label htmlFor={center} className="text-sm">{center}</Label>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                     
                     <Separator className="my-2" />
                     
                     <div className="space-y-2">
                       <Label htmlFor="stage">Stage:</Label>
-                      <Select
-                        id="stage"
-                        multiple
-                        onValueChange={handleStageFilterChange}
-                        defaultValue={filters.stage}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select stages" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <ScrollArea className="max-h-60">
-                            {stageOptions.map(stage => (
-                              <SelectItem key={stage} value={stage}>
-                                <div className="flex items-center">
-                                  <Checkbox
-                                    checked={filters.stage.includes(stage)}
-                                    className="mr-2"
-                                  />
-                                  {stage}
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </ScrollArea>
-                        </SelectContent>
-                      </Select>
+                      <div className="space-y-2">
+                        {stageOptions.map(stage => (
+                          <div key={stage} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={stage}
+                              checked={filters.stage.includes(stage)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  handleStageFilterChange([...filters.stage, stage]);
+                                } else {
+                                  handleStageFilterChange(filters.stage.filter(s => s !== stage));
+                                }
+                              }}
+                            />
+                            <Label htmlFor={stage} className="text-sm">{stage}</Label>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                     
                     <Separator className="my-2" />
                     
                     <div className="space-y-2">
                       <Label htmlFor="status">Status:</Label>
-                      <Select
-                        id="status"
-                        multiple
-                        onValueChange={handleStatusFilterChange}
-                        defaultValue={filters.status}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select statuses" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <ScrollArea className="max-h-60">
-                            {statusOptions.map(status => (
-                              <SelectItem key={status} value={status}>
-                                <div className="flex items-center">
-                                  <Checkbox
-                                    checked={filters.status.includes(status)}
-                                    className="mr-2"
-                                  />
-                                  {status}
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </ScrollArea>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <Separator className="my-2" />
-                    
-                    <div className="space-y-2">
-                      <Label>Date Range:</Label>
-                      <CalendarDateRangePicker
-                        onDateChange={handleDateRangeChange}
-                      />
+                      <div className="space-y-2">
+                        {statusOptions.map(status => (
+                          <div key={status} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={status}
+                              checked={filters.status.includes(status)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  handleStatusFilterChange([...filters.status, status]);
+                                } else {
+                                  handleStatusFilterChange(filters.status.filter(s => s !== status));
+                                }
+                              }}
+                            />
+                            <Label htmlFor={status} className="text-sm">{status}</Label>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </ScrollArea>
@@ -490,7 +434,7 @@ export default function Index() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm">LTV</span>
-                      <span className="font-semibold">₹{ltv}</span>
+                      <span className="font-semibold">₹{ltv.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Conversion Rate</span>
@@ -543,16 +487,10 @@ export default function Index() {
       </div>
       
       {/* Lead Edit Modal */}
-      <LeadEditModal
+      <EditLeadModal
         isOpen={isEditModalOpen}
         onClose={handleCloseEditModal}
         lead={selectedLead}
-      />
-      
-      {/* Lead Add Modal */}
-      <LeadAddModal
-        isOpen={isAddModalOpen}
-        onClose={handleCloseAddModal}
       />
     </div>
   );
