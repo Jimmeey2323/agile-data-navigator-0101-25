@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
@@ -98,7 +97,7 @@ const enhancedBadgeVariants = cva(
         contacted: "bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-700 shadow-blue-200",
         qualified: "bg-gradient-to-r from-purple-500 to-purple-600 text-white border-purple-700 shadow-purple-200",
         nurturing: "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white border-indigo-700 shadow-indigo-200",
-        proposalStage: "bg-gradient-to-r from-violet-500 to-violet-600 text-white border-violet-700 shadow-violet-200",
+        proposal: "bg-gradient-to-r from-violet-500 to-violet-600 text-white border-violet-700 shadow-violet-200",
         negotiation: "bg-gradient-to-r from-yellow-500 to-yellow-600 text-white border-yellow-700 shadow-yellow-200",
         // Red variants for negative statuses
         lost: "bg-gradient-to-r from-red-600 to-red-700 text-white border-red-800 shadow-red-200",
@@ -114,7 +113,7 @@ const enhancedBadgeVariants = cva(
         trialscheduled: "bg-gradient-to-r from-orange-500 to-orange-600 text-white border-orange-700 shadow-orange-200",
         trialcompleted: "bg-gradient-to-r from-orange-600 to-orange-700 text-white border-orange-800 shadow-orange-200",
         proposal: "bg-gradient-to-r from-violet-500 to-violet-600 text-white border-violet-700 shadow-violet-200",
-        negotiationStage: "bg-gradient-to-r from-yellow-500 to-yellow-600 text-white border-yellow-700 shadow-yellow-200",
+        negotiation: "bg-gradient-to-r from-yellow-500 to-yellow-600 text-white border-yellow-700 shadow-yellow-200",
         membershipsold: "bg-gradient-to-r from-green-600 to-green-700 text-white border-green-800 shadow-green-200",
         closedwon: "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white border-emerald-800 shadow-emerald-200",
         notinterested: "bg-gradient-to-r from-red-500 to-red-600 text-white border-red-700 shadow-red-200",
