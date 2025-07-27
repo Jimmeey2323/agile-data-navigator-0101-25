@@ -1,31 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { fetchLeads, updateLead, addLead, deleteLead, Lead as GoogleSheetsLead } from '@/services/googleSheets';
+import { fetchLeads, updateLead, addLead, deleteLead, Lead } from '@/services/googleSheets';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 import { getUniqueValues, countByKey } from '@/lib/utils';
 import { toast } from 'sonner';
-
-// Export Lead type for use in other components
-export interface Lead {
-  id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  source: string;
-  associate: string;
-  center: string;
-  stage: string;
-  status: string;
-  createdAt: string;
-  followUp1Date?: string;
-  followUp1Comments?: string;
-  followUp2Date?: string;
-  followUp2Comments?: string;
-  followUp3Date?: string;
-  followUp3Comments?: string;
-  followUp4Date?: string;
-  followUp4Comments?: string;
-  remarks?: string;
-}
 
 // Filter criteria for leads
 export interface LeadFilters {
@@ -51,8 +28,8 @@ export interface SortConfig {
   direction: 'asc' | 'desc';
 }
 
-// View type with new views
-export type ViewType = 'table' | 'card' | 'kanban' | 'timeline' | 'pivot' | 'comparison' | 'associate' | 'performance' | 'trends' | 'upload' | 'ai';
+// View type
+export type ViewType = 'table' | 'card' | 'kanban' | 'timeline' | 'pivot' | 'comparison';
 
 // Table display mode
 export type DisplayMode = 'compact' | 'detail';
@@ -217,18 +194,11 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const data = await fetchLeads();
       console.log('Data fetched successfully, leads count:', data.length);
-      
-      // Convert GoogleSheetsLead to Lead format
-      const convertedLeads: Lead[] = data.map(lead => ({
-        ...lead,
-        remarks: lead.remarks || ''
-      }));
-      
-      setLeads(convertedLeads);
+      setLeads(data);
       
       // Initialize visible columns if not set
-      if (settings.visibleColumns.length === 0 && convertedLeads.length > 0) {
-        const columns = Object.keys(convertedLeads[0]).filter(key => key !== 'id');
+      if (settings.visibleColumns.length === 0 && data.length > 0) {
+        const columns = Object.keys(data[0]).filter(key => key !== 'id');
         setSettings(prev => ({
           ...prev,
           visibleColumns: columns,
@@ -271,14 +241,8 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Show loading state
       toast.info('Saving changes...');
       
-      // Convert Lead to GoogleSheetsLead format
-      const googleSheetsLead: GoogleSheetsLead = {
-        ...lead,
-        remarks: lead.remarks || ''
-      };
-      
       // Save to Google Sheets first
-      await updateLead(googleSheetsLead);
+      await updateLead(lead);
       
       // Optimistic update to local state
       setLeads(currentLeads =>
@@ -289,11 +253,7 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setTimeout(async () => {
         try {
           const freshData = await fetchLeads();
-          const convertedLeads: Lead[] = freshData.map(lead => ({
-            ...lead,
-            remarks: lead.remarks || ''
-          }));
-          setLeads(convertedLeads);
+          setLeads(freshData);
           console.log('Data refreshed after update');
         } catch (refreshError) {
           console.error('Error refreshing data after update:', refreshError);
@@ -315,15 +275,8 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const handleAddLead = async (lead: Lead) => {
     try {
       console.log('Adding new lead');
-      
-      // Convert Lead to GoogleSheetsLead format
-      const googleSheetsLead: GoogleSheetsLead = {
-        ...lead,
-        remarks: lead.remarks || ''
-      };
-      
       // Save to Google Sheets
-      await addLead(googleSheetsLead);
+      await addLead(lead);
       
       // Refresh data to get the new lead
       await fetchData();
