@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { useLeads } from '@/contexts/LeadContext';
+import { useLeads, Lead } from '@/contexts/LeadContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -56,7 +56,19 @@ import {
   BarChart3,
   User
 } from 'lucide-react';
-import { formatRevenue, formatDate, groupBy, countByKey } from '@/lib/utils';
+import { formatRevenue, formatDate, countByKey } from '@/lib/utils';
+
+// Helper function to group leads by a field
+const groupLeadsByField = (leads: Lead[], field: keyof Lead) => {
+  return leads.reduce((acc: Record<string, Lead[]>, lead) => {
+    const key = String(lead[field]);
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(lead);
+    return acc;
+  }, {});
+};
 
 interface AssociateMetrics {
   name: string;
@@ -114,20 +126,25 @@ export function EnhancedAssociateAnalytics() {
       );
       
       // Calculate monthly trends
-      const monthlyData = groupBy(associateLeads, (lead) => {
-        const date = new Date(lead.createdAt);
-        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      });
-      
+      const monthlyData = groupLeadsByField(associateLeads, 'createdAt');
       const monthlyTrends = Object.entries(monthlyData)
-        .sort(([a], [b]) => a.localeCompare(b))
-        .slice(-6)
-        .map(([month, leads]) => ({
-          month,
-          leads: leads.length,
-          conversions: leads.filter(l => l.stage === 'Membership Sold' || l.stage === 'Closed Won').length,
-          revenue: leads.filter(l => l.stage === 'Membership Sold' || l.stage === 'Closed Won').length * avgDealValue
-        }));
+        .map(([_, leads]) => {
+          const firstLead = leads[0];
+          if (!firstLead) return null;
+          
+          const date = new Date(firstLead.createdAt);
+          const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+          
+          return {
+            month,
+            leads: leads.length,
+            conversions: leads.filter(l => l.stage === 'Membership Sold' || l.stage === 'Closed Won').length,
+            revenue: leads.filter(l => l.stage === 'Membership Sold' || l.stage === 'Closed Won').length * avgDealValue
+          };
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null)
+        .sort((a, b) => a.month.localeCompare(b.month))
+        .slice(-6);
       
       const conversionRate = associateLeads.length > 0 ? (conversions.length / associateLeads.length) * 100 : 0;
       const trialConversionRate = trials.length > 0 ? (conversions.length / trials.length) * 100 : 0;

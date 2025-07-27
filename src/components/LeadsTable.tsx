@@ -1,128 +1,81 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { useLeads } from '@/contexts/LeadContext';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useLeads, Lead, SortConfig } from '@/contexts/LeadContext';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
-  ChevronUp, 
-  ChevronDown, 
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Eye,
-  Phone,
-  Mail,
-  Calendar,
-  User,
-  Building,
-  MapPin,
-  Clock,
-  TrendingUp,
-  Target,
-  Flag,
-  Star,
-  ArrowUpDown
-} from 'lucide-react';
-import { formatDate } from '@/lib/utils';
-import { Checkbox } from '@/components/ui/checkbox';
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
+  DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { Lead, SortConfig } from '@/contexts/LeadContext';
+import { 
+  ChevronUp, 
+  ChevronDown, 
+  MoreHorizontal, 
+  Edit, 
+  Trash2, 
+  Eye, 
+  Phone, 
+  Mail 
+} from 'lucide-react';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { formatDate } from '@/lib/utils';
 
 interface LeadsTableProps {
-  onLeadClick: (lead: Lead) => void;
-  onEditLead: (lead: Lead) => void;
-  onDeleteLead: (leadId: string) => void;
+  onLeadClick?: (lead: Lead) => void;
+  onEditLead?: (lead: Lead) => void;
+  onDeleteLead?: (leadId: string) => void;
 }
 
 export function LeadsTable({ onLeadClick, onEditLead, onDeleteLead }: LeadsTableProps) {
   const { 
     filteredLeads, 
     loading, 
+    sortConfig, 
+    setSortConfig, 
     page, 
     pageSize, 
-    sortConfig, 
-    setSortConfig,
-    displayMode 
+    displayMode,
+    settings 
   } = useLeads();
-  
-  const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
-  const [localSortConfig, setLocalSortConfig] = useState<SortConfig | null>(sortConfig);
 
-  useEffect(() => {
-    setLocalSortConfig(sortConfig);
-  }, [sortConfig]);
-
-  // Paginate leads
-  const paginatedLeads = useMemo(() => {
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    return filteredLeads.slice(startIndex, endIndex);
-  }, [filteredLeads, page, pageSize]);
+  // Calculate pagination
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedLeads = filteredLeads.slice(startIndex, endIndex);
 
   const handleSort = (key: keyof Lead) => {
-    const newSortConfig: SortConfig = {
-      key,
-      direction: localSortConfig?.key === key && localSortConfig?.direction === 'asc' ? 'desc' : 'asc'
-    };
-    
-    setLocalSortConfig(newSortConfig);
-    setSortConfig(newSortConfig);
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedLeads.length === paginatedLeads.length) {
-      setSelectedLeads([]);
-    } else {
-      setSelectedLeads(paginatedLeads.map(lead => lead.id));
-    }
-  };
-
-  const toggleSelectLead = (leadId: string) => {
-    setSelectedLeads(prev => 
-      prev.includes(leadId) 
-        ? prev.filter(id => id !== leadId)
-        : [...prev, leadId]
-    );
+    setSortConfig(prev => {
+      if (prev && prev.key === key) {
+        return prev.direction === 'asc' 
+          ? { key, direction: 'desc' } 
+          : null;
+      }
+      return { key, direction: 'asc' };
+    });
   };
 
   const getSortIcon = (key: keyof Lead) => {
-    if (localSortConfig?.key !== key) {
-      return <ArrowUpDown className="h-3 w-3 ml-1 text-gray-400" />;
-    }
-    return localSortConfig.direction === 'asc' 
-      ? <ChevronUp className="h-3 w-3 ml-1" />
-      : <ChevronDown className="h-3 w-3 ml-1" />;
+    if (!sortConfig || sortConfig.key !== key) return null;
+    return sortConfig.direction === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />;
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
-  };
-
-  const getStatusVariant = (status: string) => {
-    const variants: Record<string, any> = {
-      'Hot': 'destructive',
-      'Warm': 'warning',
-      'Cold': 'secondary',
-      'Converted': 'success',
-      'Won': 'success',
-      'Lost': 'destructive',
-      'Open': 'default'
-    };
-    return variants[status] || 'default';
+  const getStatusColor = (status: string, stage: string) => {
+    if (stage === 'Membership Sold') return 'bg-green-100 text-green-800';
+    if (status === 'Hot') return 'bg-red-100 text-red-800';
+    if (status === 'Warm') return 'bg-yellow-100 text-yellow-800';
+    if (status === 'Cold') return 'bg-blue-100 text-blue-800';
+    return 'bg-gray-100 text-gray-800';
   };
 
   if (loading) {
@@ -134,231 +87,148 @@ export function LeadsTable({ onLeadClick, onEditLead, onDeleteLead }: LeadsTable
   }
 
   return (
-    <div className="rounded-lg border bg-white shadow-sm">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-gray-50/50 border-b">
-            <TableHead className="w-12">
-              <Checkbox 
-                checked={selectedLeads.length === paginatedLeads.length}
-                onCheckedChange={toggleSelectAll}
-              />
-            </TableHead>
-            
-            <TableHead className="text-left">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleSort('fullName')}
-                className="h-8 px-0 font-medium hover:bg-transparent"
-              >
-                Name
-                {getSortIcon('fullName')}
-              </Button>
-            </TableHead>
-            
-            <TableHead className="text-left">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleSort('email')}
-                className="h-8 px-0 font-medium hover:bg-transparent"
-              >
-                Email
-                {getSortIcon('email')}
-              </Button>
-            </TableHead>
-            
-            <TableHead className="text-left">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleSort('phone')}
-                className="h-8 px-0 font-medium hover:bg-transparent"
-              >
-                Phone
-                {getSortIcon('phone')}
-              </Button>
-            </TableHead>
-            
-            <TableHead className="text-left">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleSort('source')}
-                className="h-8 px-0 font-medium hover:bg-transparent"
-              >
-                Source
-                {getSortIcon('source')}
-              </Button>
-            </TableHead>
-            
-            <TableHead className="text-left">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleSort('associate')}
-                className="h-8 px-0 font-medium hover:bg-transparent"
-              >
-                Associate
-                {getSortIcon('associate')}
-              </Button>
-            </TableHead>
-            
-            <TableHead className="text-left">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleSort('stage')}
-                className="h-8 px-0 font-medium hover:bg-transparent"
-              >
-                Stage
-                {getSortIcon('stage')}
-              </Button>
-            </TableHead>
-            
-            <TableHead className="text-left">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleSort('status')}
-                className="h-8 px-0 font-medium hover:bg-transparent"
-              >
-                Status
-                {getSortIcon('status')}
-              </Button>
-            </TableHead>
-            
-            <TableHead className="text-left">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleSort('createdAt')}
-                className="h-8 px-0 font-medium hover:bg-transparent"
-              >
-                Created At
-                {getSortIcon('createdAt')}
-              </Button>
-            </TableHead>
-            
-            <TableHead className="text-right w-12">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        
-        <TableBody>
-          {paginatedLeads.map((lead) => (
-            <TableRow
-              key={lead.id}
-              className="hover:bg-gray-50/50 transition-colors cursor-pointer"
-              onClick={() => onLeadClick(lead)}
-            >
-              <TableCell onClick={(e) => e.stopPropagation()}>
-                <Checkbox
-                  checked={selectedLeads.includes(lead.id)}
-                  onCheckedChange={() => toggleSelectLead(lead.id)}
-                />
-              </TableCell>
-              
-              <TableCell className="text-left">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-8 w-8 border-2 border-white shadow-md">
-                    <AvatarFallback className="text-xs font-medium bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                      {getInitials(lead.fullName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium text-gray-900">{lead.fullName}</div>
-                    {displayMode === 'detail' && lead.center && (
-                      <div className="text-xs text-gray-500 flex items-center gap-1">
-                        <Building className="h-3 w-3" />
-                        {lead.center}
-                      </div>
-                    )}
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span>Leads ({filteredLeads.length})</span>
+          <div className="text-sm text-muted-foreground">
+            Showing {startIndex + 1}-{Math.min(endIndex, filteredLeads.length)} of {filteredLeads.length}
+          </div>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleSort('fullName')}
+                >
+                  <div className="flex items-center gap-2">
+                    Full Name
+                    {getSortIcon('fullName')}
                   </div>
-                </div>
-              </TableCell>
-              
-              <TableCell className="text-left">
-                <div className="flex items-center gap-1">
-                  <Mail className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                  <span className="text-sm text-gray-700 truncate">{lead.email}</span>
-                </div>
-              </TableCell>
-              
-              <TableCell className="text-left">
-                <div className="flex items-center gap-1">
-                  <Phone className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                  <span className="text-sm text-gray-700">{lead.phone}</span>
-                </div>
-              </TableCell>
-              
-              <TableCell className="text-left">
-                <Badge variant="outline" className="text-xs">
-                  {lead.source}
-                </Badge>
-              </TableCell>
-              
-              <TableCell className="text-left">
-                <div className="flex items-center gap-1">
-                  <User className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                  <span className="text-sm text-gray-700">{lead.associate}</span>
-                </div>
-              </TableCell>
-              
-              <TableCell className="text-left">
-                <Badge variant="outline" className="text-xs">
-                  {lead.stage}
-                </Badge>
-              </TableCell>
-              
-              <TableCell className="text-left">
-                <StatusBadge status={lead.status} size="sm" />
-              </TableCell>
-              
-              <TableCell className="text-left">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                  <span className="text-sm text-gray-500">{formatDate(lead.createdAt)}</span>
-                </div>
-              </TableCell>
-              
-              <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onLeadClick(lead)}>
-                      <Eye className="h-4 w-4 mr-2" />
-                      View Details
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onEditLead(lead)}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit Lead
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      onClick={() => onDeleteLead(lead.id)}
-                      className="text-red-600"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      
-      {paginatedLeads.length === 0 && (
-        <div className="text-center py-12">
-          <div className="text-gray-500">No leads found matching your criteria.</div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleSort('email')}
+                >
+                  <div className="flex items-center gap-2">
+                    Email
+                    {getSortIcon('email')}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleSort('phone')}
+                >
+                  <div className="flex items-center gap-2">
+                    Phone
+                    {getSortIcon('phone')}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50 text-left"
+                  onClick={() => handleSort('source')}
+                >
+                  <div className="flex items-center gap-2">
+                    Source
+                    {getSortIcon('source')}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50 text-left"
+                  onClick={() => handleSort('associate')}
+                >
+                  <div className="flex items-center gap-2">
+                    Associate
+                    {getSortIcon('associate')}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50 text-left"
+                  onClick={() => handleSort('stage')}
+                >
+                  <div className="flex items-center gap-2">
+                    Stage
+                    {getSortIcon('stage')}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50 text-left"
+                  onClick={() => handleSort('status')}
+                >
+                  <div className="flex items-center gap-2">
+                    Status
+                    {getSortIcon('status')}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:bg-muted/50 text-left"
+                  onClick={() => handleSort('createdAt')}
+                >
+                  <div className="flex items-center gap-2">
+                    Created At
+                    {getSortIcon('createdAt')}
+                  </div>
+                </TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedLeads.map((lead) => (
+                <TableRow 
+                  key={lead.id}
+                  className="hover:bg-muted/50 cursor-pointer"
+                  onClick={() => onLeadClick?.(lead)}
+                >
+                  <TableCell className="font-medium">{lead.fullName}</TableCell>
+                  <TableCell>{lead.email}</TableCell>
+                  <TableCell>{lead.phone}</TableCell>
+                  <TableCell className="text-left">{lead.source}</TableCell>
+                  <TableCell className="text-left">{lead.associate}</TableCell>
+                  <TableCell className="text-left">
+                    <StatusBadge status={lead.stage} />
+                  </TableCell>
+                  <TableCell className="text-left">
+                    <Badge className={getStatusColor(lead.status, lead.stage)}>
+                      {lead.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-left">{formatDate(lead.createdAt)}</TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => onLeadClick?.(lead)}>
+                          <Eye className="mr-2 h-4 w-4" />
+                          View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onEditLead?.(lead)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => onDeleteLead?.(lead.id)}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -1,8 +1,7 @@
 
 import React, { useState } from 'react';
-import { LeadProvider, useLeads } from '@/contexts/LeadContext';
+import { LeadProvider, useLeads, Lead, LeadFilters } from '@/contexts/LeadContext';
 import { EditLeadModal } from '@/components/EditLeadModal';
-import { LeadAddModal } from '@/components/LeadAddModal';
 import { LeadsTable } from '@/components/LeadsTable';
 import { OptimizedKanbanView } from '@/components/OptimizedKanbanView';
 import { LeadsCardView } from '@/components/LeadsCardView';
@@ -20,7 +19,6 @@ import { PaginationControls } from '@/components/PaginationControls';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CalendarDateRangePicker } from '@/components/ui/calendar-date-range-picker';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
@@ -55,26 +53,49 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-interface Lead {
-  id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  source: string;
-  associate: string;
-  center: string;
-  stage: string;
-  status: string;
-  createdAt: string;
-  followUp1Date?: string;
-  followUp1Comments?: string;
-  followUp2Date?: string;
-  followUp2Comments?: string;
-  followUp3Date?: string;
-  followUp3Comments?: string;
-  followUp4Date?: string;
-  followUp4Comments?: string;
-}
+// Create a simple date range picker component
+const DateRangePicker = ({ onDateRangeChange, className }: { 
+  onDateRangeChange: (start: Date | null, end: Date | null) => void;
+  className?: string;
+}) => {
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setStartDate(value);
+    const start = value ? new Date(value) : null;
+    const end = endDate ? new Date(endDate) : null;
+    onDateRangeChange(start, end);
+  };
+
+  const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEndDate(value);
+    const start = startDate ? new Date(startDate) : null;
+    const end = value ? new Date(value) : null;
+    onDateRangeChange(start, end);
+  };
+
+  return (
+    <div className={`flex gap-2 ${className}`}>
+      <Input
+        type="date"
+        value={startDate}
+        onChange={handleStartDateChange}
+        placeholder="Start date"
+        className="w-32"
+      />
+      <Input
+        type="date"
+        value={endDate}
+        onChange={handleEndDateChange}
+        placeholder="End date"
+        className="w-32"
+      />
+    </div>
+  );
+};
 
 function LeadsApp() {
   const { 
@@ -95,7 +116,6 @@ function LeadsApp() {
   
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -133,31 +153,31 @@ function LeadsApp() {
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);
-    setFilters(prev => ({ ...prev, search: term }));
+    setFilters((prev: LeadFilters) => ({ ...prev, search: term }));
   };
 
   const handleSourceFilter = (sources: string[]) => {
-    setFilters(prev => ({ ...prev, source: sources }));
+    setFilters((prev: LeadFilters) => ({ ...prev, source: sources }));
   };
 
   const handleAssociateFilter = (associates: string[]) => {
-    setFilters(prev => ({ ...prev, associate: associates }));
+    setFilters((prev: LeadFilters) => ({ ...prev, associate: associates }));
   };
 
   const handleCenterFilter = (centers: string[]) => {
-    setFilters(prev => ({ ...prev, center: centers }));
+    setFilters((prev: LeadFilters) => ({ ...prev, center: centers }));
   };
 
   const handleStageFilter = (stages: string[]) => {
-    setFilters(prev => ({ ...prev, stage: stages }));
+    setFilters((prev: LeadFilters) => ({ ...prev, stage: stages }));
   };
 
   const handleStatusFilter = (statuses: string[]) => {
-    setFilters(prev => ({ ...prev, status: statuses }));
+    setFilters((prev: LeadFilters) => ({ ...prev, status: statuses }));
   };
 
   const handleDateRangeFilter = (start: Date | null, end: Date | null) => {
-    setFilters(prev => ({ 
+    setFilters((prev: LeadFilters) => ({ 
       ...prev, 
       dateRange: { start, end } 
     }));
@@ -241,7 +261,7 @@ function LeadsApp() {
           
           <div className="flex items-center gap-2">
             <Button 
-              onClick={() => setShowAddModal(true)}
+              variant="default"
               className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -276,10 +296,18 @@ function LeadsApp() {
         <div className="space-y-4">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1">
-              <SearchBar onSearch={handleSearch} />
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search leads..."
+                  value={searchTerm}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
             <div className="flex items-center gap-2">
-              <CalendarDateRangePicker
+              <DateRangePicker
                 onDateRangeChange={handleDateRangeFilter}
                 className="w-auto"
               />
@@ -289,20 +317,58 @@ function LeadsApp() {
             </div>
           </div>
           
-          <QuickFilters 
-            onSourceFilter={handleSourceFilter}
-            onAssociateFilter={handleAssociateFilter}
-            onCenterFilter={handleCenterFilter}
-            onStageFilter={handleStageFilter}
-            onStatusFilter={handleStatusFilter}
-          />
-          
           {showFilters && (
-            <FilterPanel 
-              filters={filters}
-              onFiltersChange={setFilters}
-              onClearFilters={clearFilters}
-            />
+            <Card className="p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Source</label>
+                  <Select onValueChange={(value) => handleSourceFilter([value])}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select source" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Sources</SelectItem>
+                      <SelectItem value="website">Website</SelectItem>
+                      <SelectItem value="referral">Referral</SelectItem>
+                      <SelectItem value="social">Social Media</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Associate</label>
+                  <Select onValueChange={(value) => handleAssociateFilter([value])}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select associate" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Associates</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Status</label>
+                  <Select onValueChange={(value) => handleStatusFilter([value])}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="hot">Hot</SelectItem>
+                      <SelectItem value="warm">Warm</SelectItem>
+                      <SelectItem value="cold">Cold</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="mt-4 flex justify-end">
+                <Button variant="outline" onClick={clearFilters}>
+                  Clear Filters
+                </Button>
+              </div>
+            </Card>
           )}
         </div>
 
@@ -366,11 +432,6 @@ function LeadsApp() {
         open={showEditModal}
         onOpenChange={setShowEditModal}
         onSave={handleSaveLead}
-      />
-      
-      <LeadAddModal
-        open={showAddModal}
-        onOpenChange={setShowAddModal}
       />
     </div>
   );
