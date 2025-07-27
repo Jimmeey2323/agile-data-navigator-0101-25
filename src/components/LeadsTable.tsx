@@ -411,11 +411,11 @@ export const LeadsTable = ({
                             </div>
                           </TableCell>}
                         
-                  {visibleColumns.source && <TableCell className="h-[50px] py-2 text-center align-middle">
+                  {visibleColumns.source && <TableCell className="h-[50px] py-2 text-left align-middle">
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="badge flex items-left gap-1 justify-center whitespace-nowrap text-left">
+          <span className="badge flex items-center gap-1 justify-center whitespace-nowrap text-left">
             <Globe className="h-3 w-3" />
             {lead.source}
           </span>
@@ -468,7 +468,7 @@ export const LeadsTable = ({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="badge flex items-center gap-1 justify-center whitespace-nowrap">
+          <span className="badge flex items-center gap-1 justify-center whitespace-nowrap text-left">
             <Target className="h-3 w-3" />
             {lead.stage}
           </span>
