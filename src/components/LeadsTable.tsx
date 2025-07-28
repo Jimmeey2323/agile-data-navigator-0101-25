@@ -45,12 +45,12 @@ export function LeadsTable() {
   const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
   const [editingCell, setEditingCell] = useState<{ id: string; field: keyof Lead } | null>(null);
   const [editValue, setEditValue] = useState('');
-  const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
+  const [visibleColumns, setVisibleColumns] = useState<(keyof Lead)[]>([]);
 
   // Initialize visible columns
   useEffect(() => {
     if (settings.visibleColumns.length > 0) {
-      setVisibleColumns(settings.visibleColumns);
+      setVisibleColumns(settings.visibleColumns as (keyof Lead)[]);
     } else if (filteredLeads.length > 0) {
       // Default visible columns for better performance
       setVisibleColumns(['fullName', 'email', 'phone', 'source', 'associate', 'stage', 'status', 'createdAt']);
@@ -73,10 +73,10 @@ export function LeadsTable() {
   }, [filteredLeads, sortConfig]);
 
   const handleSort = (key: keyof Lead) => {
-    setSortConfig(prev => ({
+    setSortConfig({
       key,
-      direction: prev?.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
-    }));
+      direction: sortConfig?.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc'
+    });
   };
 
   const handleCellEdit = async (lead: Lead, field: keyof Lead, value: string) => {
@@ -167,13 +167,13 @@ export function LeadsTable() {
                 </TableHead>
                 {visibleColumns.map(column => (
                   <TableHead 
-                    key={column}
+                    key={String(column)}
                     className="cursor-pointer hover:bg-muted/50 text-left"
-                    onClick={() => handleSort(column as keyof Lead)}
+                    onClick={() => handleSort(column)}
                   >
                     <div className="flex items-center gap-2 justify-start">
-                      <span className="capitalize">{column.replace(/([A-Z])/g, ' $1').trim()}</span>
-                      {getSortIcon(column as keyof Lead)}
+                      <span className="capitalize">{String(column).replace(/([A-Z])/g, ' $1').trim()}</span>
+                      {getSortIcon(column)}
                     </div>
                   </TableHead>
                 ))}
@@ -190,15 +190,15 @@ export function LeadsTable() {
                     />
                   </TableCell>
                   {visibleColumns.map(column => (
-                    <TableCell key={column} className="text-left align-top">
+                    <TableCell key={String(column)} className="text-left align-top">
                       {editingCell?.id === lead.id && editingCell.field === column ? (
                         <Input
                           value={editValue}
                           onChange={(e) => setEditValue(e.target.value)}
-                          onBlur={() => handleCellEdit(lead, column as keyof Lead, editValue)}
+                          onBlur={() => handleCellEdit(lead, column, editValue)}
                           onKeyPress={(e) => {
                             if (e.key === 'Enter') {
-                              handleCellEdit(lead, column as keyof Lead, editValue);
+                              handleCellEdit(lead, column, editValue);
                             }
                           }}
                           className="h-8"
@@ -208,8 +208,8 @@ export function LeadsTable() {
                         <div
                           className="min-h-[32px] flex items-center cursor-pointer hover:bg-muted/50 rounded px-2 py-1 text-left"
                           onClick={() => {
-                            setEditingCell({ id: lead.id, field: column as keyof Lead });
-                            setEditValue(String(lead[column as keyof Lead] || ''));
+                            setEditingCell({ id: lead.id, field: column });
+                            setEditValue(String(lead[column] || ''));
                           }}
                         >
                           {column === 'status' ? (
@@ -221,7 +221,7 @@ export function LeadsTable() {
                           ) : column === 'createdAt' ? (
                             <span className="text-left">{formatDate(lead.createdAt)}</span>
                           ) : (
-                            <span className="text-left">{lead[column as keyof Lead] || '-'}</span>
+                            <span className="text-left">{String(lead[column] || '-')}</span>
                           )}
                         </div>
                       )}

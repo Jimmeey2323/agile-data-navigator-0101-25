@@ -4,6 +4,9 @@ import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 import { getUniqueValues, countByKey } from '@/lib/utils';
 import { toast } from 'sonner';
 
+// Re-export Lead type for use in other components
+export type { Lead } from '@/services/googleSheets';
+
 // Filter criteria for leads
 export interface LeadFilters {
   search: string;

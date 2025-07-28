@@ -10,8 +10,7 @@ import {
   User, 
   Phone, 
   Calendar, 
-  Target,
-  type LucideIcon as LucideIconType
+  Target
 } from "lucide-react";
 
 const statusBadgeVariants = cva(
@@ -36,7 +35,7 @@ const statusBadgeVariants = cva(
   }
 );
 
-const statusIcons: Record<string, typeof LucideIconType> = {
+const statusIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   Hot: CheckCircle,
   Warm: Clock,
   Cold: AlertCircle,
