@@ -1,5 +1,6 @@
-// AI Service for OpenAI integration
+// AI Service for multiple AI providers integration
 export interface AIConfig {
+  provider: 'openai' | 'gemini' | 'deepseek' | 'groq';
   apiKey: string;
   model: string;
   temperature: number;
@@ -41,10 +42,45 @@ export interface AIAnalysisResult {
   summary: string;
 }
 
+// Provider configurations
+const PROVIDER_CONFIGS = {
+  openai: {
+    baseUrl: 'https://api.openai.com/v1/chat/completions',
+    defaultModel: 'gpt-4',
+    headers: (apiKey: string) => ({
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    })
+  },
+  gemini: {
+    baseUrl: 'https://generativelanguage.googleapis.com/v1beta/models',
+    defaultModel: 'gemini-pro',
+    headers: (apiKey: string) => ({
+      'Content-Type': 'application/json',
+    })
+  },
+  deepseek: {
+    baseUrl: 'https://api.deepseek.com/v1/chat/completions',
+    defaultModel: 'deepseek-chat',
+    headers: (apiKey: string) => ({
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    })
+  },
+  groq: {
+    baseUrl: 'https://api.groq.com/openai/v1/chat/completions',
+    defaultModel: 'llama3-70b-8192',
+    headers: (apiKey: string) => ({
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    })
+  }
+};
+
 class AIService {
   private config: AIConfig | null = null;
 
-  // Initialize AI service with API key
+  // Initialize AI service with configuration
   initialize(config: AIConfig) {
     this.config = config;
     localStorage.setItem('ai_config', JSON.stringify(config));
@@ -65,35 +101,98 @@ class AIService {
     return this.config !== null && this.config.apiKey !== '';
   }
 
-  // Make OpenAI API call
-  private async callOpenAI(prompt: string, systemPrompt?: string): Promise<string> {
+  // Get available models for each provider
+  getAvailableModels(provider: string) {
+    switch (provider) {
+      case 'openai':
+        return ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo'];
+      case 'gemini':
+        return ['gemini-pro', 'gemini-pro-vision'];
+      case 'deepseek':
+        return ['deepseek-chat', 'deepseek-coder'];
+      case 'groq':
+        return ['llama3-70b-8192', 'llama3-8b-8192', 'mixtral-8x7b-32768'];
+      default:
+        return [];
+    }
+  }
+
+  // Make API call to the configured provider
+  private async callAI(prompt: string, systemPrompt?: string): Promise<string> {
     if (!this.config) {
       throw new Error('AI service not configured');
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.config.apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: this.config.model || 'gpt-4',
-        messages: [
-          ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
-          { role: 'user', content: prompt }
-        ],
-        temperature: this.config.temperature || 0.7,
-        max_tokens: 2000,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.statusText}`);
+    const providerConfig = PROVIDER_CONFIGS[this.config.provider];
+    if (!providerConfig) {
+      throw new Error(`Unsupported provider: ${this.config.provider}`);
     }
 
-    const data = await response.json();
-    return data.choices[0]?.message?.content || '';
+    try {
+      let requestBody: any;
+      let url = providerConfig.baseUrl;
+
+      switch (this.config.provider) {
+        case 'openai':
+        case 'deepseek':
+        case 'groq':
+          requestBody = {
+            model: this.config.model || providerConfig.defaultModel,
+            messages: [
+              ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
+              { role: 'user', content: prompt }
+            ],
+            temperature: this.config.temperature || 0.7,
+            max_tokens: 2000,
+          };
+          break;
+        
+        case 'gemini':
+          url = `${providerConfig.baseUrl}/${this.config.model || providerConfig.defaultModel}:generateContent?key=${this.config.apiKey}`;
+          requestBody = {
+            contents: [{
+              parts: [{
+                text: systemPrompt ? `${systemPrompt}\n\n${prompt}` : prompt
+              }]
+            }],
+            generationConfig: {
+              temperature: this.config.temperature || 0.7,
+              maxOutputTokens: 2000,
+            }
+          };
+          break;
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: providerConfig.headers(this.config.apiKey),
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`${this.config.provider} API error: ${error.error?.message || response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      // Extract response based on provider
+      switch (this.config.provider) {
+        case 'openai':
+        case 'deepseek':
+        case 'groq':
+          return data.choices[0]?.message?.content || '';
+        
+        case 'gemini':
+          return data.candidates[0]?.content?.parts[0]?.text || '';
+        
+        default:
+          throw new Error(`Response parsing not implemented for ${this.config.provider}`);
+      }
+    } catch (error) {
+      console.error(`Error calling ${this.config.provider}:`, error);
+      throw error;
+    }
   }
 
   // Analyze leads data and generate insights
@@ -148,7 +247,7 @@ Format your response as JSON with the following structure:
 }`;
 
     try {
-      const response = await this.callOpenAI(prompt, systemPrompt);
+      const response = await this.callAI(prompt, systemPrompt);
       const parsed = JSON.parse(response);
       
       return {
@@ -194,7 +293,6 @@ Lead Data:
 - Associate: ${lead.associate}
 - Remarks: ${lead.remarks}
 - Follow-ups: ${[lead.followUp1Date, lead.followUp2Date, lead.followUp3Date, lead.followUp4Date].filter(Boolean).length}/4
-- Follow-up Comments: ${[lead.followUp1Comments, lead.followUp2Comments, lead.followUp3Comments, lead.followUp4Comments].filter(Boolean).join('; ')}
 
 Provide a JSON response with:
 {
@@ -212,7 +310,7 @@ Provide a JSON response with:
 }`;
 
     try {
-      const response = await this.callOpenAI(prompt, systemPrompt);
+      const response = await this.callAI(prompt, systemPrompt);
       return JSON.parse(response);
     } catch (error) {
       console.error('Error calculating AI lead score:', error);
@@ -352,7 +450,7 @@ Remarks: ${lead.remarks}
 Provide actionable, personalized follow-up suggestions as a JSON array of strings.`;
 
     try {
-      const response = await this.callOpenAI(prompt);
+      const response = await this.callAI(prompt);
       return JSON.parse(response);
     } catch (error) {
       return this.getBasicFollowUpSuggestions(lead);
@@ -404,7 +502,7 @@ Create a personalized, engaging email that:
 Return just the email content without subject line.`;
 
     try {
-      return await this.callOpenAI(prompt);
+      return await this.callAI(prompt);
     } catch (error) {
       return this.getBasicEmailTemplate(lead, purpose);
     }
