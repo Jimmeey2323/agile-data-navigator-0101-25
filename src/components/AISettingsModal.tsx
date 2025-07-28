@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -25,9 +24,7 @@ import {
   Save,
   TestTube,
   Shield,
-  Cpu,
-  Rocket,
-  Globe
+  Cpu
 } from 'lucide-react';
 import { aiService, AIConfig } from '@/services/aiService';
 import { toast } from 'sonner';
@@ -37,40 +34,8 @@ interface AISettingsModalProps {
   onClose: () => void;
 }
 
-const AI_PROVIDERS = [
-  { 
-    value: 'openai', 
-    label: 'OpenAI', 
-    icon: <Brain className="h-4 w-4" />,
-    description: 'Industry-leading AI models with excellent reasoning capabilities',
-    color: 'from-green-500 to-emerald-600'
-  },
-  { 
-    value: 'gemini', 
-    label: 'Google Gemini', 
-    icon: <Sparkles className="h-4 w-4" />,
-    description: 'Google\'s powerful multimodal AI with strong analytical capabilities',
-    color: 'from-blue-500 to-cyan-600'
-  },
-  { 
-    value: 'deepseek', 
-    label: 'DeepSeek', 
-    icon: <Target className="h-4 w-4" />,
-    description: 'Cost-effective AI with strong coding and reasoning capabilities',
-    color: 'from-purple-500 to-violet-600'
-  },
-  { 
-    value: 'groq', 
-    label: 'Groq', 
-    icon: <Rocket className="h-4 w-4" />,
-    description: 'Ultra-fast inference with excellent performance',
-    color: 'from-orange-500 to-red-600'
-  }
-];
-
 export function AISettingsModal({ isOpen, onClose }: AISettingsModalProps) {
   const [config, setConfig] = useState<AIConfig>({
-    provider: 'openai',
     apiKey: '',
     model: 'gpt-4',
     temperature: 0.7
@@ -89,7 +54,7 @@ export function AISettingsModal({ isOpen, onClose }: AISettingsModalProps) {
 
   const handleSave = async () => {
     if (!config.apiKey.trim()) {
-      toast.error('Please enter your API key');
+      toast.error('Please enter your OpenAI API key');
       return;
     }
 
@@ -119,34 +84,34 @@ export function AISettingsModal({ isOpen, onClose }: AISettingsModalProps) {
       // Temporarily initialize with current config for testing
       aiService.initialize(config);
       
-      // Simple test based on provider
       const testPrompt = 'Respond with "AI connection successful!" if you can read this message.';
-      
-      // This is a simplified test - in real implementation, you'd call the actual API
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      
-      setTestResult('✅ Connection successful! AI features are ready to use.');
-      toast.success('API connection test passed!');
-      
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${config.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: config.model,
+          messages: [{ role: 'user', content: testPrompt }],
+          max_tokens: 50,
+        }),
+      });
+
+      if (response.ok) {
+        setTestResult('✅ Connection successful! AI features are ready to use.');
+        toast.success('API connection test passed!');
+      } else {
+        const error = await response.json();
+        setTestResult(`❌ Connection failed: ${error.error?.message || 'Unknown error'}`);
+        toast.error('API connection test failed');
+      }
     } catch (error) {
       setTestResult(`❌ Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       toast.error('API connection test failed');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleProviderChange = (provider: string) => {
-    const models = aiService.getAvailableModels(provider);
-    setConfig(prev => ({
-      ...prev,
-      provider: provider as AIConfig['provider'],
-      model: models[0] || 'default'
-    }));
-  };
-
-  const getProviderInfo = (provider: string) => {
-    return AI_PROVIDERS.find(p => p.value === provider);
   };
 
   const aiFeatures = [
@@ -182,12 +147,9 @@ export function AISettingsModal({ isOpen, onClose }: AISettingsModalProps) {
     }
   ];
 
-  const availableModels = aiService.getAvailableModels(config.provider);
-  const selectedProviderInfo = getProviderInfo(config.provider);
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl h-[90vh] p-0 bg-white border-0 shadow-2xl rounded-2xl flex flex-col overflow-hidden">
+      <DialogContent className="max-w-4xl h-[90vh] p-0 bg-white border-0 shadow-2xl rounded-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex-shrink-0 px-8 py-6 bg-gradient-to-r from-blue-600 via-purple-600 to-teal-600 text-white shadow-lg">
           <DialogHeader>
@@ -200,7 +162,7 @@ export function AISettingsModal({ isOpen, onClose }: AISettingsModalProps) {
                   AI Configuration Center
                 </DialogTitle>
                 <p className="text-blue-100 mt-1">
-                  Configure AI provider integration to unlock advanced AI-powered features
+                  Configure OpenAI integration to unlock advanced AI-powered features
                 </p>
               </div>
             </div>
@@ -229,54 +191,11 @@ export function AISettingsModal({ isOpen, onClose }: AISettingsModalProps) {
 
             <div className="flex-1 overflow-y-auto">
               <TabsContent value="setup" className="mt-0 p-8 space-y-6">
-                {/* Provider Selection */}
-                <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-violet-50">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-purple-800">
-                      <Globe className="h-5 w-5" />
-                      AI Provider Selection
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {AI_PROVIDERS.map(provider => (
-                        <Card 
-                          key={provider.value}
-                          className={`cursor-pointer transition-all border-2 ${
-                            config.provider === provider.value 
-                              ? 'border-purple-500 bg-purple-50' 
-                              : 'border-gray-200 hover:border-purple-300'
-                          }`}
-                          onClick={() => handleProviderChange(provider.value)}
-                        >
-                          <CardContent className="p-4">
-                            <div className="flex items-start gap-3">
-                              <div className={`p-2 rounded-lg bg-gradient-to-r ${provider.color} text-white`}>
-                                {provider.icon}
-                              </div>
-                              <div className="flex-1">
-                                <h3 className="font-semibold text-gray-800">{provider.label}</h3>
-                                <p className="text-sm text-gray-600 mt-1">{provider.description}</p>
-                                {config.provider === provider.value && (
-                                  <Badge className="mt-2 bg-purple-100 text-purple-800">
-                                    Selected
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Configuration */}
                 <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-blue-800">
                       <Key className="h-5 w-5" />
-                      {selectedProviderInfo?.label} Configuration
+                      OpenAI API Configuration
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -287,11 +206,22 @@ export function AISettingsModal({ isOpen, onClose }: AISettingsModalProps) {
                       <Input
                         id="apiKey"
                         type="password"
-                        placeholder="Enter your API key..."
+                        placeholder="sk-..."
                         value={config.apiKey}
                         onChange={(e) => setConfig({ ...config, apiKey: e.target.value })}
                         className="mt-1 font-mono text-sm"
                       />
+                      <p className="text-xs text-gray-600 mt-1">
+                        Get your API key from{' '}
+                        <a 
+                          href="https://platform.openai.com/api-keys" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          OpenAI Platform
+                        </a>
+                      </p>
                     </div>
 
                     <div>
@@ -303,11 +233,9 @@ export function AISettingsModal({ isOpen, onClose }: AISettingsModalProps) {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {availableModels.map(model => (
-                            <SelectItem key={model} value={model}>
-                              {model}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value="gpt-4">GPT-4 (Recommended)</SelectItem>
+                          <SelectItem value="gpt-4-turbo">GPT-4 Turbo</SelectItem>
+                          <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo (Faster)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -370,7 +298,7 @@ export function AISettingsModal({ isOpen, onClose }: AISettingsModalProps) {
                         <div>
                           <h3 className="font-semibold text-green-800">AI Features Enabled</h3>
                           <p className="text-sm text-green-700">
-                            Your {selectedProviderInfo?.label} integration is active and ready to enhance your lead management experience.
+                            Your OpenAI integration is active and ready to enhance your lead management experience.
                           </p>
                         </div>
                       </div>
@@ -419,7 +347,7 @@ export function AISettingsModal({ isOpen, onClose }: AISettingsModalProps) {
                         <h4 className="font-semibold text-gray-800">Data Privacy</h4>
                         <p className="text-sm text-gray-600">
                           Your API key is stored locally in your browser and never sent to our servers. 
-                          Lead data is only sent to your selected AI provider for analysis when you explicitly use AI features.
+                          Lead data is only sent to OpenAI for analysis when you explicitly use AI features.
                         </p>
                       </div>
                     </div>
@@ -429,9 +357,43 @@ export function AISettingsModal({ isOpen, onClose }: AISettingsModalProps) {
                       <div>
                         <h4 className="font-semibold text-gray-800">Usage Costs</h4>
                         <p className="text-sm text-gray-600">
-                          AI features use your API credits from the selected provider. Monitor your usage on the provider's platform 
+                          AI features use your OpenAI API credits. Monitor your usage on the OpenAI platform 
                           to avoid unexpected charges.
                         </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-gray-200">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-gray-800">
+                      <Cpu className="h-5 w-5" />
+                      Performance Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm font-semibold text-gray-700">Max Tokens</Label>
+                        <Input 
+                          type="number" 
+                          defaultValue="2000" 
+                          className="mt-1"
+                          disabled
+                        />
+                        <p className="text-xs text-gray-600 mt-1">Maximum response length</p>
+                      </div>
+                      
+                      <div>
+                        <Label className="text-sm font-semibold text-gray-700">Timeout (seconds)</Label>
+                        <Input 
+                          type="number" 
+                          defaultValue="30" 
+                          className="mt-1"
+                          disabled
+                        />
+                        <p className="text-xs text-gray-600 mt-1">Request timeout duration</p>
                       </div>
                     </div>
                   </CardContent>

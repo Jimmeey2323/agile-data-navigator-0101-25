@@ -1,7 +1,7 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -48,16 +48,16 @@ export function LeadPerformanceView() {
     { value: 'leadsReceived', label: 'Leads Received', icon: <Users className="h-3 w-3" /> },
     { value: 'membershipsSold', label: 'Memberships Sold', icon: <Award className="h-3 w-3" /> },
     { value: 'trialCompleted', label: 'Trial Completed', icon: <Target className="h-3 w-3" /> },
-    { value: 'leadToTrialConversion', label: 'Lead to Trial %', icon: <TrendingUp className="h-3 w-3" /> },
-    { value: 'trialToSoldConversion', label: 'Trial to Sold %', icon: <TrendingUp className="h-3 w-3" /> },
-    { value: 'leadToSoldConversion', label: 'Lead to Sold %', icon: <Activity className="h-3 w-3" /> }
+    { value: 'leadToTrialConversion', label: 'Lead to Trial Conversion', icon: <TrendingUp className="h-3 w-3" /> },
+    { value: 'trialToSoldConversion', label: 'Trial to Sold Conversion', icon: <TrendingUp className="h-3 w-3" /> },
+    { value: 'leadToSoldConversion', label: 'Lead to Sold Conversion', icon: <Activity className="h-3 w-3" /> }
   ];
 
   const viewOptions = [
     { value: 'source', label: 'Source Analysis' },
-    { value: 'associate', label: 'Associate Analysis' },
+    { value: 'channel', label: 'Channel Analysis' },
     { value: 'stage', label: 'Stage Analysis' },
-    { value: 'status', label: 'Status Analysis' }
+    { value: 'associate', label: 'Associate Analysis' }
   ];
 
   // Generate month labels for the last 12 months
@@ -83,9 +83,9 @@ export function LeadPerformanceView() {
     const uniqueValues = [...new Set(filteredLeads.map(lead => {
       switch(selectedView) {
         case 'source': return lead.source || 'Unknown';
-        case 'associate': return lead.associate || 'Unknown';
+        case 'channel': return lead.source || 'Unknown'; // Using source as channel for now
         case 'stage': return lead.stage || 'Unknown';
-        case 'status': return lead.status || 'Unknown';
+        case 'associate': return lead.associate || 'Unknown';
         default: return lead.source || 'Unknown';
       }
     }))].filter(Boolean);
@@ -94,35 +94,28 @@ export function LeadPerformanceView() {
       const valueLeads = filteredLeads.filter(lead => {
         switch(selectedView) {
           case 'source': return (lead.source || 'Unknown') === value;
-          case 'associate': return (lead.associate || 'Unknown') === value;
+          case 'channel': return (lead.source || 'Unknown') === value;
           case 'stage': return (lead.stage || 'Unknown') === value;
-          case 'status': return (lead.status || 'Unknown') === value;
+          case 'associate': return (lead.associate || 'Unknown') === value;
           default: return (lead.source || 'Unknown') === value;
         }
       });
 
       data[value] = monthLabels.map(month => {
-        // Parse month for comparison
-        const [monthName, year] = month.split(' ');
-        const monthIndex = new Date(Date.parse(monthName + " 1, 2000")).getMonth();
-        const fullYear = 2000 + parseInt(year);
-        
         // Filter leads for this month
         const monthLeads = valueLeads.filter(lead => {
           if (!lead.createdAt) return false;
           try {
             const leadDate = new Date(lead.createdAt);
-            return leadDate.getMonth() === monthIndex && leadDate.getFullYear() === fullYear;
+            const leadMonth = leadDate.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+            return leadMonth === month;
           } catch (error) {
-            console.error('Error parsing date:', lead.createdAt, error);
             return false;
           }
         });
 
         const leadsReceived = monthLeads.length;
-        const membershipsSold = monthLeads.filter(lead => 
-          lead.stage === 'Membership Sold' || lead.status === 'Converted'
-        ).length;
+        const membershipsSold = monthLeads.filter(lead => lead.stage === 'Membership Sold').length;
         const trialCompleted = monthLeads.filter(lead => 
           lead.stage === 'Trial Completed' || lead.stage === 'Membership Sold'
         ).length;
@@ -202,13 +195,18 @@ export function LeadPerformanceView() {
         leadToSoldConversion: 0
       });
 
-      // Calculate conversion rates
-      if (totals[key].leadsReceived > 0) {
-        totals[key].leadToTrialConversion = Math.round((totals[key].trialCompleted / totals[key].leadsReceived) * 10000) / 100;
-        totals[key].leadToSoldConversion = Math.round((totals[key].membershipsSold / totals[key].leadsReceived) * 10000) / 100;
-      }
-      if (totals[key].trialCompleted > 0) {
-        totals[key].trialToSoldConversion = Math.round((totals[key].membershipsSold / totals[key].trialCompleted) * 10000) / 100;
+      // Calculate average conversion rates
+      const validMonths = data.filter(d => d.leadsReceived > 0);
+      if (validMonths.length > 0) {
+        totals[key].leadToTrialConversion = Math.round(
+          (validMonths.reduce((sum, d) => sum + d.leadToTrialConversion, 0) / validMonths.length) * 100
+        ) / 100;
+        totals[key].trialToSoldConversion = Math.round(
+          (validMonths.reduce((sum, d) => sum + d.trialToSoldConversion, 0) / validMonths.length) * 100
+        ) / 100;
+        totals[key].leadToSoldConversion = Math.round(
+          (validMonths.reduce((sum, d) => sum + d.leadToSoldConversion, 0) / validMonths.length) * 100
+        ) / 100;
       }
     });
 
@@ -246,6 +244,19 @@ export function LeadPerformanceView() {
       if (value >= 10) return 'bg-purple-100 text-purple-800 border-purple-200';
       return 'bg-gray-100 text-gray-800 border-gray-200';
     }
+  };
+
+  const getChangeIndicator = (current: number, previous: number) => {
+    if (previous === 0) return null;
+    const change = ((current - previous) / previous) * 100;
+    const isPositive = change > 0;
+    
+    return (
+      <div className={`flex items-center gap-1 text-xs ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+        {isPositive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+        <span>{Math.abs(change).toFixed(1)}%</span>
+      </div>
+    );
   };
 
   if (loading) {
@@ -311,6 +322,11 @@ export function LeadPerformanceView() {
                 <RefreshCw className={`h-3 w-3 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
+              
+              <Button variant="outline" size="sm" className="bg-white border-slate-300 text-sm">
+                <Download className="h-3 w-3 mr-2" />
+                Export
+              </Button>
             </div>
           </div>
         </CardHeader>
@@ -329,16 +345,24 @@ export function LeadPerformanceView() {
           <div className="overflow-x-auto">
             <Table className="font-mono text-xs">
               <TableHeader className="bg-gradient-to-r from-slate-700 to-slate-800 sticky top-0 z-10">
-                <TableRow className="border-b border-slate-600">
-                  <TableHead className="text-white font-bold text-xs w-[200px] bg-slate-800 h-[50px] text-left">
+                <TableRow className="border-b border-slate-600 hover:bg-gradient-to-r hover:from-slate-600 hover:to-slate-700 hover:border-b-2 hover:border-b-cyan-400 hover:shadow-[0_2px_0_0_#06b6d4] transition-all duration-200">
+                  <TableHead className="text-white font-bold text-xs w-[200px] bg-slate-800 h-[50px] text-left align-middle">
                     {selectedView.charAt(0).toUpperCase() + selectedView.slice(1)}
                   </TableHead>
-                  {monthLabels.map((month) => (
-                    <TableHead key={month} className="text-white font-bold text-xs text-center min-w-[100px] h-[50px]">
-                      {month}
+                  {monthLabels.map((month, index) => (
+                    <TableHead key={month} className="text-white font-bold text-xs text-center min-w-[100px] h-[50px] align-middle hover:border-b-2 hover:border-b-cyan-400 hover:shadow-[0_2px_0_0_#06b6d4] transition-all duration-200">
+                      <div className="flex flex-col items-center">
+                        <span>{month}</span>
+                        {index > 0 && monthlyTotals[index] && monthlyTotals[index - 1] && hoveredCell === `header-${month}` && (
+                          getChangeIndicator(
+                            monthlyTotals[index][selectedMetric as keyof MonthlyData] as number,
+                            monthlyTotals[index - 1][selectedMetric as keyof MonthlyData] as number
+                          )
+                        )}
+                      </div>
                     </TableHead>
                   ))}
-                  <TableHead className="text-white font-bold text-xs text-center min-w-[100px] bg-slate-800 h-[50px]">
+                  <TableHead className="text-white font-bold text-xs text-center min-w-[100px] bg-slate-800 h-[50px] align-middle">
                     TOTAL
                   </TableHead>
                 </TableRow>
@@ -352,26 +376,33 @@ export function LeadPerformanceView() {
                       rowIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'
                     }`}
                   >
-                    <TableCell className="font-semibold text-slate-800 bg-slate-100 border-r border-slate-200 h-[50px] text-left">
+                    <TableCell className="font-semibold text-slate-800 bg-slate-100 border-r border-slate-200 h-[50px] text-left align-middle">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-teal-600"></div>
                         <span className="truncate max-w-[160px] text-xs">{key}</span>
                       </div>
                     </TableCell>
                     
-                    {data.map((monthData) => {
+                    {data.map((monthData, colIndex) => {
                       const value = monthData[selectedMetric as keyof MonthlyData] as number;
+                      const prevValue = colIndex > 0 ? data[colIndex - 1][selectedMetric as keyof MonthlyData] as number : 0;
+                      const cellKey = `${key}-${monthData.month}`;
                       
                       return (
                         <TableCell 
-                          key={monthData.month} 
+                          key={cellKey} 
                           className="text-center p-2 h-[50px] align-middle"
+                          onMouseEnter={() => setHoveredCell(cellKey)}
+                          onMouseLeave={() => setHoveredCell(null)}
                         >
-                          <Badge 
-                            className={`${getCellColor(value, selectedMetric)} font-mono text-xs px-2 py-1 min-w-[50px] justify-center border`}
-                          >
-                            {formatMetricValue(value, selectedMetric)}
-                          </Badge>
+                          <div className="flex flex-col items-center gap-1">
+                            <Badge 
+                              className={`${getCellColor(value, selectedMetric)} font-mono text-xs px-2 py-1 min-w-[50px] justify-center border`}
+                            >
+                              {formatMetricValue(value, selectedMetric)}
+                            </Badge>
+                            {hoveredCell === cellKey && colIndex > 0 && prevValue > 0 && getChangeIndicator(value, prevValue)}
+                          </div>
                         </TableCell>
                       );
                     })}
@@ -385,6 +416,51 @@ export function LeadPerformanceView() {
                     </TableCell>
                   </TableRow>
                 ))}
+                
+                {/* Totals Row */}
+                <TableRow className="bg-gradient-to-r from-slate-200 to-slate-100 border-t-2 border-slate-300 font-bold h-[50px]">
+                  <TableCell className="font-bold text-slate-800 bg-slate-300 border-r border-slate-400 h-[50px] text-left align-middle">
+                    <div className="flex items-center gap-2">
+                      <Activity className="h-3 w-3 text-slate-700" />
+                      TOTAL
+                    </div>
+                  </TableCell>
+                  
+                  {monthlyTotals.map((monthTotal, index) => {
+                    const value = monthTotal[selectedMetric as keyof MonthlyData] as number;
+                    const prevValue = index > 0 ? monthlyTotals[index - 1][selectedMetric as keyof MonthlyData] as number : 0;
+                    const cellKey = `total-${monthTotal.month}`;
+                    
+                    return (
+                      <TableCell 
+                        key={cellKey} 
+                        className="text-center p-2 h-[50px] align-middle"
+                        onMouseEnter={() => setHoveredCell(cellKey)}
+                        onMouseLeave={() => setHoveredCell(null)}
+                      >
+                        <div className="flex flex-col items-center gap-1">
+                          <Badge 
+                            className="bg-slate-700 text-white font-mono text-xs px-2 py-1 min-w-[50px] justify-center font-bold border border-slate-600"
+                          >
+                            {formatMetricValue(value, selectedMetric)}
+                          </Badge>
+                          {hoveredCell === cellKey && index > 0 && prevValue > 0 && getChangeIndicator(value, prevValue)}
+                        </div>
+                      </TableCell>
+                    );
+                  })}
+                  
+                  <TableCell className="text-center font-bold bg-slate-300 border-l border-slate-400 h-[50px] align-middle">
+                    <Badge 
+                      className="bg-slate-800 text-white font-mono text-xs px-2 py-1 min-w-[50px] justify-center font-bold border border-slate-700"
+                    >
+                      {formatMetricValue(
+                        monthlyTotals.reduce((sum, month) => sum + (month[selectedMetric as keyof MonthlyData] as number), 0),
+                        selectedMetric
+                      )}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </div>
@@ -397,12 +473,15 @@ export function LeadPerformanceView() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-green-700">Total Leads</p>
+                <p className="text-xs font-medium text-green-700">Best Performing</p>
                 <p className="text-xl font-bold text-green-800">
-                  {filteredLeads.length.toLocaleString()}
+                  {Object.entries(rowTotals).reduce((best, [key, data]) => {
+                    const value = data[selectedMetric as keyof MonthlyData] as number;
+                    return value > (best.value || 0) ? { key, value } : best;
+                  }, { key: '', value: 0 }).key || 'N/A'}
                 </p>
               </div>
-              <Users className="h-6 w-6 text-green-600" />
+              <Award className="h-6 w-6 text-green-600" />
             </div>
           </CardContent>
         </Card>
@@ -411,12 +490,15 @@ export function LeadPerformanceView() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-blue-700">Converted</p>
+                <p className="text-xs font-medium text-blue-700">Current Month</p>
                 <p className="text-xl font-bold text-blue-800">
-                  {filteredLeads.filter(lead => lead.stage === 'Membership Sold' || lead.status === 'Converted').length}
+                  {formatMetricValue(
+                    monthlyTotals[monthlyTotals.length - 1]?.[selectedMetric as keyof MonthlyData] as number || 0,
+                    selectedMetric
+                  )}
                 </p>
               </div>
-              <Award className="h-6 w-6 text-blue-600" />
+              <Calendar className="h-6 w-6 text-blue-600" />
             </div>
           </CardContent>
         </Card>
@@ -425,9 +507,12 @@ export function LeadPerformanceView() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-purple-700">Conversion Rate</p>
+                <p className="text-xs font-medium text-purple-700">Monthly Average</p>
                 <p className="text-xl font-bold text-purple-800">
-                  {filteredLeads.length > 0 ? Math.round((filteredLeads.filter(lead => lead.stage === 'Membership Sold' || lead.status === 'Converted').length / filteredLeads.length) * 100) : 0}%
+                  {formatMetricValue(
+                    monthlyTotals.reduce((sum, month) => sum + (month[selectedMetric as keyof MonthlyData] as number), 0) / monthlyTotals.length,
+                    selectedMetric
+                  )}
                 </p>
               </div>
               <TrendingUp className="h-6 w-6 text-purple-600" />
