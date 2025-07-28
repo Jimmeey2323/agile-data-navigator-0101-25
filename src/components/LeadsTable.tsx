@@ -21,12 +21,14 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 interface LeadsTableProps {
   onLeadClick: (lead: any) => void;
   selectedLeads: string[];
   setSelectedLeads: (leadIds: string[]) => void;
   compactMode?: boolean;
 }
+
 export const LeadsTable = ({
   onLeadClick,
   selectedLeads,
@@ -43,6 +45,7 @@ export const LeadsTable = ({
     deleteLead,
     setPageSize
   } = useLeads();
+
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
   const [bookmarkedLeads, setBookmarkedLeads] = useState<string[]>([]);
   const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
@@ -95,6 +98,7 @@ export const LeadsTable = ({
     });
     return paginatedGroups;
   }, [displayedLeads, groupByField, startIndex, pageSize]);
+
   const handleSort = (key: string) => {
     if (sortConfig?.key === key) {
       setSortConfig({
@@ -108,6 +112,7 @@ export const LeadsTable = ({
       });
     }
   };
+
   const handleDeleteLead = (id: string) => {
     if (window.confirm("Are you sure you want to delete this lead?")) {
       deleteLead(id).then(() => {
@@ -121,6 +126,7 @@ export const LeadsTable = ({
       });
     }
   };
+
   const handleSelectAllLeads = (checked: boolean) => {
     if (checked) {
       const allLeads = Object.values(groupedLeads).flat();
@@ -129,6 +135,7 @@ export const LeadsTable = ({
       setSelectedLeads([]);
     }
   };
+
   const handleSelectLead = (leadId: string, checked: boolean) => {
     if (checked) {
       setSelectedLeads([...selectedLeads, leadId]);
@@ -136,6 +143,7 @@ export const LeadsTable = ({
       setSelectedLeads(selectedLeads.filter(id => id !== leadId));
     }
   };
+
   const handleToggleBookmark = (id: string, isBookmarked: boolean) => {
     if (isBookmarked) {
       setBookmarkedLeads([...bookmarkedLeads, id]);
@@ -145,12 +153,14 @@ export const LeadsTable = ({
       toast.success("Lead removed from bookmarks");
     }
   };
+
   const toggleColumn = (column: string) => {
     setVisibleColumns(prev => ({
       ...prev,
       [column]: !prev[column]
     }));
   };
+
   const toggleGroup = (groupKey: string) => {
     setCollapsedGroups(prev => prev.includes(groupKey) ? prev.filter(key => key !== groupKey) : [...prev, groupKey]);
   };
@@ -171,6 +181,7 @@ export const LeadsTable = ({
     };
     return sourceVariants[source] || 'other';
   };
+
   const getStageBadgeVariant = (stage: string) => {
     const stageVariants: Record<string, string> = {
       'New Enquiry': 'newenquiry',
@@ -183,6 +194,7 @@ export const LeadsTable = ({
     };
     return stageVariants[stage] || 'default';
   };
+
   const getStatusBadgeVariant = (status: string) => {
     const statusVariants: Record<string, string> = {
       'Won': 'won',
@@ -197,9 +209,11 @@ export const LeadsTable = ({
     };
     return statusVariants[status] || 'default';
   };
+
   const getInitials = (name: string) => {
     return name.split(' ').map(part => part[0]).join('').toUpperCase().substring(0, 2);
   };
+
   if (loading) {
     return <Card className="shadow-md border-border/30">
         <CardContent className="p-4">
@@ -210,6 +224,7 @@ export const LeadsTable = ({
         </CardContent>
       </Card>;
   }
+
   return <Card className="shadow-xl border-border/30 overflow-hidden bg-white backdrop-blur-xl">
       {/* Enhanced Header with darker gradient */}
       <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-b-4 border-slate-700">
@@ -411,21 +426,23 @@ export const LeadsTable = ({
                             </div>
                           </TableCell>}
                         
-                  {visibleColumns.source && <TableCell className="h-[50px] py-2 text-left align-middle">
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="badge flex items-center gap-1 justify-center whitespace-nowrap text-left">
-            <Globe className="h-3 w-3" />
-            {lead.source}
-          </span>
-        </TooltipTrigger>
-        <TooltipContent className="bg-slate-800 text-white">
-          <p>Source: {lead.source}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  </TableCell>}
+                        {visibleColumns.source && <TableCell className="h-[50px] py-2 text-left align-middle">
+                          <div className="flex justify-start">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex items-center gap-1 text-xs text-gray-700 font-semibold">
+                                    <Globe className="h-3 w-3" />
+                                    {lead.source}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent className="bg-slate-800 text-white">
+                                  <p>Source: {lead.source}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        </TableCell>}
                         
                         {visibleColumns.created && <TableCell className="h-[50px] py-2 text-left align-middle">
                             <TooltipProvider>
@@ -464,37 +481,41 @@ export const LeadsTable = ({
                             </div>
                           </TableCell>}
                         
-                  {visibleColumns.stage && <TableCell className="h-[50px] py-2 text-left text-left ">
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="badge flex items-center gap-1 justify-center whitespace-nowrap text-left">
-            <Target className="h-3 w-3" />
-            {lead.stage}
-          </span>
-        </TooltipTrigger>
-        <TooltipContent className="bg-slate-800 text-white">
-          <p>Stage: {lead.stage}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  </TableCell>}
+                        {visibleColumns.stage && <TableCell className="h-[50px] py-2 text-left align-middle">
+                          <div className="flex justify-start">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex items-center gap-1 text-xs text-gray-700 font-semibold">
+                                    <Target className="h-3 w-3" />
+                                    {lead.stage}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent className="bg-slate-800 text-white">
+                                  <p>Stage: {lead.stage}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        </TableCell>}
                         
-                  {visibleColumns.status && <TableCell className="h-[50px] py-2 text-center align-middle">
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="badge flex items-center gap-1 justify-center whitespace-nowrap">
-            <Activity className="h-3 w-3" />
-            {lead.status}
-          </span>
-        </TooltipTrigger>
-        <TooltipContent className="bg-slate-800 text-white">
-          <p>Status: {lead.status}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  </TableCell>}
+                        {visibleColumns.status && <TableCell className="h-[50px] py-2 text-left align-middle">
+                          <div className="flex justify-start">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="inline-flex items-center gap-1 text-xs text-gray-700 font-semibold">
+                                    <Activity className="h-3 w-3" />
+                                    {lead.status}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent className="bg-slate-800 text-white">
+                                  <p>Status: {lead.status}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        </TableCell>}
                         
                         {visibleColumns.remarks && <TableCell className="h-[50px] py-2 text-left align-middle">
                             <TooltipProvider>
