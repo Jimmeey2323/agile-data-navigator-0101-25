@@ -142,10 +142,13 @@ const defaultFilters: LeadFilters = {
   search: '',
   source: [],
   associate: [],
-  center: ['Kenkere House'],
+  center: [], // Start empty to show all data on load
   stage: [],
   status: [],
-  dateRange: getLastWeekRange(),
+  dateRange: {
+    start: null, // Start with no date filter to show all data
+    end: null,
+  },
   compareDate: {
     start: null,
     end: null,
@@ -239,6 +242,25 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     console.log('Initial data fetch triggered');
     fetchData();
   }, [fetchData]);
+
+  // Set smart default filters after data loads
+  useEffect(() => {
+    if (leads.length > 0) {
+      // Check if we have center data and if "Kenkere House" exists
+      const uniqueCenters = getUniqueValues(leads, 'center');
+      const hasKenkereHouse = uniqueCenters.includes('Kenkere House');
+      
+      // Only set default filters if they haven't been manually changed and data is available
+      if (filters.center.length === 0 && filters.dateRange.start === null && filters.dateRange.end === null) {
+        const lastWeekRange = getLastWeekRange();
+        setFilters(prev => ({
+          ...prev,
+          center: hasKenkereHouse ? ['Kenkere House'] : [], // Only set if it exists in data
+          dateRange: lastWeekRange // Set last week as default
+        }));
+      }
+    }
+  }, [leads.length, setFilters]); // Only depend on leads.length to avoid infinite loops
   
   // Update lead
   const handleUpdateLead = async (lead: Lead) => {

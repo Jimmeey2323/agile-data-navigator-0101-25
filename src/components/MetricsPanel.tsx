@@ -22,11 +22,14 @@ import {
   CheckCircle,
   AlertTriangle,
   Info,
-  HelpCircle
+  HelpCircle,
+  Download,
+  X
 } from 'lucide-react';
 import { useLeads } from '@/contexts/LeadContext';
 import { cn, formatNumber, calculatePercentageChange } from '@/lib/utils';
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import CountUp from 'react-countup';
 
@@ -100,8 +103,27 @@ export function MetricsPanel() {
       </div>
       
       {!collapsed && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-          <TooltipProvider>
+        <>
+          {totalLeads === 0 && !loading ? (
+            <div className="col-span-full bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-400 p-6 rounded-lg">
+              <div className="flex items-center justify-center space-x-3">
+                <AlertTriangle className="h-8 w-8 text-amber-500" />
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-amber-800 mb-2">No Data Found</h3>
+                  <p className="text-amber-700 mb-3">
+                    Your current filters may be too restrictive, or the selected location/date range has no leads.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                    <p className="text-sm text-amber-600">
+                      💡 Try: Clearing filters, selecting a different location, or expanding the date range
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+              <TooltipProvider>
             <MetricCard
               title="Total Leads"
               value={totalLeads}
@@ -109,6 +131,9 @@ export function MetricsPanel() {
               icon={<Users className="h-6 w-6 text-blue-600" />}
               description={`${formatNumber(totalLeads)} of ${formatNumber(totalAllLeads)} total leads`}
               loading={loading}
+              statusCounts={statusCounts}
+              filteredLeads={filteredLeads}
+              totalLeads={totalLeads}
               tooltip={{
                 title: "Total Leads",
                 content: "Total number of leads in your current filtered view. This includes all leads regardless of their status or stage.",
@@ -130,6 +155,9 @@ export function MetricsPanel() {
               icon={<Layers className="h-6 w-6 text-teal-600" />}
               description="Leads in active stages"
               loading={loading}
+              statusCounts={statusCounts}
+              filteredLeads={filteredLeads}
+              totalLeads={totalLeads}
               tooltip={{
                 title: "Active Leads",
                 content: "Leads that are currently being worked on and haven't been closed (won or lost).",
@@ -152,6 +180,9 @@ export function MetricsPanel() {
               description={`${convertedLeadsCount} converted leads`}
               loading={loading}
               isPercentage={true}
+              statusCounts={statusCounts}
+              filteredLeads={filteredLeads}
+              totalLeads={totalLeads}
               tooltip={{
                 title: "Conversion Rate",
                 content: "Percentage of leads that have been successfully converted to customers.",
@@ -175,6 +206,9 @@ export function MetricsPanel() {
               loading={loading}
               isCurrency={true}
               currencyValue={ltv}
+              statusCounts={statusCounts}
+              filteredLeads={filteredLeads}
+              totalLeads={totalLeads}
               tooltip={{
                 title: "Estimated Value",
                 content: "Total estimated revenue from converted leads based on average deal size.",
@@ -193,6 +227,9 @@ export function MetricsPanel() {
               icon={<Clock className="h-6 w-6 text-red-600" />}
               description="Time to first response"
               loading={loading}
+              statusCounts={statusCounts}
+              filteredLeads={filteredLeads}
+              totalLeads={totalLeads}
               tooltip={{
                 title: "Average Response Time",
                 content: "Average time between lead creation and first contact attempt.",
@@ -212,6 +249,9 @@ export function MetricsPanel() {
               description="Leads with follow-up activities"
               loading={loading}
               isPercentage={true}
+              statusCounts={statusCounts}
+              filteredLeads={filteredLeads}
+              totalLeads={totalLeads}
               tooltip={{
                 title: "Follow-up Rate",
                 content: "Percentage of leads that have at least one follow-up activity recorded.",
@@ -223,7 +263,9 @@ export function MetricsPanel() {
               }}
             />
           </TooltipProvider>
-        </div>
+            </div>
+          )}
+        </>
       )}
     </section>
   );
@@ -244,6 +286,10 @@ interface MetricCardProps {
     content: string;
     insights: string[];
   };
+  // Data for drill-down
+  statusCounts?: Record<string, number>;
+  filteredLeads?: any[];
+  totalLeads?: number;
 }
 
 function MetricCard({ 
@@ -256,7 +302,10 @@ function MetricCard({
   isPercentage = false,
   isCurrency = false,
   currencyValue = 0,
-  tooltip
+  tooltip,
+  statusCounts = {},
+  filteredLeads = [],
+  totalLeads = 0
 }: MetricCardProps) {
   const positive = change >= 0;
   const prevValueRef = useRef<string | number>(0);
@@ -340,17 +389,97 @@ function MetricCard({
           </div>
         )}
       </CardContent>
-      {/* Drilldown Modal Placeholder */}
+      {/* Enhanced Drilldown Modal */}
       {showDrilldown && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full relative animate-fade-in">
-            <button className="absolute top-3 right-3 text-slate-400 hover:text-slate-700" onClick={e => {e.stopPropagation(); setShowDrilldown(false);}}>
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl w-full max-h-[80vh] overflow-y-auto relative animate-fade-in">
+            <button className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 z-10" onClick={e => {e.stopPropagation(); setShowDrilldown(false);}}>
               <span className="sr-only">Close</span>
-              <ChevronDown className="h-6 w-6" />
+              <X className="h-6 w-6" />
             </button>
-            <h3 className="text-xl font-bold mb-4">{title} Analytics</h3>
-            <div className="text-slate-700 text-sm mb-2">(Drilldown analytics and data will appear here.)</div>
-            {/* TODO: Insert analytics/charts/data here */}
+            <h3 className="text-2xl font-bold mb-6 text-slate-800">{title} - Detailed Analytics</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {/* Current Period Stats */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-4 rounded-lg">
+                <h4 className="font-semibold text-slate-700 mb-2">Current Period</h4>
+                <div className="text-2xl font-bold text-blue-600">{value}</div>
+                <div className="text-sm text-slate-600">{description}</div>
+              </div>
+              
+              {/* Change Analysis */}
+              <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-4 rounded-lg">
+                <h4 className="font-semibold text-slate-700 mb-2">Trend Analysis</h4>
+                <div className="flex items-center gap-2">
+                  {change > 0 ? (
+                    <ArrowUpRight className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <ArrowDownRight className="h-5 w-5 text-red-600" />
+                  )}
+                  <span className={`text-lg font-bold ${change > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {Math.abs(change).toFixed(1)}%
+                  </span>
+                </div>
+                <div className="text-sm text-slate-600">vs previous period</div>
+              </div>
+            </div>
+
+            {/* Breakdown by Source/Associate */}
+            <div className="mb-6">
+              <h4 className="font-semibold text-slate-700 mb-4">Breakdown by Source</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {Object.entries(statusCounts).map(([status, count]) => (
+                  <div key={status} className="bg-slate-50 p-3 rounded-lg">
+                    <div className="text-sm text-slate-600">{status}</div>
+                    <div className="text-lg font-bold text-slate-800">{count}</div>
+                    <div className="text-xs text-slate-500">
+                      {totalLeads > 0 ? ((count / totalLeads) * 100).toFixed(1) : 0}% of total
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="mb-4">
+              <h4 className="font-semibold text-slate-700 mb-4">Recent Activity</h4>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {filteredLeads.slice(0, 5).map((lead, index) => (
+                  <div key={lead.id || index} className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span className="text-sm font-medium">{lead.fullName || 'Unknown'}</span>
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      {lead.source || 'N/A'} • {lead.status || 'N/A'}
+                    </div>
+                  </div>
+                ))}
+                {filteredLeads.length === 0 && (
+                  <div className="text-center text-slate-500 py-4">
+                    <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-orange-400" />
+                    <p>No data available for current filters</p>
+                    <p className="text-xs">Try adjusting your filter settings</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-between items-center pt-4 border-t border-slate-200">
+              <div className="text-sm text-slate-500">
+                Last updated: {new Date().toLocaleTimeString()}
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+                <Button size="sm" onClick={() => setShowDrilldown(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}
