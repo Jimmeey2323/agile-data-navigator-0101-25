@@ -260,6 +260,7 @@ function MetricCard({
 }: MetricCardProps) {
   const positive = change >= 0;
   const prevValueRef = useRef<string | number>(0);
+  const [showDrilldown, setShowDrilldown] = useState(false);
 
   useEffect(() => {
     prevValueRef.current = value;
@@ -272,16 +273,20 @@ function MetricCard({
     if (isCurrency) return currencyValue;
     return parseInt(value.toString().replace(/[^0-9.-]+/g, '') || '0');
   })();
-  
+
   const cardContent = (
-    <Card className="overflow-hidden bg-white border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group cursor-pointer rounded-lg">
+    <Card
+      className="overflow-hidden bg-white/70 border-0 shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group cursor-pointer rounded-2xl backdrop-blur-lg ring-1 ring-blue-100 hover:ring-blue-300"
+      onClick={() => setShowDrilldown(true)}
+      style={{ minHeight: 140 }}
+    >
       <CardContent className="p-6">
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-600 mb-2">{title}</p>
-            <h3 className="text-2xl font-bold text-gray-900 mb-1">
+            <p className="text-sm font-semibold text-slate-600 mb-2 tracking-wide uppercase">{title}</p>
+            <h3 className="text-3xl font-extrabold text-slate-900 mb-1">
               {loading ? (
-                <div className="h-8 w-24 bg-gray-200 animate-pulse rounded"></div>
+                <div className="h-8 w-24 bg-slate-200 animate-pulse rounded"></div>
               ) : (
                 <>
                   {isCurrency && !value.toString().includes('₹') ? '₹' : ''}
@@ -289,7 +294,7 @@ function MetricCard({
                     start={0}
                     end={numericValue}
                     duration={1.5}
-                    separator=","
+                    separator="," 
                     decimals={isPercentage ? 1 : 0}
                     decimal="."
                     suffix={isPercentage && !value.toString().includes('%') ? '%' : ''}
@@ -297,9 +302,9 @@ function MetricCard({
                 </>
               )}
             </h3>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-1">
               <div className={cn(
-                "flex items-center text-xs font-medium",
+                "flex items-center text-xs font-semibold",
                 positive ? "text-green-600" : "text-red-600"
               )}>
                 {positive ? (
@@ -308,36 +313,47 @@ function MetricCard({
                   <ArrowDownRight className="h-3 w-3 mr-1" />
                 )}
                 {loading ? (
-                  <div className="h-3 w-10 bg-gray-200 animate-pulse rounded"></div>
+                  <div className="h-3 w-10 bg-slate-200 animate-pulse rounded"></div>
                 ) : (
                   `${Math.abs(change).toFixed(1)}%`
                 )}
               </div>
-              
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-slate-500">
                 {loading ? (
-                  <div className="h-3 w-20 bg-gray-200 animate-pulse rounded"></div>
+                  <div className="h-3 w-20 bg-slate-200 animate-pulse rounded"></div>
                 ) : (
                   description
                 )}
               </span>
             </div>
           </div>
-          
-          <div className="h-12 w-12 rounded-lg flex items-center justify-center bg-gray-50 group-hover:bg-gray-100 transition-colors duration-300">
+          <div className="h-14 w-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-100 to-teal-100 group-hover:from-blue-200 group-hover:to-teal-200 transition-colors duration-300 shadow">
             {icon}
           </div>
         </div>
-
         {tooltip && (
           <div className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="flex items-center gap-1 text-xs text-gray-500">
+            <div className="flex items-center gap-1 text-xs text-slate-500">
               <Info className="h-3 w-3" />
               <span>Hover for insights</span>
             </div>
           </div>
         )}
       </CardContent>
+      {/* Drilldown Modal Placeholder */}
+      {showDrilldown && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full relative animate-fade-in">
+            <button className="absolute top-3 right-3 text-slate-400 hover:text-slate-700" onClick={e => {e.stopPropagation(); setShowDrilldown(false);}}>
+              <span className="sr-only">Close</span>
+              <ChevronDown className="h-6 w-6" />
+            </button>
+            <h3 className="text-xl font-bold mb-4">{title} Analytics</h3>
+            <div className="text-slate-700 text-sm mb-2">(Drilldown analytics and data will appear here.)</div>
+            {/* TODO: Insert analytics/charts/data here */}
+          </div>
+        </div>
+      )}
     </Card>
   );
 
@@ -353,7 +369,6 @@ function MetricCard({
               <h4 className="font-semibold text-sm mb-1">{tooltip.title}</h4>
               <p className="text-xs text-muted-foreground">{tooltip.content}</p>
             </div>
-            
             <div>
               <h5 className="font-medium text-xs mb-2 flex items-center gap-1">
                 <Zap className="h-3 w-3" />

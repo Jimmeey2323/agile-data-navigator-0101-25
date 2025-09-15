@@ -22,8 +22,23 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+
+interface Lead {
+  id: string;
+  fullName: string;
+  source: string;
+  createdAt: string;
+  associate: string;
+  stage: string;
+  status: string;
+  remarks?: string;
+  email?: string;
+  phone?: string;
+  [key: string]: any;
+}
+
 interface LeadsTableProps {
-  onLeadClick: (lead: any) => void;
+  onLeadClick: (lead: Lead) => void;
   selectedLeads: string[];
   setSelectedLeads: (leadIds: string[]) => void;
   compactMode?: boolean;
@@ -75,28 +90,25 @@ export const LeadsTable = ({
     localStorage.setItem('bookmarkedLeads', JSON.stringify(bookmarkedLeads));
   }, [bookmarkedLeads]);
   const startIndex = (page - 1) * pageSize;
-  let displayedLeads = filteredLeads;
+
+  let displayedLeads: Lead[] = filteredLeads as Lead[];
 
   // Filter by bookmarks if enabled
+
   if (showBookmarkedOnly) {
-    displayedLeads = displayedLeads.filter(lead => bookmarkedLeads.includes(lead.id));
+    displayedLeads = displayedLeads.filter((lead: Lead) => bookmarkedLeads.includes(lead.id));
   }
 
   // Group leads if grouping is enabled
-  const groupedLeads = useMemo(() => {
+  const groupedLeads: Record<string, Lead[]> = useMemo(() => {
     if (groupByField === 'none') {
       return {
         '': displayedLeads.slice(startIndex, startIndex + pageSize)
       };
     }
-    const grouped = groupBy(displayedLeads, groupByField as keyof typeof displayedLeads[0]);
-
-    // Apply pagination to each group
-    const paginatedGroups: Record<string, any[]> = {};
-    Object.entries(grouped).forEach(([key, leads]) => {
-      paginatedGroups[key] = leads;
-    });
-    return paginatedGroups;
+    // groupBy returns Record<string, Lead[]>
+    const grouped = groupBy(displayedLeads, groupByField as keyof Lead);
+    return grouped;
   }, [displayedLeads, groupByField, startIndex, pageSize]);
 
   const handleSort = (key: string) => {
@@ -129,8 +141,8 @@ export const LeadsTable = ({
 
   const handleSelectAllLeads = (checked: boolean) => {
     if (checked) {
-      const allLeads = Object.values(groupedLeads).flat();
-      setSelectedLeads(allLeads.map(lead => lead.id));
+      const allLeads: Lead[] = Object.values(groupedLeads).flat();
+      setSelectedLeads(allLeads.map((lead: Lead) => lead.id));
     } else {
       setSelectedLeads([]);
     }
@@ -298,91 +310,91 @@ export const LeadsTable = ({
           <Table className="font-mono text-xs">
             <TableHeader className="bg-gradient-to-r from-slate-700 via-slate-800 to-slate-700 border-b-4 border-slate-600 sticky top-0 z-10">
               <TableRow className="hover:bg-gradient-to-r hover:from-slate-600 hover:via-slate-700 hover:to-slate-600 border-b border-white/10 transition-all duration-200">
-                <TableHead className="w-[50px] text-white h-[50px] font-bold text-center text-xs">
+                <TableHead className="w-[50px] text-white h-[40px] font-bold text-center text-xs select-none" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
                   <Checkbox checked={selectedLeads.length === Object.values(groupedLeads).flat().length && Object.values(groupedLeads).flat().length > 0} onCheckedChange={handleSelectAllLeads} className="border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-slate-800" />
                 </TableHead>
-                {visibleColumns.name && <TableHead className="min-w-[250px] text-white h-[50px] font-bold text-xs">
+                {visibleColumns.name && <TableHead className="min-w-[400px] text-white h-[40px] font-bold text-xs select-none text-left" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('fullName')}>
                       <User className="h-3 w-3 mr-2" />
                       FULL NAME
                       <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>}
-                {visibleColumns.source && <TableHead className="min-w-[100px] text-white h-[50px] font-bold text-xs">
+                {visibleColumns.source && <TableHead className="min-w-[100px] text-white h-[40px] font-bold text-xs select-none text-left" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('source')}>
                       <Globe className="h-3 w-3 mr-2" />
                       SOURCE
                       <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>}
-                {visibleColumns.created && <TableHead className="min-w-[120px] text-white h-[50px] font-bold text-xs">
+                {visibleColumns.created && <TableHead className="min-w-[120px] text-white h-[40px] font-bold text-xs select-none text-left" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('createdAt')}>
                       <Calendar className="h-3 w-3 mr-2" />
                       CREATED
                       <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>}
-                {visibleColumns.associate && <TableHead className="min-w-[160px] text-white h-[50px] font-bold text-xs">
+                {visibleColumns.associate && <TableHead className="min-w-[320px] text-white h-[40px] font-bold text-xs select-none text-left" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('associate')}>
                       <User className="h-3 w-3 mr-2" />
                       ASSOCIATE
                       <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>}
-                {visibleColumns.stage && <TableHead className="min-w-[100px] text-white h-[50px] font-bold text-xs">
+                {visibleColumns.stage && <TableHead className="min-w-[300px] text-white h-[40px] font-bold text-xs select-none text-left" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('stage')}>
                       <Target className="h-3 w-3 mr-2" />
                       STAGE
                       <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>}
-                {visibleColumns.status && <TableHead className="min-w-[80px] text-white h-[50px] font-bold text-xs">
+                {visibleColumns.status && <TableHead className="min-w-[80px] text-white h-[40px] font-bold text-xs select-none text-left" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('status')}>
                       <Activity className="h-3 w-3 mr-2" />
                       STATUS
                       <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>}
-                {visibleColumns.remarks && <TableHead className="min-w-[200px] text-white h-[50px] font-bold text-xs">
+                {visibleColumns.remarks && <TableHead className="min-w-[400px] text-white h-[40px] font-bold text-xs select-none text-left" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
                     <div className="flex items-center cursor-pointer" onClick={() => handleSort('remarks')}>
                       <FileText className="h-3 w-3 mr-2" />
                       REMARKS
                       <ArrowUpDown className="ml-2 h-3 w-3" />
                     </div>
                   </TableHead>}
-                <TableHead className="min-w-[120px] text-white h-[50px] font-bold text-xs">
+                <TableHead className="min-w-[120px] text-white h-[40px] font-bold text-xs select-none text-left" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
                   <div className="flex items-center">
                     <MessageCircle className="h-3 w-3 mr-2" />
                     FOLLOW-UPS
                   </div>
                 </TableHead>
-                <TableHead className="text-right w-[100px] text-white h-[50px] font-bold text-xs">ACTIONS</TableHead>
+                <TableHead className="text-right w-[100px] text-white h-[40px] font-bold text-xs select-none" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>ACTIONS</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="bg-white">
-              {Object.entries(groupedLeads).map(([groupKey, groupLeads]) => <React.Fragment key={groupKey}>
+              {Object.entries(groupedLeads).map(([groupKey, groupLeadsArr]) => <React.Fragment key={groupKey}>
                   {groupByField !== 'none' && groupKey && <TableRow className="bg-gradient-to-r from-slate-100 to-slate-50 hover:from-slate-200 hover:to-slate-100 border-b-2 border-slate-300">
                       <TableCell colSpan={Object.values(visibleColumns).filter(Boolean).length + 3} className="h-[50px]">
                         <div className="flex items-center justify-between">
                           <Button variant="ghost" size="sm" onClick={() => toggleGroup(groupKey)} className="flex items-center gap-2 font-bold text-slate-800 hover:text-slate-900 text-xs">
                             {collapsedGroups.includes(groupKey) ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                             <Layers className="h-4 w-4" />
-                            {groupKey} ({groupLeads.length} leads)
+                            {groupKey} ({groupLeadsArr.length} leads)
                           </Button>
                           <div className="flex items-center gap-4 text-xs text-slate-700 font-semibold">
-                            <span>Subtotal: {groupLeads.length} leads</span>
+                            <span>Subtotal: {groupLeadsArr.length} leads</span>
                             <Badge variant="outline" className="bg-white border-slate-300 text-xs">
-                              {Math.round(groupLeads.length / filteredLeads.length * 100)}% of total
+                              {filteredLeads.length > 0 ? Math.round(groupLeadsArr.length / filteredLeads.length * 100) : 0}% of total
                             </Badge>
                           </div>
                         </div>
                       </TableCell>
                     </TableRow>}
                   
-                  {(groupByField === 'none' || !collapsedGroups.includes(groupKey)) && groupLeads.map(lead => {
+                  {(groupByField === 'none' || !collapsedGroups.includes(groupKey)) && groupLeadsArr.map((lead: Lead) => {
                 const followUpStatus = getFollowUpStatus(lead);
-                return <TableRow key={lead.id} className="h-[50px] hover:bg-slate-50/80 transition-colors cursor-pointer border-b border-slate-100 font-mono" onClick={() => onLeadClick(lead)}>
-                        <TableCell className="h-[50px] py-2 text-center align-middle" onClick={e => e.stopPropagation()}>
+                return <TableRow key={lead.id} className="h-[40px] hover:bg-slate-50/80 transition-colors cursor-pointer border-b border-slate-100 font-mono" style={{maxHeight:'40px'}} onClick={() => onLeadClick(lead)}>
+                        <TableCell className="h-[40px] py-2 text-center align-middle" style={{maxHeight:'40px'}} onClick={e => e.stopPropagation()}>
                           <div className="flex items-center justify-center gap-2">
                             <Checkbox checked={selectedLeads.includes(lead.id)} onCheckedChange={checked => handleSelectLead(lead.id, checked === true)} className="h-3 w-3" />
                             <Button variant="ghost" size="icon" className={`h-4 w-4 p-0 ${bookmarkedLeads.includes(lead.id) ? 'text-amber-500' : 'text-slate-400'}`} onClick={e => {
@@ -393,8 +405,7 @@ export const LeadsTable = ({
                             </Button>
                           </div>
                         </TableCell>
-                        
-                        {visibleColumns.name && <TableCell className="h-[50px] py-2 text-left align-middle">
+                        {visibleColumns.name && <TableCell className="h-[40px] py-2 text-left align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}}>
                             <div className="flex items-center gap-3">
                               <Avatar className="h-6 w-6 border">
                                 <AvatarFallback className="bg-gradient-to-br from-blue-500 to-teal-600 text-white text-xs font-bold">
@@ -405,7 +416,7 @@ export const LeadsTable = ({
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <span className="font-bold text-xs text-gray-700 truncate max-w-[180px] cursor-pointer">
+                                      <span className="font-bold text-xs text-gray-700 truncate max-w-[180px] cursor-pointer" style={{whiteSpace:'nowrap'}}>
                                         {lead.fullName}
                                       </span>
                                     </TooltipTrigger>
@@ -419,15 +430,15 @@ export const LeadsTable = ({
                                 <div className="flex items-center gap-2 text-xs text-gray-600">
                                   {lead.email && <div className="flex items-center gap-1">
                                       <Mail className="h-2 w-2" />
-                                      <span className="truncate max-w-[120px]">{lead.email}</span>
+                                      <span className="truncate max-w-[120px]" style={{whiteSpace:'nowrap'}}>{lead.email}</span>
                                     </div>}
                                 </div>
                               </div>
                             </div>
                           </TableCell>}
                         
-                        {visibleColumns.source && <TableCell className="h-[50px] py-2 text-left align-middle">
-                          <div className="flex justify-start">
+                        {visibleColumns.source && <TableCell className="h-[40px] py-2 text-left align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}}>
+                          <div className="flex justify-start items-center">
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -444,7 +455,7 @@ export const LeadsTable = ({
                           </div>
                         </TableCell>}
                         
-                        {visibleColumns.created && <TableCell className="h-[50px] py-2 text-left align-middle">
+                        {visibleColumns.created && <TableCell className="h-[40px] py-2 text-left align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}}>
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -459,7 +470,7 @@ export const LeadsTable = ({
                             </TooltipProvider>
                           </TableCell>}
                         
-                        {visibleColumns.associate && <TableCell className="h-[50px] py-2 text-left align-middle">
+                        {visibleColumns.associate && <TableCell className="h-[40px] py-2 text-left align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}}>
                             <div className="flex items-center gap-2">
                               <Avatar className="h-5 w-5">
                                 <AvatarFallback className="bg-gradient-to-br from-slate-500 to-slate-600 text-white text-xs font-bold">
@@ -481,7 +492,7 @@ export const LeadsTable = ({
                             </div>
                           </TableCell>}
                         
-                        {visibleColumns.stage && <TableCell className="h-[50px] py-2 text-left align-middle">
+                        {visibleColumns.stage && <TableCell className="h-[40px] py-2 text-left align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}}>
                           <div className="flex justify-start">
                             <TooltipProvider>
                               <Tooltip>
@@ -499,7 +510,7 @@ export const LeadsTable = ({
                           </div>
                         </TableCell>}
                         
-                        {visibleColumns.status && <TableCell className="h-[50px] py-2 text-left align-middle">
+                        {visibleColumns.status && <TableCell className="h-[40px] py-2 text-left align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}}>
                           <div className="flex justify-start">
                             <TooltipProvider>
                               <Tooltip>
@@ -517,7 +528,7 @@ export const LeadsTable = ({
                           </div>
                         </TableCell>}
                         
-                        {visibleColumns.remarks && <TableCell className="h-[50px] py-2 text-left align-middle">
+                        {visibleColumns.remarks && <TableCell className="h-[40px] py-2 text-left align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}}>
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -534,7 +545,7 @@ export const LeadsTable = ({
                           </TableCell>}
                         
                         {/* Enhanced Follow-ups Column */}
-                        <TableCell className="h-[50px] py-2 text-left align-middle" onClick={e => e.stopPropagation()}>
+                        <TableCell className="h-[40px] py-2 text-left align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}} onClick={e => e.stopPropagation()}>
                           <div className="flex items-center gap-2">
                             <div className="flex items-center gap-1">
                               <MessageCircle className="h-3 w-3 text-blue-600" />
@@ -566,34 +577,43 @@ export const LeadsTable = ({
                                   <Eye className="h-3 w-3" />
                                 </Button>
                               </PopoverTrigger>
-                              <PopoverContent className="w-80">
-                                <div className="space-y-3">
-                                  <h4 className="font-semibold text-xs">Follow-up History</h4>
+                              <PopoverContent className="w-96 rounded-xl shadow-xl border-0 bg-white/90 backdrop-blur-lg">
+                                <div className="space-y-4 p-2">
+                                  <h4 className="font-bold text-sm text-slate-700 mb-2 border-b border-slate-200 pb-1">Follow-up History</h4>
+                                  {followUpStatus.followUps.length === 0 && (
+                                    <div className="text-xs text-slate-400">No follow-ups found.</div>
+                                  )}
                                   {followUpStatus.followUps.map((followUp, index) => {
-                              const isOverdue = !followUp.isValid && followUpStatus.daysSinceCreated >= followUp.expectedDay;
-                              return <div key={index} className={`p-2 rounded border text-xs ${isOverdue ? 'border-red-200 bg-red-50' : 'border-gray-200'}`}>
+                                    const isOverdue = !followUp.isValid && followUpStatus.daysSinceCreated >= followUp.expectedDay;
+                                    return (
+                                      <div key={index} className={`p-3 rounded-xl border text-xs flex flex-col gap-1 ${isOverdue ? 'border-red-200 bg-red-50' : 'border-slate-200 bg-slate-50'}`} style={{boxShadow:'0 2px 8px 0 rgba(0,0,0,0.04)'}}>
                                         <div className="flex items-center gap-2 mb-1">
-                                          <span className="font-medium">Follow-up {index + 1}</span>
+                                          <span className="font-semibold text-slate-700">Follow-up {index + 1}</span>
                                           {isOverdue && <AlertTriangleIcon className="h-3 w-3 text-red-500" />}
                                           {followUp.isValid && <CheckCircle className="h-3 w-3 text-green-500" />}
                                           <Clock className="h-3 w-3 text-gray-500" />
                                           <span className="text-xs text-gray-500">Day {followUp.expectedDay}</span>
                                         </div>
-                                        {followUp.date ? <>
-                                            <p className="text-xs text-gray-600">Date: {formatDate(followUp.date)}</p>
-                                            <p className="text-xs">{followUp.comments || 'No comments'}</p>
-                                          </> : <p className="text-xs text-gray-500">
+                                        {followUp.date ? (
+                                          <>
+                                            <p className="text-xs text-slate-600">Date: <span className="font-semibold">{formatDate(followUp.date)}</span></p>
+                                            <p className="text-xs text-slate-700">{followUp.comments || <span className="italic text-slate-400">No comments</span>}</p>
+                                          </>
+                                        ) : (
+                                          <p className={`text-xs ${isOverdue ? 'text-red-600' : 'text-slate-500'}`}>
                                             {isOverdue ? `Overdue (expected day ${followUp.expectedDay})` : `Expected on day ${followUp.expectedDay}`}
-                                          </p>}
-                                      </div>;
-                            })}
+                                          </p>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               </PopoverContent>
                             </Popover>
                           </div>
                         </TableCell>
                         
-                        <TableCell className="text-right h-[50px] py-2 align-middle" onClick={e => e.stopPropagation()}>
+                        <TableCell className="text-right h-[40px] py-2 align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}} onClick={e => e.stopPropagation()}>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" className="h-5 w-5 p-0 hover:bg-slate-200">

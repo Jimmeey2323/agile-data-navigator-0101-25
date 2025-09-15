@@ -157,58 +157,56 @@ export function QuickFilters() {
   ];
 
   return (
-    <Card className="p-3 shadow-sm border-border/30">
-      <div className="flex flex-col space-y-3">
+    <Card className="p-4 shadow-xl border-0 bg-white/70 backdrop-blur-lg rounded-2xl">
+      <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
-          <h4 className="text-xs font-medium text-muted-foreground">Quick Date Filters (Combinable)</h4>
-          <div className="flex flex-wrap gap-1.5">
+          <h4 className="text-sm font-semibold text-slate-700 mb-1">Quick Date Filters</h4>
+          <div className="flex flex-wrap gap-2">
             {quickFilterButtons.map(({ key, label, icon: Icon }) => (
               <Button
                 key={key}
                 variant={isActiveFilter(key) ? "default" : "outline"}
                 size="sm"
                 onClick={() => handleQuickFilter(key)}
-                className={`gap-1.5 h-7 text-xs transition-all duration-200 ${
+                className={`gap-2 h-8 text-xs rounded-lg transition-all duration-200 ${
                   isActiveFilter(key) 
-                    ? 'bg-primary text-primary-foreground shadow-md transform scale-105' 
-                    : 'hover:bg-primary/10 hover:scale-105'
+                    ? 'bg-gradient-to-r from-blue-500 to-teal-400 text-white shadow-md scale-105' 
+                    : 'hover:bg-blue-50 hover:scale-105'
                 }`}
               >
-                <Icon className="h-3 w-3" />
+                <Icon className="h-4 w-4" />
                 {label}
               </Button>
             ))}
           </div>
         </div>
-
         {centerOptions.length > 0 && (
           <div className="flex flex-col space-y-2">
-            <h4 className="text-xs font-medium text-muted-foreground">Location Filters (Combinable)</h4>
-            <div className="flex flex-wrap gap-1.5">
+            <h4 className="text-sm font-semibold text-slate-700 mb-1">Location Filters</h4>
+            <div className="flex flex-wrap gap-2">
               {centerOptions.map((center) => (
                 <Button
                   key={center}
                   variant={isActiveCenterFilter(center) ? "default" : "outline"}
                   size="sm"
                   onClick={() => handleCenterFilter(center)}
-                  className={`gap-1.5 h-7 text-xs transition-all duration-200 ${
+                  className={`gap-2 h-8 text-xs rounded-lg transition-all duration-200 ${
                     isActiveCenterFilter(center) 
-                      ? 'bg-primary text-primary-foreground shadow-md transform scale-105' 
-                      : 'hover:bg-primary/10 hover:scale-105'
+                      ? 'bg-gradient-to-r from-green-400 to-blue-400 text-white shadow-md scale-105' 
+                      : 'hover:bg-green-50 hover:scale-105'
                   }`}
                 >
-                  <MapPin className="h-3 w-3" />
+                  <MapPin className="h-4 w-4" />
                   {center}
                 </Button>
               ))}
             </div>
           </div>
         )}
-        
         {/* Active filters summary */}
         {(filters.dateRange.start || filters.dateRange.end || filters.center.length > 0) && (
-          <div className="pt-2 border-t border-border/30">
-            <div className="text-xs text-muted-foreground">
+          <div className="pt-2 border-t border-slate-200">
+            <div className="text-xs text-slate-500">
               <span className="font-medium">Active: </span>
               {filters.dateRange.start && (
                 <span className="text-blue-600">Date filter + </span>

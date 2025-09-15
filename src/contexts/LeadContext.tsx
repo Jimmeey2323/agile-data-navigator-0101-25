@@ -128,17 +128,24 @@ interface LeadContextType {
 }
 
 // Default values for context
+const getLastWeekRange = () => {
+  const today = new Date();
+  const lastWeek = new Date(today);
+  lastWeek.setDate(today.getDate() - 7);
+  return {
+    start: lastWeek,
+    end: today,
+  };
+};
+
 const defaultFilters: LeadFilters = {
   search: '',
   source: [],
   associate: [],
-  center: [],
+  center: ['Kenkere House'],
   stage: [],
   status: [],
-  dateRange: {
-    start: null,
-    end: null,
-  },
+  dateRange: getLastWeekRange(),
   compareDate: {
     start: null,
     end: null,
