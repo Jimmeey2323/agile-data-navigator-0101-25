@@ -159,10 +159,10 @@ export function AIInsightsView() {
 
   return (
     <div className="space-y-6">
-      <Card className="border-border/40 bg-white dark:bg-gray-900 shadow-md overflow-hidden">
+      <Card className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700 shadow-2xl overflow-hidden rounded-2xl">
         <CardHeader className="pb-4">
-          <CardTitle className="flex items-center text-xl">
-            <BrainCircuit className="w-5 h-5 mr-2 text-primary" />
+          <CardTitle className="flex items-center text-xl text-white">
+            <BrainCircuit className="w-5 h-5 mr-2 text-blue-400" />
             AI Lead Insights
           </CardTitle>
         </CardHeader>

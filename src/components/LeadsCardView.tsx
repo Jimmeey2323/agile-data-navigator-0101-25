@@ -125,17 +125,17 @@ export function LeadsCardView({ onLeadClick }: LeadsCardViewProps) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {Array(6).fill(0).map((_, index) => (
-          <Card key={index} className="shadow-md animate-pulse">
+          <Card key={index} className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700 shadow-2xl animate-pulse rounded-2xl">
             <CardHeader className="pb-2">
-              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-6 w-3/4 bg-gray-700" />
             </CardHeader>
             <CardContent className="space-y-4">
-              <Skeleton className="h-14 w-full" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-2/3" />
+              <Skeleton className="h-14 w-full bg-gray-700" />
+              <Skeleton className="h-4 w-full bg-gray-700" />
+              <Skeleton className="h-4 w-2/3 bg-gray-700" />
             </CardContent>
             <CardFooter>
-              <Skeleton className="h-9 w-full" />
+              <Skeleton className="h-9 w-full bg-gray-700" />
             </CardFooter>
           </Card>
         ))}
@@ -149,7 +149,7 @@ export function LeadsCardView({ onLeadClick }: LeadsCardViewProps) {
         paginatedLeads.map(lead => (
           <Card
             key={lead.id}
-            className="group lead-card shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border-border/40 backdrop-blur-sm hover:bg-card/80 cursor-pointer transform hover:-translate-y-2"
+            className="group lead-card bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700 shadow-2xl hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] transition-all duration-500 overflow-hidden backdrop-blur-lg ring-1 ring-gray-700 hover:ring-gray-500 cursor-pointer transform hover:-translate-y-2 hover:scale-[1.02] rounded-2xl"
             onClick={() => onLeadClick(lead)}
           >
             {/* Status indicator bar */}
@@ -164,19 +164,19 @@ export function LeadsCardView({ onLeadClick }: LeadsCardViewProps) {
             <CardHeader className="pb-3 pt-4">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <Avatar className="h-12 w-12 border-2 border-white shadow-lg">
-                    <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold">
+                  <Avatar className="h-12 w-12 border-2 border-gray-600 shadow-lg">
+                    <AvatarFallback className="bg-gradient-to-br from-blue-600 to-teal-600 text-white font-semibold">
                       {getInitials(lead.fullName)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <CardTitle className="text-lg font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors">
+                    <CardTitle className="text-lg font-semibold text-white group-hover:text-blue-300 transition-colors">
                       {lead.fullName}
                     </CardTitle>
                     <div className="flex items-center gap-2 mt-1">
                       {getStatusIcon(lead.status)}
                       <Badge 
-                        className={`${getStatusColor(lead.status)} text-xs font-medium border`}
+                        className={`${getStatusColor(lead.status)} text-xs font-medium border border-gray-600`}
                       >
                         {lead.status}
                       </Badge>
@@ -186,7 +186,7 @@ export function LeadsCardView({ onLeadClick }: LeadsCardViewProps) {
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                    <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-gray-700 opacity-0 group-hover:opacity-100 transition-all duration-300 text-gray-400 hover:text-white">
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -224,59 +224,59 @@ export function LeadsCardView({ onLeadClick }: LeadsCardViewProps) {
               {/* Contact Information */}
               <div className="space-y-2">
                 {lead.email && (
-                  <div className="flex items-center text-sm text-slate-600">
-                    <Mail className="h-4 w-4 text-slate-400 mr-3 flex-shrink-0" />
+                  <div className="flex items-center text-sm text-gray-300">
+                    <Mail className="h-4 w-4 text-gray-400 mr-3 flex-shrink-0" />
                     <span className="truncate">{lead.email}</span>
                   </div>
                 )}
                 {lead.phone && (
-                  <div className="flex items-center text-sm text-slate-600">
-                    <Phone className="h-4 w-4 text-slate-400 mr-3 flex-shrink-0" />
+                  <div className="flex items-center text-sm text-gray-300">
+                    <Phone className="h-4 w-4 text-gray-400 mr-3 flex-shrink-0" />
                     <span>{lead.phone}</span>
                   </div>
                 )}
-                <div className="flex items-center text-sm text-slate-600">
-                  <Calendar className="h-4 w-4 text-slate-400 mr-3 flex-shrink-0" />
+                <div className="flex items-center text-sm text-gray-300">
+                  <Calendar className="h-4 w-4 text-gray-400 mr-3 flex-shrink-0" />
                   <span>{formatDate(lead.createdAt)}</span>
                 </div>
               </div>
               
               {/* Lead Details */}
-              <div className="pt-3 border-t border-slate-100 space-y-3">
+              <div className="pt-3 border-t border-gray-700 space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-medium text-slate-500">Source:</span>
-                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 flex items-center gap-1">
+                  <span className="text-xs font-medium text-gray-400">Source:</span>
+                  <Badge variant="outline" className="bg-blue-600/20 text-blue-300 border-blue-500/30 flex items-center gap-1">
                     {getSourceIcon(lead.source)}
                     <span className="text-xs">{lead.source}</span>
                   </Badge>
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-medium text-slate-500">Stage:</span>
-                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 flex items-center gap-1">
+                  <span className="text-xs font-medium text-gray-400">Stage:</span>
+                  <Badge variant="outline" className="bg-purple-600/20 text-purple-300 border-purple-500/30 flex items-center gap-1">
                     <Activity className="h-3 w-3" />
                     <span className="text-xs truncate max-w-[120px]">{lead.stage}</span>
                   </Badge>
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-medium text-slate-500">Associate:</span>
+                  <span className="text-xs font-medium text-gray-400">Associate:</span>
                   <div className="flex items-center gap-1">
                     <Avatar className="h-5 w-5">
-                      <AvatarFallback className="bg-gradient-to-br from-slate-500 to-slate-600 text-white text-xs">
+                      <AvatarFallback className="bg-gradient-to-br from-gray-600 to-gray-700 text-white text-xs">
                         {getInitials(lead.associate)}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="font-medium text-xs text-slate-700 truncate max-w-[100px]">{lead.associate}</span>
+                    <span className="font-medium text-xs text-gray-300 truncate max-w-[100px]">{lead.associate}</span>
                   </div>
                 </div>
               </div>
               
               {/* Remarks */}
               {lead.remarks && (
-                <div className="pt-3 border-t border-slate-100">
-                  <p className="text-xs text-slate-500 mb-1 font-medium">Remarks:</p>
-                  <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed">{lead.remarks}</p>
+                <div className="pt-3 border-t border-gray-700">
+                  <p className="text-xs text-gray-400 mb-1 font-medium">Remarks:</p>
+                  <p className="text-sm text-gray-300 line-clamp-2 leading-relaxed">{lead.remarks}</p>
                 </div>
               )}
               

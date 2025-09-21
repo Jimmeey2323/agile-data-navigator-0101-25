@@ -112,21 +112,40 @@ export function MetricsPanel() {
 
   return (
     <section className="w-full">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <BarChart3 className="h-5 w-5 text-muted-foreground" />
-          <h2 className="text-lg font-medium animate-pulse bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">Key Metrics</h2>
+      {/* Enhanced title section with dark accents */}
+      <div className="relative mb-6">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-teal-600/10 rounded-2xl blur-xl"></div>
+        <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700 rounded-2xl p-6 shadow-2xl backdrop-blur-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-teal-600 flex items-center justify-center shadow-lg">
+                <BarChart3 className="h-6 w-6 text-white animate-pulse" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-teal-400 bg-clip-text text-transparent">
+                  Key Metrics
+                </h2>
+                <p className="text-sm text-gray-400 mt-1">Real-time performance insights</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shadow-lg shadow-emerald-400/50"></div>
+                <span className="text-xs text-gray-400">Live</span>
+              </div>
+              <button
+                onClick={() => setCollapsed(!collapsed)}
+                className="p-2 hover:bg-gray-700 rounded-lg focus:outline-none transition-all duration-300 hover:scale-105 group"
+              >
+                {collapsed ? (
+                  <ChevronDown className="h-5 w-5 text-gray-400 group-hover:text-white transition-colors duration-300" />
+                ) : (
+                  <ChevronUp className="h-5 w-5 text-gray-400 group-hover:text-white transition-colors duration-300" />
+                )}
+              </button>
+            </div>
+          </div>
         </div>
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1 hover:bg-secondary rounded-md focus:outline-none"
-        >
-          {collapsed ? (
-            <ChevronDown className="h-5 w-5 text-muted-foreground" />
-          ) : (
-            <ChevronUp className="h-5 w-5 text-muted-foreground" />
-          )}
-        </button>
       </div>
       
       {!collapsed && (
@@ -149,7 +168,7 @@ export function MetricsPanel() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 auto-rows-fr">
               <TooltipProvider>
             <MetricCard
               title="Total Leads"
@@ -486,24 +505,27 @@ function MetricCard({
 
   const cardContent = (
     <Card
-      className="overflow-hidden bg-white/70 border-0 shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group cursor-pointer rounded-2xl backdrop-blur-lg ring-1 ring-blue-100 hover:ring-blue-300"
+      className="overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-0 shadow-2xl transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:-translate-y-2 hover:scale-[1.02] group cursor-pointer rounded-2xl backdrop-blur-lg ring-1 ring-gray-700 hover:ring-gray-500 transform-gpu h-full"
       onClick={onDrillDown}
-      style={{ minHeight: 140 }}
+      style={{ minHeight: 160 }}
     >
-      <CardContent className="p-6">
-        <div className="flex justify-between items-start">
+      <CardContent className="p-6 relative overflow-hidden">
+        {/* Subtle animated background gradient */}
+        <div className="absolute inset-0 opacity-20 bg-gradient-to-br from-blue-400/20 via-transparent to-teal-400/20 group-hover:opacity-30 transition-opacity duration-500" />
+        
+        <div className="flex justify-between items-start relative z-10">
           <div className="flex-1">
-            <p className="text-sm font-semibold text-slate-600 mb-2 tracking-wide uppercase">{title}</p>
-            <h3 className="text-3xl font-extrabold text-slate-900 mb-1">
+            <p className="text-sm font-semibold text-gray-400 mb-2 tracking-wide uppercase group-hover:text-gray-300 transition-colors duration-300">{title}</p>
+            <h3 className="text-3xl font-extrabold text-white mb-1 group-hover:text-blue-100 transition-colors duration-300">
               {loading ? (
-                <div className="h-8 w-24 bg-slate-200 animate-pulse rounded"></div>
+                <div className="h-8 w-24 bg-gray-700 animate-pulse rounded"></div>
               ) : (
                 <>
                   {isCurrency && !value.toString().includes('₹') ? '₹' : ''}
                   <CountUp
                     start={0}
                     end={numericValue}
-                    duration={1.5}
+                    duration={2}
                     separator="," 
                     decimals={isPercentage ? 1 : 0}
                     decimal="."
@@ -514,41 +536,50 @@ function MetricCard({
             </h3>
             <div className="flex items-center gap-2 mt-1">
               <div className={cn(
-                "flex items-center text-xs font-semibold",
-                positive ? "text-green-600" : "text-red-600"
+                "flex items-center text-xs font-semibold px-2 py-1 rounded-full transition-all duration-300",
+                positive 
+                  ? "text-emerald-400 bg-emerald-500/20 group-hover:bg-emerald-500/30" 
+                  : "text-red-400 bg-red-500/20 group-hover:bg-red-500/30"
               )}>
                 {positive ? (
-                  <ArrowUpRight className="h-3 w-3 mr-1" />
+                  <ArrowUpRight className="h-3 w-3 mr-1 animate-pulse" />
                 ) : (
-                  <ArrowDownRight className="h-3 w-3 mr-1" />
+                  <ArrowDownRight className="h-3 w-3 mr-1 animate-pulse" />
                 )}
                 {loading ? (
-                  <div className="h-3 w-10 bg-slate-200 animate-pulse rounded"></div>
+                  <div className="h-3 w-10 bg-gray-700 animate-pulse rounded"></div>
                 ) : (
                   `${Math.abs(change).toFixed(1)}%`
                 )}
               </div>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
                 {loading ? (
-                  <div className="h-3 w-20 bg-slate-200 animate-pulse rounded"></div>
+                  <div className="h-3 w-20 bg-gray-700 animate-pulse rounded"></div>
                 ) : (
                   description
                 )}
               </span>
             </div>
           </div>
-          <div className="h-14 w-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-100 to-teal-100 group-hover:from-blue-200 group-hover:to-teal-200 transition-colors duration-300 shadow">
-            {icon}
+          <div className="h-14 w-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-600 group-hover:from-blue-600 group-hover:to-teal-600 transition-all duration-500 shadow-lg group-hover:shadow-xl group-hover:scale-110 transform-gpu">
+            <div className="transform group-hover:scale-110 transition-transform duration-300">
+              {icon}
+            </div>
           </div>
         </div>
         {tooltip && (
-          <div className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="flex items-center gap-1 text-xs text-slate-500">
-              <Info className="h-3 w-3" />
+          <div className="mt-3 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
+            <div className="flex items-center gap-1 text-xs text-gray-400 bg-gray-800/50 px-3 py-2 rounded-lg backdrop-blur-sm">
+              <Info className="h-3 w-3 animate-pulse" />
               <span>Click for detailed analytics</span>
             </div>
           </div>
         )}
+        
+        {/* Subtle shine effect on hover */}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-1000" />
+        </div>
       </CardContent>
     </Card>
   );

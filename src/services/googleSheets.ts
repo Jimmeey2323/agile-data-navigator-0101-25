@@ -158,11 +158,13 @@ export const fetchLeads = async (): Promise<Lead[]> => {
             lead.email = value;
             break;
           case 'phone':
+          case 'phone number':
           case 'contact number':
           case 'mobile':
             lead.phone = value;
             break;
           case 'source':
+          case 'source name':
           case 'lead source':
             lead.source = value;
             break;
@@ -174,6 +176,7 @@ export const fetchLeads = async (): Promise<Lead[]> => {
             lead.status = value;
             break;
           case 'stage':
+          case 'stage name':
             lead.stage = value;
             break;
           case 'created at':
@@ -467,11 +470,11 @@ export const parseCSV = (file: File): Promise<any[]> => {
             id: `imported-${index + 1}`,
             fullName: row['Full Name'] || row['Name'] || row['Client Name'] || '',
             email: row['Email'] || row['Email Address'] || '',
-            phone: row['Phone'] || row['Contact Number'] || row['Mobile'] || '',
-            source: row['Source'] || row['Lead Source'] || 'Other',
+            phone: row['Phone'] || row['Phone Number'] || row['Contact Number'] || row['Mobile'] || '',
+            source: row['Source'] || row['Source Name'] || row['Lead Source'] || 'Other',
             associate: row['Associate'] || row['Assigned To'] || '',
             status: row['Status'] || 'New',
-            stage: row['Stage'] || 'Initial Contact',
+            stage: row['Stage'] || row['Stage Name'] || 'Initial Contact',
             createdAt: row['Created At'] || row['Date'] || new Date().toISOString().split('T')[0],
             center: row['Center'] || row['Location'] || '',
             remarks: row['Remarks'] || row['Notes'] || row['Comments'] || '',

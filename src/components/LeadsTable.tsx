@@ -64,12 +64,11 @@ export const LeadsTable = ({
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
   const [bookmarkedLeads, setBookmarkedLeads] = useState<string[]>([]);
   const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
-  const [groupByField, setGroupByField] = useState<string>('none');
+  const [groupByFields, setGroupByFields] = useState<string[]>([]);
   const [collapsedGroups, setCollapsedGroups] = useState<string[]>([]);
   const [visibleColumns, setVisibleColumns] = useState({
     name: true,
     source: true,
-    phone: true,
     created: true,
     associate: true,
     stage: true,
@@ -101,17 +100,38 @@ export const LeadsTable = ({
     displayedLeads = displayedLeads.filter((lead: Lead) => bookmarkedLeads.includes(lead.id));
   }
 
+  // Multi-level grouping function
+  const createMultiLevelGroups = (leads: Lead[], fields: string[]): Record<string, Lead[]> => {
+    if (fields.length === 0) {
+      return { '': leads };
+    }
+
+    const grouped: Record<string, Lead[]> = {};
+    
+    for (const lead of leads) {
+      const groupKey = fields.map(field => {
+        const value = lead[field as keyof Lead];
+        return value || 'Unassigned';
+      }).join(' → ');
+      
+      if (!grouped[groupKey]) {
+        grouped[groupKey] = [];
+      }
+      grouped[groupKey].push(lead);
+    }
+    
+    return grouped;
+  };
+
   // Group leads if grouping is enabled
   const groupedLeads: Record<string, Lead[]> = useMemo(() => {
-    if (groupByField === 'none') {
+    if (groupByFields.length === 0) {
       return {
         '': displayedLeads.slice(startIndex, startIndex + pageSize)
       };
     }
-    // groupBy returns Record<string, Lead[]>
-    const grouped = groupBy(displayedLeads, groupByField as keyof Lead);
-    return grouped;
-  }, [displayedLeads, groupByField, startIndex, pageSize]);
+    return createMultiLevelGroups(displayedLeads, groupByFields);
+  }, [displayedLeads, groupByFields, startIndex, pageSize]);
 
   const handleSort = (key: string) => {
     if (sortConfig?.key === key) {
@@ -292,19 +312,78 @@ export const LeadsTable = ({
               </Tooltip>
             </TooltipProvider>
 
-            <Select value={groupByField} onValueChange={setGroupByField}>
-              <SelectTrigger className="w-44 bg-white/10 border-white/30 text-white font-medium text-sm backdrop-blur-sm">
-                <SelectValue placeholder="Group by..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">No grouping</SelectItem>
-                <SelectItem value="source">Source</SelectItem>
-                <SelectItem value="status">Status</SelectItem>
-                <SelectItem value="stage">Stage</SelectItem>
-                <SelectItem value="associate">Associate</SelectItem>
-                <SelectItem value="center">Center</SelectItem>
-              </SelectContent>
-            </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-44 bg-white/10 border-white/30 text-white font-medium text-sm backdrop-blur-sm justify-between">
+                  <span>
+                    {groupByFields.length === 0 ? 'Group by...' : `${groupByFields.length} field${groupByFields.length > 1 ? 's' : ''}`}
+                  </span>
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-3" align="start">
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm">Group by fields</h4>
+                  <div className="space-y-2">
+                    {['source', 'status', 'stage', 'associate', 'center'].map((field) => (
+                      <div key={field} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={field}
+                          checked={groupByFields.includes(field)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setGroupByFields([...groupByFields, field]);
+                            } else {
+                              setGroupByFields(groupByFields.filter(f => f !== field));
+                            }
+                          }}
+                        />
+                        <Label htmlFor={field} className="text-sm capitalize">
+                          {field}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                  {groupByFields.length > 0 && (
+                    <div className="pt-2 border-t">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setGroupByFields([])}
+                        className="w-full"
+                      >
+                        Clear all
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+            
+            {groupByFields.length > 0 && (
+              <div className="flex gap-1">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-white hover:bg-white/20 transition-colors text-xs px-2 py-1"
+                  onClick={() => setCollapsedGroups([])}
+                >
+                  Expand All
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-white hover:bg-white/20 transition-colors text-xs px-2 py-1"
+                  onClick={() => {
+                    // Get all group keys to collapse them all
+                    const allGroupKeys = Object.keys(groupedLeads).filter(key => key !== '');
+                    setCollapsedGroups(allGroupKeys);
+                  }}
+                >
+                  Collapse All
+                </Button>
+              </div>
+            )}
 
             <Popover>
               <PopoverTrigger asChild>
@@ -354,16 +433,7 @@ export const LeadsTable = ({
                     <TableHead className="min-w-[140px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
                       <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('source')}>
                         <Globe className="h-4 w-4 mr-2" />
-                        SOURCE NAME
-                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
-                      </div>
-                    </TableHead>
-                  )}
-                  {visibleColumns.phone && (
-                    <TableHead className="min-w-[140px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
-                      <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('phone')}>
-                        <Phone className="h-4 w-4 mr-2" />
-                        PHONE NUMBER
+                        SOURCE
                         <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
                       </div>
                     </TableHead>
@@ -390,7 +460,7 @@ export const LeadsTable = ({
                     <TableHead className="min-w-[160px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
                       <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('stage')}>
                         <Target className="h-4 w-4 mr-2" />
-                        STAGE NAME
+                        STAGE
                         <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
                       </div>
                     </TableHead>
@@ -437,7 +507,7 @@ export const LeadsTable = ({
               <TableBody className="bg-white">
                 {Object.entries(groupedLeads).map(([groupKey, groupLeadsArr]) => (
                   <React.Fragment key={groupKey}>
-                    {groupByField !== 'none' && groupKey && (
+                    {groupByFields.length > 0 && groupKey && (
                       <TableRow className="bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-150 border-b-2 border-gray-200">
                         <TableCell colSpan={Object.values(visibleColumns).filter(Boolean).length + 2} className="h-14">
                           <div className="flex items-center justify-between">
@@ -466,7 +536,7 @@ export const LeadsTable = ({
                       </TableRow>
                     )}
                     
-                    {(groupByField === 'none' || !collapsedGroups.includes(groupKey)) && 
+                    {(groupByFields.length === 0 || !collapsedGroups.includes(groupKey)) && 
                       groupLeadsArr.map((lead: Lead) => {
                         const followUpStatus = getFollowUpStatus(lead);
                         const allComments = getAllFollowUpComments(lead);
@@ -525,11 +595,17 @@ export const LeadsTable = ({
                                         </TooltipContent>
                                       </Tooltip>
                                     </TooltipProvider>
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                    <div className="flex flex-col gap-1 text-sm text-gray-600">
                                       {lead.email && (
                                         <div className="flex items-center gap-1">
                                           <Mail className="h-3 w-3" />
                                           <span className="truncate max-w-[160px]">{lead.email}</span>
+                                        </div>
+                                      )}
+                                      {lead.phone && (
+                                        <div className="flex items-center gap-1">
+                                          <Phone className="h-3 w-3" />
+                                          <span className="truncate max-w-[160px]">{lead.phone}</span>
                                         </div>
                                       )}
                                     </div>
@@ -551,26 +627,6 @@ export const LeadsTable = ({
                                       </TooltipTrigger>
                                       <TooltipContent className="bg-gray-800 text-white">
                                         <p>Source: {lead.source}</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                </div>
-                              </TableCell>
-                            )}
-                            
-                            {visibleColumns.phone && (
-                              <TableCell className="h-16 py-3 border-r border-gray-100">
-                                <div className="flex justify-start items-center">
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <span className="inline-flex items-center gap-2 text-sm text-gray-700 font-medium">
-                                          <Phone className="h-4 w-4" />
-                                          {lead.phone || 'N/A'}
-                                        </span>
-                                      </TooltipTrigger>
-                                      <TooltipContent className="bg-gray-800 text-white">
-                                        <p>Phone: {lead.phone || 'Not provided'}</p>
                                       </TooltipContent>
                                     </Tooltip>
                                   </TooltipProvider>
