@@ -379,37 +379,37 @@ export function LeadsKanbanView({ onLeadClick }: LeadsKanbanViewProps) {
 
       {/* Kanban Board */}
       <div 
-        className="kanban-board grid gap-4 pb-4 pt-1"
+        className="kanban-board grid gap-6 pb-4 pt-1"
         style={{
-          gridTemplateColumns: `repeat(${Math.min(columnsPerRow[0], sortedGroups.length)}, minmax(280px, 1fr))`
+          gridTemplateColumns: `repeat(${Math.min(columnsPerRow[0], sortedGroups.length)}, minmax(350px, 1fr))`
         }}
       >
         {sortedGroups.map(group => (
-          <div key={group} className="kanban-column flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-gray-700 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 backdrop-blur-lg">
-            <div className={`sticky top-0 z-10 bg-gradient-to-r ${getGroupColor(group)} p-4 text-white shadow-2xl`}>
+          <div key={group} className="kanban-column flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-gray-300 bg-white">
+            <div className={`sticky top-0 z-10 bg-gradient-to-r from-gray-800 to-gray-700 p-4 text-white shadow-2xl border-b border-gray-300`}>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Layers className="h-4 w-4" />
-                  <h3 className="text-sm font-semibold truncate">{group || 'Undefined'}</h3>
-                  <Badge className="bg-white/30 text-white hover:bg-white/40 border-white/20 text-xs">
+                <div className="flex items-center gap-3">
+                  <Layers className="h-5 w-5" />
+                  <h3 className="text-base font-semibold truncate">{group || 'Undefined'}</h3>
+                  <Badge className="bg-white/20 text-white hover:bg-white/30 border-white/30 text-xs px-2 py-1">
                     {groupedLeads[group].length}
                   </Badge>
                 </div>
                 
-                <Button variant="ghost" size="icon" className="h-6 w-6 text-white/70 hover:text-white hover:bg-white/20 transition-all duration-300">
-                  <MoreHorizontal className="h-3 w-3" />
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/20 transition-all duration-300 rounded-md">
+                  <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </div>
             </div>
             
             <div 
-              className="flex-1 space-y-3 p-4 bg-gray-800/30 overflow-y-auto"
+              className="flex-1 space-y-3 p-5 bg-gray-50 overflow-y-auto"
               style={{ maxHeight: '70vh' }}
             >
               {groupedLeads[group].map(lead => (
                 <Card 
                   key={lead.id} 
-                  className="kanban-card shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer border-l-4 bg-gradient-to-br from-gray-800 via-gray-700 to-gray-800 border border-gray-600 group hover:scale-105 hover:-translate-y-1 rounded-xl backdrop-blur-sm"
+                  className="kanban-card shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer border-l-4 bg-white border border-gray-300 hover:border-gray-400 group hover:scale-105 hover:-translate-y-1 rounded-xl"
                   style={{
                     borderLeftColor: `hsl(var(--${
                       lead.status === 'Hot' ? 'destructive' : 
@@ -425,7 +425,7 @@ export function LeadsKanbanView({ onLeadClick }: LeadsKanbanViewProps) {
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-2 flex-1">
                         {showAvatars && (
-                          <Avatar className={`border-2 border-gray-600 shadow-md ${compactMode ? 'h-6 w-6' : 'h-8 w-8'}`}>
+                          <Avatar className={`border-2 border-gray-300 shadow-md ${compactMode ? 'h-6 w-6' : 'h-8 w-8'}`}>
                             <AvatarFallback className={`text-white bg-gradient-to-br ${
                               groupByField === 'status' ? getGroupColor(lead.status) : getGroupColor(group)
                             } ${compactMode ? 'text-xs' : 'text-sm'}`}>
@@ -434,7 +434,7 @@ export function LeadsKanbanView({ onLeadClick }: LeadsKanbanViewProps) {
                           </Avatar>
                         )}
                         <div className="space-y-1 flex-1 min-w-0">
-                          <h4 className={`font-semibold line-clamp-1 text-white group-hover:text-blue-300 transition-colors ${
+                          <h4 className={`font-semibold line-clamp-1 text-gray-800 group-hover:text-gray-900 transition-colors ${
                             compactMode ? 'text-xs' : 'text-sm'
                           }`}>
                             {lead.fullName}
@@ -444,7 +444,7 @@ export function LeadsKanbanView({ onLeadClick }: LeadsKanbanViewProps) {
                               {getStatusIcon(lead.status)}
                               <Badge 
                                 variant="outline"
-                                className={`bg-gray-700/50 border-gray-500 text-gray-300 ${compactMode ? 'text-xs px-1 py-0' : 'text-xs'}`}
+                                className={`bg-white border-gray-300 text-gray-700 ${compactMode ? 'text-xs px-1 py-0' : 'text-xs'}`}
                               >
                                 {lead.status}
                               </Badge>
@@ -458,14 +458,14 @@ export function LeadsKanbanView({ onLeadClick }: LeadsKanbanViewProps) {
                       <div className="text-xs space-y-1 text-slate-600">
                         {lead.email && (
                           <div className="flex items-center gap-1 overflow-hidden">
-                            <Mail className="h-2.5 w-2.5 flex-shrink-0 text-gray-400" />
-                            <span className="truncate text-xs text-gray-300">{lead.email}</span>
+                            <Mail className="h-2.5 w-2.5 flex-shrink-0 text-gray-500" />
+                            <span className="truncate text-xs text-gray-600">{lead.email}</span>
                           </div>
                         )}
                         {lead.phone && (
                           <div className="flex items-center gap-1">
-                            <Phone className="h-2.5 w-2.5 flex-shrink-0 text-gray-400" />
-                            <span className="text-xs text-gray-300">{lead.phone}</span>
+                            <Phone className="h-2.5 w-2.5 flex-shrink-0 text-gray-500" />
+                            <span className="text-xs text-gray-600">{lead.phone}</span>
                           </div>
                         )}
                       </div>
@@ -473,7 +473,7 @@ export function LeadsKanbanView({ onLeadClick }: LeadsKanbanViewProps) {
                     
                     <div className="flex flex-wrap gap-1">
                       {lead.source && groupByField !== 'source' && (
-                        <Badge variant="outline" className={`flex items-center gap-1 bg-blue-600/20 border-blue-500/30 text-blue-300 ${
+                        <Badge variant="outline" className={`flex items-center gap-1 bg-blue-50 border-blue-200 text-blue-700 ${
                           compactMode ? 'text-xs px-1 py-0' : 'text-xs'
                         }`}>
                           {getSourceIcon(lead.source)}
@@ -482,7 +482,7 @@ export function LeadsKanbanView({ onLeadClick }: LeadsKanbanViewProps) {
                       )}
                       
                       {groupByField !== 'stage' && lead.stage && (
-                        <Badge variant="outline" className={`flex items-center gap-1 bg-purple-600/20 border-purple-500/30 text-purple-300 ${
+                        <Badge variant="outline" className={`flex items-center gap-1 bg-purple-50 border-purple-200 text-purple-700 ${
                           compactMode ? 'text-xs px-1 py-0' : 'text-xs'
                         }`}>
                           {getStageIcon(lead.stage)}
@@ -495,7 +495,7 @@ export function LeadsKanbanView({ onLeadClick }: LeadsKanbanViewProps) {
                     {!compactMode && getFollowUpBadges(lead).length > 0 && (
                       <div className="mt-2">
                         <details className="text-xs">
-                          <summary className="cursor-pointer text-gray-400 font-medium flex items-center gap-1 hover:text-gray-300 transition-colors">
+                          <summary className="cursor-pointer text-gray-500 font-medium flex items-center gap-1 hover:text-gray-700 transition-colors">
                             <MessageSquare className="h-2.5 w-2.5" />
                             Follow-ups ({getFollowUpBadges(lead).length})
                           </summary>

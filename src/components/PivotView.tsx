@@ -153,18 +153,20 @@ export function PivotView() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700 shadow-2xl rounded-2xl">
-          <CardContent className="pt-6">
-            <h3 className="text-sm font-medium mb-2 text-white">Row Fields</h3>
+        <Card className="bg-white border border-gray-300 shadow-lg rounded-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-3 border-b border-gray-300">
+            <h3 className="text-sm font-medium text-white">Row Fields</h3>
+          </div>
+          <CardContent className="pt-4">
             <div className="space-y-2">
               {rowFields.map((field, index) => (
-                <div key={`row-${index}`} className="flex items-center justify-between py-1 px-2 bg-gray-700/50 rounded-md border border-gray-600">
-                  <span className="text-sm text-gray-300">{fieldOptions.find(f => f.value === field)?.label || field}</span>
-                  <Button variant="ghost" size="sm" onClick={() => handleRemoveRowField(index)} className="h-6 w-6 p-0 text-gray-400 hover:text-white hover:bg-gray-600">×</Button>
+                <div key={`row-${index}`} className="flex items-center justify-between py-1 px-2 bg-gray-100 rounded-md border border-gray-200">
+                  <span className="text-sm text-gray-700">{fieldOptions.find(f => f.value === field)?.label || field}</span>
+                  <Button variant="ghost" size="sm" onClick={() => handleRemoveRowField(index)} className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-200">×</Button>
                 </div>
               ))}
               <Select onValueChange={handleAddRowField}>
-                <SelectTrigger className="w-full mt-2 bg-gray-800 border-gray-600 text-gray-300">
+                <SelectTrigger className="w-full mt-2 bg-white border-gray-300 text-gray-700">
                   <SelectValue placeholder="Add row field" />
                 </SelectTrigger>
                 <SelectContent>
@@ -179,18 +181,20 @@ export function PivotView() {
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700 shadow-2xl rounded-2xl">
-          <CardContent className="pt-6">
-            <h3 className="text-sm font-medium mb-2 text-white">Column Fields</h3>
+        <Card className="bg-white border border-gray-300 shadow-lg rounded-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-3 border-b border-gray-300">
+            <h3 className="text-sm font-medium text-white">Column Fields</h3>
+          </div>
+          <CardContent className="pt-4">
             <div className="space-y-2">
               {colFields.map((field, index) => (
-                <div key={`col-${index}`} className="flex items-center justify-between py-1 px-2 bg-gray-700/50 rounded-md border border-gray-600">
-                  <span className="text-sm text-gray-300">{fieldOptions.find(f => f.value === field)?.label || field}</span>
-                  <Button variant="ghost" size="sm" onClick={() => handleRemoveColField(index)} className="h-6 w-6 p-0 text-gray-400 hover:text-white hover:bg-gray-600">×</Button>
+                <div key={`col-${index}`} className="flex items-center justify-between py-1 px-2 bg-gray-100 rounded-md border border-gray-200">
+                  <span className="text-sm text-gray-700">{fieldOptions.find(f => f.value === field)?.label || field}</span>
+                  <Button variant="ghost" size="sm" onClick={() => handleRemoveColField(index)} className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-200">×</Button>
                 </div>
               ))}
               <Select onValueChange={handleAddColField}>
-                <SelectTrigger className="w-full mt-2 bg-gray-800 border-gray-600 text-gray-300">
+                <SelectTrigger className="w-full mt-2 bg-white border-gray-300 text-gray-700">
                   <SelectValue placeholder="Add column field" />
                 </SelectTrigger>
                 <SelectContent>
@@ -205,14 +209,16 @@ export function PivotView() {
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700 shadow-2xl rounded-2xl">
-          <CardContent className="pt-6">
-            <h3 className="text-sm font-medium mb-2 text-white">Values</h3>
+        <Card className="bg-white border border-gray-300 shadow-lg rounded-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-3 border-b border-gray-300">
+            <h3 className="text-sm font-medium text-white">Values</h3>
+          </div>
+          <CardContent className="pt-4">
             <div className="space-y-4">
               <div>
-                <label className="text-xs text-gray-400">Value Field</label>
+                <label className="text-xs text-gray-600">Value Field</label>
                 <Select value={valueField} onValueChange={setValueField}>
-                  <SelectTrigger className="w-full mt-1 bg-gray-800 border-gray-600 text-gray-300">
+                  <SelectTrigger className="w-full mt-1 bg-white border-gray-300 text-gray-700">
                     <SelectValue placeholder="Select value field" />
                   </SelectTrigger>
                   <SelectContent>
@@ -226,7 +232,7 @@ export function PivotView() {
               </div>
               
               <div>
-                <label className="text-xs text-gray-400">Aggregation</label>
+                <label className="text-xs text-gray-600">Aggregation</label>
                 <Select value={valueType} onValueChange={setValueType}>
                   <SelectTrigger className="w-full mt-1">
                     <SelectValue placeholder="Select aggregation" />
@@ -252,51 +258,54 @@ export function PivotView() {
         </Button>
       </div>
       
-      <Card className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700 shadow-2xl rounded-2xl overflow-auto">
+      <Card className="bg-white border border-gray-300 shadow-lg rounded-2xl overflow-auto">
+        <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-4 border-b border-gray-300">
+          <h3 className="text-lg font-semibold text-white">Pivot Table Results</h3>
+        </div>
         <div className="p-4 overflow-x-auto">
           {isLoading ? (
             <div className="p-8 flex items-center justify-center">
-              <RefreshCw className="h-8 w-8 animate-spin text-gray-400" />
+              <RefreshCw className="h-8 w-8 animate-spin text-gray-500" />
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="bg-gray-700/50 font-medium text-white border-gray-600">
+                  <TableHead className="bg-gradient-to-r from-gray-800 to-gray-700 font-medium text-white border-gray-600">
                     {fieldOptions.find(f => f.value === rowFields[0])?.label || rowFields[0]}
                     {' / '}
                     {fieldOptions.find(f => f.value === colFields[0])?.label || colFields[0]}
                   </TableHead>
                   {pivotResult.colValues.map((col) => (
-                    <TableHead key={col} className="bg-gray-700/50 font-medium text-white border-gray-600">
+                    <TableHead key={col} className="bg-gradient-to-r from-gray-800 to-gray-700 font-medium text-white border-gray-600">
                       {col}
                     </TableHead>
                   ))}
-                  <TableHead className="bg-gray-700/50 font-medium text-white border-gray-600">Total</TableHead>
+                  <TableHead className="bg-gradient-to-r from-gray-800 to-gray-700 font-medium text-white border-gray-600">Total</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {pivotResult.rowValues.map((row) => (
                   <TableRow key={row}>
-                    <TableCell className="font-medium bg-gray-800/30 text-gray-300 border-gray-600">{row}</TableCell>
+                    <TableCell className="font-medium bg-gray-100 text-gray-800 border-gray-300">{row}</TableCell>
                     {pivotResult.colValues.map((col) => (
-                      <TableCell key={`${row}-${col}`} className="text-gray-300 border-gray-600">
+                      <TableCell key={`${row}-${col}`} className="text-gray-700 border-gray-300">
                         {pivotResult.data[row][col]}
                       </TableCell>
                     ))}
-                    <TableCell className="font-medium bg-gray-800/30 text-gray-300 border-gray-600">
+                    <TableCell className="font-medium bg-gray-100 text-gray-800 border-gray-300">
                       {pivotResult.colValues.reduce((sum, col) => sum + pivotResult.data[row][col], 0)}
                     </TableCell>
                   </TableRow>
                 ))}
-                <TableRow className="border-t-2 border-gray-600">
-                  <TableCell className="font-medium bg-gray-700/50 text-white border-gray-600">Total</TableCell>
+                <TableRow className="border-t-2 border-gray-400">
+                  <TableCell className="font-medium bg-gradient-to-r from-gray-800 to-gray-700 text-white border-gray-600">Total</TableCell>
                   {pivotResult.colValues.map((col) => (
-                    <TableCell key={`total-${col}`} className="font-medium bg-gray-800/30 text-gray-300 border-gray-600">
+                    <TableCell key={`total-${col}`} className="font-medium bg-gradient-to-r from-gray-800 to-gray-700 text-white border-gray-600">
                       {pivotResult.rowValues.reduce((sum, row) => sum + pivotResult.data[row][col], 0)}
                     </TableCell>
                   ))}
-                  <TableCell className="font-medium bg-gray-700/50 text-white border-gray-600">
+                  <TableCell className="font-medium bg-gradient-to-r from-gray-800 to-gray-700 text-white border-gray-600">
                     {pivotResult.rowValues.reduce(
                       (rowSum, row) => rowSum + pivotResult.colValues.reduce(
                         (colSum, col) => colSum + pivotResult.data[row][col], 0
