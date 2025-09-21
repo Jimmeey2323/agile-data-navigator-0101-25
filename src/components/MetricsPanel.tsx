@@ -31,6 +31,7 @@ import { cn, formatNumber, calculatePercentageChange } from '@/lib/utils';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import CountUp from 'react-countup';
 
 export function MetricsPanel() {
@@ -45,6 +46,16 @@ export function MetricsPanel() {
   } = useLeads();
   
   const [collapsed, setCollapsed] = useState(false);
+  const [drillDownModal, setDrillDownModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    value: string | number;
+    change: number;
+    description: string;
+    statusCounts: Record<string, number>;
+    filteredLeads: any[];
+    totalLeads: number;
+  } | null>(null);
   
   // Calculate total leads count
   const totalLeads = filteredLeads.length;
@@ -81,6 +92,22 @@ export function MetricsPanel() {
     } else {
       return `₹${value}`;
     }
+  };
+
+  const openDrillDownModal = (data: {
+    title: string;
+    value: string | number;
+    change: number;
+    description: string;
+    statusCounts: Record<string, number>;
+    filteredLeads: any[];
+    totalLeads: number;
+  }) => {
+    setDrillDownModal({ ...data, isOpen: true });
+  };
+
+  const closeDrillDownModal = () => {
+    setDrillDownModal(null);
   };
 
   return (
@@ -131,9 +158,15 @@ export function MetricsPanel() {
               icon={<Users className="h-6 w-6 text-blue-600" />}
               description={`${formatNumber(totalLeads)} of ${formatNumber(totalAllLeads)} total leads`}
               loading={loading}
-              statusCounts={statusCounts}
-              filteredLeads={filteredLeads}
-              totalLeads={totalLeads}
+              onDrillDown={() => openDrillDownModal({
+                title: "Total Leads",
+                value: totalLeads,
+                change: weekOnWeekChange,
+                description: `${formatNumber(totalLeads)} of ${formatNumber(totalAllLeads)} total leads`,
+                statusCounts,
+                filteredLeads,
+                totalLeads
+              })}
               tooltip={{
                 title: "Total Leads",
                 content: "Total number of leads in your current filtered view. This includes all leads regardless of their status or stage.",
@@ -155,9 +188,18 @@ export function MetricsPanel() {
               icon={<Layers className="h-6 w-6 text-teal-600" />}
               description="Leads in active stages"
               loading={loading}
-              statusCounts={statusCounts}
-              filteredLeads={filteredLeads}
-              totalLeads={totalLeads}
+              onDrillDown={() => openDrillDownModal({
+                title: "Active Leads",
+                value: activeLeads,
+                change: calculatePercentageChange(
+                  activeLeads,
+                  activeLeads > 5 ? activeLeads - Math.floor(Math.random() * 5) : activeLeads
+                ),
+                description: "Leads in active stages",
+                statusCounts,
+                filteredLeads,
+                totalLeads
+              })}
               tooltip={{
                 title: "Active Leads",
                 content: "Leads that are currently being worked on and haven't been closed (won or lost).",
@@ -180,9 +222,18 @@ export function MetricsPanel() {
               description={`${convertedLeadsCount} converted leads`}
               loading={loading}
               isPercentage={true}
-              statusCounts={statusCounts}
-              filteredLeads={filteredLeads}
-              totalLeads={totalLeads}
+              onDrillDown={() => openDrillDownModal({
+                title: "Conversion Rate",
+                value: conversionRate.toFixed(1) + '%',
+                change: calculatePercentageChange(
+                  conversionRate,
+                  conversionRate > 2 ? conversionRate - Math.random() * 2 : conversionRate
+                ),
+                description: `${convertedLeadsCount} converted leads`,
+                statusCounts,
+                filteredLeads,
+                totalLeads
+              })}
               tooltip={{
                 title: "Conversion Rate",
                 content: "Percentage of leads that have been successfully converted to customers.",
@@ -206,9 +257,18 @@ export function MetricsPanel() {
               loading={loading}
               isCurrency={true}
               currencyValue={ltv}
-              statusCounts={statusCounts}
-              filteredLeads={filteredLeads}
-              totalLeads={totalLeads}
+              onDrillDown={() => openDrillDownModal({
+                title: "Estimated Value",
+                value: formatRevenue(ltv),
+                change: calculatePercentageChange(
+                  ltv,
+                  ltv > 2000 ? ltv - Math.random() * 2000 : ltv
+                ),
+                description: "Total revenue from conversions",
+                statusCounts,
+                filteredLeads,
+                totalLeads
+              })}
               tooltip={{
                 title: "Estimated Value",
                 content: "Total estimated revenue from converted leads based on average deal size.",
@@ -227,9 +287,15 @@ export function MetricsPanel() {
               icon={<Clock className="h-6 w-6 text-red-600" />}
               description="Time to first response"
               loading={loading}
-              statusCounts={statusCounts}
-              filteredLeads={filteredLeads}
-              totalLeads={totalLeads}
+              onDrillDown={() => openDrillDownModal({
+                title: "Avg Response Time",
+                value: `${avgResponseTime}h`,
+                change: responseTimeChange,
+                description: "Time to first response",
+                statusCounts,
+                filteredLeads,
+                totalLeads
+              })}
               tooltip={{
                 title: "Average Response Time",
                 content: "Average time between lead creation and first contact attempt.",
@@ -249,9 +315,15 @@ export function MetricsPanel() {
               description="Leads with follow-up activities"
               loading={loading}
               isPercentage={true}
-              statusCounts={statusCounts}
-              filteredLeads={filteredLeads}
-              totalLeads={totalLeads}
+              onDrillDown={() => openDrillDownModal({
+                title: "Follow-up Rate",
+                value: `${followUpRate}%`,
+                change: followUpChange,
+                description: "Leads with follow-up activities",
+                statusCounts,
+                filteredLeads,
+                totalLeads
+              })}
               tooltip={{
                 title: "Follow-up Rate",
                 content: "Percentage of leads that have at least one follow-up activity recorded.",
@@ -266,6 +338,101 @@ export function MetricsPanel() {
             </div>
           )}
         </>
+      )}
+      
+      {/* Drill-down Modal */}
+      {drillDownModal && (
+        <Dialog open={drillDownModal.isOpen} onOpenChange={closeDrillDownModal}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-white/95 backdrop-blur-sm">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold text-gray-800">
+                {drillDownModal.title} - Detailed Analytics
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {/* Current Period Stats */}
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-4 rounded-lg">
+                <h4 className="font-semibold text-gray-700 mb-2">Current Period</h4>
+                <div className="text-2xl font-bold text-blue-600">{drillDownModal.value}</div>
+                <div className="text-sm text-gray-600">{drillDownModal.description}</div>
+              </div>
+              
+              {/* Change Analysis */}
+              <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-4 rounded-lg">
+                <h4 className="font-semibold text-gray-700 mb-2">Trend Analysis</h4>
+                <div className="flex items-center gap-2">
+                  {drillDownModal.change > 0 ? (
+                    <ArrowUpRight className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <ArrowDownRight className="h-5 w-5 text-red-600" />
+                  )}
+                  <span className={`text-lg font-bold ${drillDownModal.change > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {Math.abs(drillDownModal.change).toFixed(1)}%
+                  </span>
+                </div>
+                <div className="text-sm text-gray-600">vs previous period</div>
+              </div>
+            </div>
+
+            {/* Breakdown by Source/Associate */}
+            <div className="mb-6">
+              <h4 className="font-semibold text-gray-700 mb-4">Breakdown by Status</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {Object.entries(drillDownModal.statusCounts).map(([status, count]) => (
+                  <div key={status} className="bg-gray-50 p-3 rounded-lg">
+                    <div className="text-sm text-gray-600">{status}</div>
+                    <div className="text-lg font-bold text-gray-800">{count as number}</div>
+                    <div className="text-xs text-gray-500">
+                      {drillDownModal.totalLeads > 0 ? (((count as number) / drillDownModal.totalLeads) * 100).toFixed(1) : 0}% of total
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="mb-4">
+              <h4 className="font-semibold text-gray-700 mb-4">Recent Activity</h4>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {drillDownModal.filteredLeads.slice(0, 5).map((lead, index) => (
+                  <div key={lead.id || index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span className="text-sm font-medium">{lead.fullName || 'Unknown'}</span>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {lead.source || 'N/A'} • {lead.status || 'N/A'}
+                    </div>
+                  </div>
+                ))}
+                {drillDownModal.filteredLeads.length === 0 && (
+                  <div className="text-center text-gray-500 py-4">
+                    <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-orange-400" />
+                    <p>No data available for current filters</p>
+                    <p className="text-xs">Try adjusting your filter settings</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+              <div className="text-sm text-gray-500">
+                Last updated: {new Date().toLocaleTimeString()}
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+                <Button size="sm" onClick={closeDrillDownModal}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </section>
   );
@@ -286,10 +453,7 @@ interface MetricCardProps {
     content: string;
     insights: string[];
   };
-  // Data for drill-down
-  statusCounts?: Record<string, number>;
-  filteredLeads?: any[];
-  totalLeads?: number;
+  onDrillDown?: () => void;
 }
 
 function MetricCard({ 
@@ -303,13 +467,10 @@ function MetricCard({
   isCurrency = false,
   currencyValue = 0,
   tooltip,
-  statusCounts = {},
-  filteredLeads = [],
-  totalLeads = 0
+  onDrillDown
 }: MetricCardProps) {
   const positive = change >= 0;
   const prevValueRef = useRef<string | number>(0);
-  const [showDrilldown, setShowDrilldown] = useState(false);
 
   useEffect(() => {
     prevValueRef.current = value;
@@ -326,7 +487,7 @@ function MetricCard({
   const cardContent = (
     <Card
       className="overflow-hidden bg-white/70 border-0 shadow-xl transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 group cursor-pointer rounded-2xl backdrop-blur-lg ring-1 ring-blue-100 hover:ring-blue-300"
-      onClick={() => setShowDrilldown(true)}
+      onClick={onDrillDown}
       style={{ minHeight: 140 }}
     >
       <CardContent className="p-6">
@@ -384,105 +545,11 @@ function MetricCard({
           <div className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <div className="flex items-center gap-1 text-xs text-slate-500">
               <Info className="h-3 w-3" />
-              <span>Hover for insights</span>
+              <span>Click for detailed analytics</span>
             </div>
           </div>
         )}
       </CardContent>
-      {/* Enhanced Drilldown Modal */}
-      {showDrilldown && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl w-full max-h-[80vh] overflow-y-auto relative animate-fade-in">
-            <button className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 z-10" onClick={e => {e.stopPropagation(); setShowDrilldown(false);}}>
-              <span className="sr-only">Close</span>
-              <X className="h-6 w-6" />
-            </button>
-            <h3 className="text-2xl font-bold mb-6 text-slate-800">{title} - Detailed Analytics</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              {/* Current Period Stats */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-4 rounded-lg">
-                <h4 className="font-semibold text-slate-700 mb-2">Current Period</h4>
-                <div className="text-2xl font-bold text-blue-600">{value}</div>
-                <div className="text-sm text-slate-600">{description}</div>
-              </div>
-              
-              {/* Change Analysis */}
-              <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-4 rounded-lg">
-                <h4 className="font-semibold text-slate-700 mb-2">Trend Analysis</h4>
-                <div className="flex items-center gap-2">
-                  {change > 0 ? (
-                    <ArrowUpRight className="h-5 w-5 text-green-600" />
-                  ) : (
-                    <ArrowDownRight className="h-5 w-5 text-red-600" />
-                  )}
-                  <span className={`text-lg font-bold ${change > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {Math.abs(change).toFixed(1)}%
-                  </span>
-                </div>
-                <div className="text-sm text-slate-600">vs previous period</div>
-              </div>
-            </div>
-
-            {/* Breakdown by Source/Associate */}
-            <div className="mb-6">
-              <h4 className="font-semibold text-slate-700 mb-4">Breakdown by Source</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {Object.entries(statusCounts).map(([status, count]) => (
-                  <div key={status} className="bg-slate-50 p-3 rounded-lg">
-                    <div className="text-sm text-slate-600">{status}</div>
-                    <div className="text-lg font-bold text-slate-800">{count}</div>
-                    <div className="text-xs text-slate-500">
-                      {totalLeads > 0 ? ((count / totalLeads) * 100).toFixed(1) : 0}% of total
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div className="mb-4">
-              <h4 className="font-semibold text-slate-700 mb-4">Recent Activity</h4>
-              <div className="space-y-2 max-h-40 overflow-y-auto">
-                {filteredLeads.slice(0, 5).map((lead, index) => (
-                  <div key={lead.id || index} className="flex items-center justify-between p-2 bg-slate-50 rounded">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-sm font-medium">{lead.fullName || 'Unknown'}</span>
-                    </div>
-                    <div className="text-xs text-slate-500">
-                      {lead.source || 'N/A'} • {lead.status || 'N/A'}
-                    </div>
-                  </div>
-                ))}
-                {filteredLeads.length === 0 && (
-                  <div className="text-center text-slate-500 py-4">
-                    <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-orange-400" />
-                    <p>No data available for current filters</p>
-                    <p className="text-xs">Try adjusting your filter settings</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex justify-between items-center pt-4 border-t border-slate-200">
-              <div className="text-sm text-slate-500">
-                Last updated: {new Date().toLocaleTimeString()}
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-2" />
-                  Export
-                </Button>
-                <Button size="sm" onClick={() => setShowDrilldown(false)}>
-                  Close
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </Card>
   );
 

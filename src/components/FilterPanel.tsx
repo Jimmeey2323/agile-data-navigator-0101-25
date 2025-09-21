@@ -94,6 +94,47 @@ export function FilterPanel() {
     setFilters({ ...filters, status: currentValues });
   };
 
+  // Select All / Deselect All functions for each filter type
+  const handleSourceSelectAll = () => {
+    setFilters({ ...filters, source: [...sourceOptions] });
+  };
+
+  const handleSourceDeselectAll = () => {
+    setFilters({ ...filters, source: [] });
+  };
+
+  const handleAssociateSelectAll = () => {
+    setFilters({ ...filters, associate: [...associateOptions] });
+  };
+
+  const handleAssociateDeselectAll = () => {
+    setFilters({ ...filters, associate: [] });
+  };
+
+  const handleCenterSelectAll = () => {
+    setFilters({ ...filters, center: [...centerOptions] });
+  };
+
+  const handleCenterDeselectAll = () => {
+    setFilters({ ...filters, center: [] });
+  };
+
+  const handleStageSelectAll = () => {
+    setFilters({ ...filters, stage: [...stageOptions] });
+  };
+
+  const handleStageDeselectAll = () => {
+    setFilters({ ...filters, stage: [] });
+  };
+
+  const handleStatusSelectAll = () => {
+    setFilters({ ...filters, status: [...statusOptions] });
+  };
+
+  const handleStatusDeselectAll = () => {
+    setFilters({ ...filters, status: [] });
+  };
+
   const handleStartDateChange = (date: Date | null) => {
     setFilters({
       ...filters,
@@ -140,32 +181,24 @@ export function FilterPanel() {
     options, 
     selectedValues, 
     onValueChange, 
+    onSelectAll,
+    onDeselectAll,
     open, 
-    setOpen,
+    setOpen, 
     icon 
   }: {
     title: string;
     options: string[];
     selectedValues: string[];
     onValueChange: (value: string) => void;
+    onSelectAll: () => void;
+    onDeselectAll: () => void;
     open: boolean;
     setOpen: (open: boolean) => void;
     icon?: React.ReactNode;
   }) => {
     const allSelected = options.length > 0 && selectedValues.length === options.length;
-    const noneSelected = selectedValues.length === 0;
-    
-    const handleSelectAll = () => {
-      options.forEach(option => {
-        if (!selectedValues.includes(option)) onValueChange(option);
-      });
-    };
-    
-    const handleDeselectAll = () => {
-      selectedValues.forEach(option => onValueChange(option));
-    };
-    
-    return (
+    const noneSelected = selectedValues.length === 0;    return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm" className="flex items-center gap-2 h-9 border-slate-300 hover:bg-slate-100 backdrop-blur-sm bg-white/80">
@@ -183,7 +216,7 @@ export function FilterPanel() {
               variant="ghost" 
               size="sm" 
               className="text-xs px-3 py-1.5 hover:bg-blue-100 text-blue-600 font-medium" 
-              onClick={handleSelectAll} 
+              onClick={onSelectAll} 
               disabled={allSelected}
             >
               Select All
@@ -192,7 +225,7 @@ export function FilterPanel() {
               variant="ghost" 
               size="sm" 
               className="text-xs px-3 py-1.5 hover:bg-red-100 text-red-600 font-medium" 
-              onClick={handleDeselectAll} 
+              onClick={onDeselectAll} 
               disabled={noneSelected}
             >
               Deselect All
@@ -261,6 +294,8 @@ export function FilterPanel() {
             options={sourceOptions}
             selectedValues={filters.source}
             onValueChange={handleSourceChange}
+            onSelectAll={handleSourceSelectAll}
+            onDeselectAll={handleSourceDeselectAll}
             open={sourceOpen}
             setOpen={setSourceOpen}
             icon={<Tag className="h-4 w-4 text-blue-500" />}
@@ -271,6 +306,8 @@ export function FilterPanel() {
             options={associateOptions}
             selectedValues={filters.associate}
             onValueChange={handleAssociateChange}
+            onSelectAll={handleAssociateSelectAll}
+            onDeselectAll={handleAssociateDeselectAll}
             open={associateOpen}
             setOpen={setAssociateOpen}
           />
@@ -280,6 +317,8 @@ export function FilterPanel() {
             options={centerOptions}
             selectedValues={filters.center}
             onValueChange={handleCenterChange}
+            onSelectAll={handleCenterSelectAll}
+            onDeselectAll={handleCenterDeselectAll}
             open={centerOpen}
             setOpen={setCenterOpen}
           />
@@ -289,6 +328,8 @@ export function FilterPanel() {
             options={statusOptions}
             selectedValues={filters.status}
             onValueChange={handleStatusChange}
+            onSelectAll={handleStatusSelectAll}
+            onDeselectAll={handleStatusDeselectAll}
             open={statusOpen}
             setOpen={setStatusOpen}
           />
@@ -298,6 +339,8 @@ export function FilterPanel() {
             options={stageOptions}
             selectedValues={filters.stage}
             onValueChange={handleStageChange}
+            onSelectAll={handleStageSelectAll}
+            onDeselectAll={handleStageDeselectAll}
             open={stageOpen}
             setOpen={setStageOpen}
           />

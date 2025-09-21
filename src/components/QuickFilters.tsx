@@ -10,11 +10,12 @@ import {
   Building,
   MapPin,
   Timer,
-  CalendarClock
+  CalendarClock,
+  User
 } from 'lucide-react';
 
 export function QuickFilters() {
-  const { setFilters, filters, centerOptions } = useLeads();
+  const { setFilters, filters, centerOptions, associateOptions } = useLeads();
 
   const getDateRange = (type: string) => {
     const now = new Date();
@@ -133,6 +134,24 @@ export function QuickFilters() {
     }
   };
 
+  const handleAssociateFilter = (associate: string) => {
+    const isCurrentlyActive = filters.associate.includes(associate);
+    
+    if (isCurrentlyActive) {
+      // Remove the associate filter - PRESERVE existing filters
+      setFilters({
+        ...filters,
+        associate: filters.associate.filter(a => a !== associate)
+      });
+    } else {
+      // Add the associate filter - PRESERVE existing filters
+      setFilters({
+        ...filters,
+        associate: [...filters.associate, associate]
+      });
+    }
+  };
+
   const isActiveFilter = (type: string) => {
     const dateRange = getDateRange(type);
     return (
@@ -143,6 +162,10 @@ export function QuickFilters() {
 
   const isActiveCenterFilter = (center: string) => {
     return filters.center.includes(center);
+  };
+
+  const isActiveAssociateFilter = (associate: string) => {
+    return filters.associate.includes(associate);
   };
 
   const quickFilterButtons = [
@@ -203,8 +226,31 @@ export function QuickFilters() {
             </div>
           </div>
         )}
+        {associateOptions.length > 0 && (
+          <div className="flex flex-col space-y-2">
+            <h4 className="text-sm font-semibold text-slate-700 mb-1">Associate Filters</h4>
+            <div className="flex flex-wrap gap-2">
+              {associateOptions.map((associate) => (
+                <Button
+                  key={associate}
+                  variant={isActiveAssociateFilter(associate) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleAssociateFilter(associate)}
+                  className={`gap-2 h-8 text-xs rounded-lg transition-all duration-200 ${
+                    isActiveAssociateFilter(associate) 
+                      ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-md scale-105' 
+                      : 'hover:bg-purple-50 hover:scale-105'
+                  }`}
+                >
+                  <User className="h-4 w-4" />
+                  {associate}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
         {/* Active filters summary */}
-        {(filters.dateRange.start || filters.dateRange.end || filters.center.length > 0) && (
+        {(filters.dateRange.start || filters.dateRange.end || filters.center.length > 0 || filters.associate.length > 0) && (
           <div className="pt-2 border-t border-slate-200">
             <div className="text-xs text-slate-500">
               <span className="font-medium">Active: </span>
@@ -212,7 +258,10 @@ export function QuickFilters() {
                 <span className="text-blue-600">Date filter + </span>
               )}
               {filters.center.length > 0 && (
-                <span className="text-green-600">{filters.center.length} location(s)</span>
+                <span className="text-green-600">{filters.center.length} location(s) + </span>
+              )}
+              {filters.associate.length > 0 && (
+                <span className="text-purple-600">{filters.associate.length} associate(s)</span>
               )}
             </div>
           </div>

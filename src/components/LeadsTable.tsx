@@ -69,12 +69,14 @@ export const LeadsTable = ({
   const [visibleColumns, setVisibleColumns] = useState({
     name: true,
     source: true,
+    phone: true,
     created: true,
     associate: true,
     stage: true,
     status: true,
     remarks: true,
-    followUps: true
+    followUps: true,
+    followUpComments: true
   });
 
   // Load bookmarks from localStorage on component mount
@@ -226,42 +228,61 @@ export const LeadsTable = ({
     return name.split(' ').map(part => part[0]).join('').toUpperCase().substring(0, 2);
   };
 
+  // Function to aggregate all meaningful follow-up comments
+  const getAllFollowUpComments = (lead: Lead) => {
+    const comments = [
+      lead.followUp1Comments,
+      lead.followUp2Comments,
+      lead.followUp3Comments,
+      lead.followUp4Comments
+    ].filter(comment => comment && comment.trim() !== '' && comment.trim() !== '-');
+    
+    return comments.join(' • ');
+  };
+
   if (loading) {
-    return <Card className="shadow-md border-border/30">
+    return (
+      <Card className="shadow-md border-border/30">
         <CardContent className="p-4">
           <div className="space-y-3">
             <Skeleton className="h-8 w-full" />
-            {Array(5).fill(0).map((_, index) => <Skeleton key={index} className="h-8 w-full rounded-md" />)}
+            {Array(5).fill(0).map((_, index) => (
+              <Skeleton key={index} className="h-8 w-full rounded-md" />
+            ))}
           </div>
         </CardContent>
-      </Card>;
+      </Card>
+    );
   }
 
-  return <Card className="shadow-xl border-border/30 overflow-hidden bg-white backdrop-blur-xl">
-      {/* Enhanced Header with darker gradient */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-b-4 border-slate-700">
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-800/20 via-slate-900/20 to-slate-800/20 animate-pulse"></div>
-        <div className="relative flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
+  return (
+    <Card className="shadow-2xl border-0 overflow-hidden bg-white/95 backdrop-blur-sm rounded-xl">
+      {/* Enhanced Header with sophisticated design */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border-b border-gray-700/50">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/10 via-purple-900/10 to-blue-900/10"></div>
+        <div className="relative flex items-center justify-between px-8 py-6">
+          <div className="flex items-center gap-6">
             <div className="relative">
-              <Activity className="h-6 w-6 text-white animate-pulse" />
-              <div className="absolute inset-0 bg-white/20 rounded-full animate-ping"></div>
+              <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+                <Activity className="h-7 w-7 text-white" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white tracking-wide font-mono">
-                LEAD MANAGEMENT SYSTEM
+              <h2 className="text-xl font-bold text-white tracking-wide font-sans">
+                Lead Management System
               </h2>
-              <p className="text-slate-300 mt-1 font-mono text-xs uppercase tracking-wider">
-                Enhanced table with intelligent analytics & refined badges
+              <p className="text-gray-300 mt-1 font-medium text-sm tracking-wide">
+                Advanced analytics & comprehensive lead tracking
               </p>
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="sm" onClick={() => setShowBookmarkedOnly(!showBookmarkedOnly)} className={`text-white hover:bg-white/20 ${showBookmarkedOnly ? "bg-white/20" : ""}`}>
+                  <Button variant="ghost" size="sm" onClick={() => setShowBookmarkedOnly(!showBookmarkedOnly)} className={`text-white hover:bg-white/20 transition-colors ${showBookmarkedOnly ? "bg-white/20" : ""}`}>
                     {showBookmarkedOnly ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
                   </Button>
                 </TooltipTrigger>
@@ -272,7 +293,7 @@ export const LeadsTable = ({
             </TooltipProvider>
 
             <Select value={groupByField} onValueChange={setGroupByField}>
-              <SelectTrigger className="w-40 bg-white/10 border-white/20 text-white font-mono text-xs">
+              <SelectTrigger className="w-44 bg-white/10 border-white/30 text-white font-medium text-sm backdrop-blur-sm">
                 <SelectValue placeholder="Group by..." />
               </SelectTrigger>
               <SelectContent>
@@ -287,17 +308,19 @@ export const LeadsTable = ({
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
+                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 transition-colors">
                   <Columns className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-56">
-                <div className="space-y-2">
-                  <Label className="text-xs">Visible Columns</Label>
-                  {Object.entries(visibleColumns).map(([key, value]) => <div key={key} className="flex items-center justify-between">
-                      <Label htmlFor={`column-${key}`} className="capitalize text-xs">{key}</Label>
+              <PopoverContent className="w-64">
+                <div className="space-y-3">
+                  <Label className="text-sm font-semibold">Visible Columns</Label>
+                  {Object.entries(visibleColumns).map(([key, value]) => (
+                    <div key={key} className="flex items-center justify-between">
+                      <Label htmlFor={`column-${key}`} className="capitalize text-sm">{key.replace(/([A-Z])/g, ' $1').trim()}</Label>
                       <Checkbox id={`column-${key}`} checked={value} onCheckedChange={() => toggleColumn(key)} />
-                    </div>)}
+                    </div>
+                  ))}
                 </div>
               </PopoverContent>
             </Popover>
@@ -306,359 +329,515 @@ export const LeadsTable = ({
       </div>
 
       <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <Table className="font-mono text-xs">
-            <TableHeader className="bg-gradient-to-r from-slate-700 via-slate-800 to-slate-700 border-b-4 border-slate-600 sticky top-0 z-10">
-              <TableRow className="hover:bg-gradient-to-r hover:from-slate-600 hover:via-slate-700 hover:to-slate-600 border-b border-white/10 transition-all duration-200">
-                <TableHead className="w-[50px] text-white h-[40px] font-bold text-center text-xs select-none" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
-                  <Checkbox checked={selectedLeads.length === Object.values(groupedLeads).flat().length && Object.values(groupedLeads).flat().length > 0} onCheckedChange={handleSelectAllLeads} className="border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-slate-800" />
-                </TableHead>
-                {visibleColumns.name && <TableHead className="min-w-[400px] text-white h-[40px] font-bold text-xs select-none text-left" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
-                    <div className="flex items-center cursor-pointer" onClick={() => handleSort('fullName')}>
-                      <User className="h-3 w-3 mr-2" />
-                      FULL NAME
-                      <ArrowUpDown className="ml-2 h-3 w-3" />
-                    </div>
-                  </TableHead>}
-                {visibleColumns.source && <TableHead className="min-w-[100px] text-white h-[40px] font-bold text-xs select-none text-left" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
-                    <div className="flex items-center cursor-pointer" onClick={() => handleSort('source')}>
-                      <Globe className="h-3 w-3 mr-2" />
-                      SOURCE
-                      <ArrowUpDown className="ml-2 h-3 w-3" />
-                    </div>
-                  </TableHead>}
-                {visibleColumns.created && <TableHead className="min-w-[120px] text-white h-[40px] font-bold text-xs select-none text-left" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
-                    <div className="flex items-center cursor-pointer" onClick={() => handleSort('createdAt')}>
-                      <Calendar className="h-3 w-3 mr-2" />
-                      CREATED
-                      <ArrowUpDown className="ml-2 h-3 w-3" />
-                    </div>
-                  </TableHead>}
-                {visibleColumns.associate && <TableHead className="min-w-[320px] text-white h-[40px] font-bold text-xs select-none text-left" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
-                    <div className="flex items-center cursor-pointer" onClick={() => handleSort('associate')}>
-                      <User className="h-3 w-3 mr-2" />
-                      ASSOCIATE
-                      <ArrowUpDown className="ml-2 h-3 w-3" />
-                    </div>
-                  </TableHead>}
-                {visibleColumns.stage && <TableHead className="min-w-[300px] text-white h-[40px] font-bold text-xs select-none text-left" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
-                    <div className="flex items-center cursor-pointer" onClick={() => handleSort('stage')}>
-                      <Target className="h-3 w-3 mr-2" />
-                      STAGE
-                      <ArrowUpDown className="ml-2 h-3 w-3" />
-                    </div>
-                  </TableHead>}
-                {visibleColumns.status && <TableHead className="min-w-[80px] text-white h-[40px] font-bold text-xs select-none text-left" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
-                    <div className="flex items-center cursor-pointer" onClick={() => handleSort('status')}>
-                      <Activity className="h-3 w-3 mr-2" />
-                      STATUS
-                      <ArrowUpDown className="ml-2 h-3 w-3" />
-                    </div>
-                  </TableHead>}
-                {visibleColumns.remarks && <TableHead className="min-w-[400px] text-white h-[40px] font-bold text-xs select-none text-left" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
-                    <div className="flex items-center cursor-pointer" onClick={() => handleSort('remarks')}>
-                      <FileText className="h-3 w-3 mr-2" />
-                      REMARKS
-                      <ArrowUpDown className="ml-2 h-3 w-3" />
-                    </div>
-                  </TableHead>}
-                <TableHead className="min-w-[120px] text-white h-[40px] font-bold text-xs select-none text-left" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>
-                  <div className="flex items-center">
-                    <MessageCircle className="h-3 w-3 mr-2" />
-                    FOLLOW-UPS
-                  </div>
-                </TableHead>
-                <TableHead className="text-right w-[100px] text-white h-[40px] font-bold text-xs select-none" style={{whiteSpace:'nowrap',maxHeight:'40px'}}>ACTIONS</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="bg-white">
-              {Object.entries(groupedLeads).map(([groupKey, groupLeadsArr]) => <React.Fragment key={groupKey}>
-                  {groupByField !== 'none' && groupKey && <TableRow className="bg-gradient-to-r from-slate-100 to-slate-50 hover:from-slate-200 hover:to-slate-100 border-b-2 border-slate-300">
-                      <TableCell colSpan={Object.values(visibleColumns).filter(Boolean).length + 3} className="h-[50px]">
-                        <div className="flex items-center justify-between">
-                          <Button variant="ghost" size="sm" onClick={() => toggleGroup(groupKey)} className="flex items-center gap-2 font-bold text-slate-800 hover:text-slate-900 text-xs">
-                            {collapsedGroups.includes(groupKey) ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                            <Layers className="h-4 w-4" />
-                            {groupKey} ({groupLeadsArr.length} leads)
-                          </Button>
-                          <div className="flex items-center gap-4 text-xs text-slate-700 font-semibold">
-                            <span>Subtotal: {groupLeadsArr.length} leads</span>
-                            <Badge variant="outline" className="bg-white border-slate-300 text-xs">
-                              {filteredLeads.length > 0 ? Math.round(groupLeadsArr.length / filteredLeads.length * 100) : 0}% of total
-                            </Badge>
-                          </div>
-                        </div>
-                      </TableCell>
-                    </TableRow>}
-                  
-                  {(groupByField === 'none' || !collapsedGroups.includes(groupKey)) && groupLeadsArr.map((lead: Lead) => {
-                const followUpStatus = getFollowUpStatus(lead);
-                return <TableRow key={lead.id} className="h-[40px] hover:bg-slate-50/80 transition-colors cursor-pointer border-b border-slate-100 font-mono" style={{maxHeight:'40px'}} onClick={() => onLeadClick(lead)}>
-                        <TableCell className="h-[40px] py-2 text-center align-middle" style={{maxHeight:'40px'}} onClick={e => e.stopPropagation()}>
-                          <div className="flex items-center justify-center gap-2">
-                            <Checkbox checked={selectedLeads.includes(lead.id)} onCheckedChange={checked => handleSelectLead(lead.id, checked === true)} className="h-3 w-3" />
-                            <Button variant="ghost" size="icon" className={`h-4 w-4 p-0 ${bookmarkedLeads.includes(lead.id) ? 'text-amber-500' : 'text-slate-400'}`} onClick={e => {
-                        e.stopPropagation();
-                        handleToggleBookmark(lead.id, !bookmarkedLeads.includes(lead.id));
-                      }}>
-                              {bookmarkedLeads.includes(lead.id) ? <BookmarkCheck className="h-3 w-3" /> : <Bookmark className="h-3 w-3" />}
+        <div className="overflow-x-auto bg-white rounded-b-xl">
+          <div className="relative">
+            <Table className="w-full text-sm">
+              <TableHeader className="sticky top-0 z-20 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 shadow-lg">
+                <TableRow className="border-0 hover:bg-gradient-to-r hover:from-gray-800 hover:via-gray-700 hover:to-gray-800 transition-all duration-300">
+                  <TableHead className="w-16 text-white font-bold text-center border-r border-white/10 h-14 bg-transparent">
+                    <Checkbox 
+                      checked={selectedLeads.length === Object.values(groupedLeads).flat().length && Object.values(groupedLeads).flat().length > 0} 
+                      onCheckedChange={handleSelectAllLeads} 
+                      className="border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-gray-800" 
+                    />
+                  </TableHead>
+                  {visibleColumns.name && (
+                    <TableHead className="min-w-[280px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
+                      <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('fullName')}>
+                        <User className="h-4 w-4 mr-2" />
+                        FULL NAME
+                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                      </div>
+                    </TableHead>
+                  )}
+                  {visibleColumns.source && (
+                    <TableHead className="min-w-[140px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
+                      <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('source')}>
+                        <Globe className="h-4 w-4 mr-2" />
+                        SOURCE NAME
+                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                      </div>
+                    </TableHead>
+                  )}
+                  {visibleColumns.phone && (
+                    <TableHead className="min-w-[140px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
+                      <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('phone')}>
+                        <Phone className="h-4 w-4 mr-2" />
+                        PHONE NUMBER
+                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                      </div>
+                    </TableHead>
+                  )}
+                  {visibleColumns.created && (
+                    <TableHead className="min-w-[120px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
+                      <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('createdAt')}>
+                        <Calendar className="h-4 w-4 mr-2" />
+                        CREATED
+                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                      </div>
+                    </TableHead>
+                  )}
+                  {visibleColumns.associate && (
+                    <TableHead className="min-w-[180px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
+                      <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('associate')}>
+                        <User className="h-4 w-4 mr-2" />
+                        ASSOCIATE
+                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                      </div>
+                    </TableHead>
+                  )}
+                  {visibleColumns.stage && (
+                    <TableHead className="min-w-[160px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
+                      <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('stage')}>
+                        <Target className="h-4 w-4 mr-2" />
+                        STAGE NAME
+                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                      </div>
+                    </TableHead>
+                  )}
+                  {visibleColumns.status && (
+                    <TableHead className="min-w-[120px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
+                      <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('status')}>
+                        <Activity className="h-4 w-4 mr-2" />
+                        STATUS
+                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                      </div>
+                    </TableHead>
+                  )}
+                  {visibleColumns.remarks && (
+                    <TableHead className="min-w-[200px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
+                      <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('remarks')}>
+                        <FileText className="h-4 w-4 mr-2" />
+                        REMARKS
+                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                      </div>
+                    </TableHead>
+                  )}
+                  {visibleColumns.followUps && (
+                    <TableHead className="min-w-[140px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
+                      <div className="flex items-center py-2">
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        FOLLOW-UPS
+                      </div>
+                    </TableHead>
+                  )}
+                  {visibleColumns.followUpComments && (
+                    <TableHead className="min-w-[300px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
+                      <div className="flex items-center py-2">
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        FOLLOW-UP COMMENTS
+                      </div>
+                    </TableHead>
+                  )}
+                  <TableHead className="w-24 text-white font-bold text-center h-14 bg-transparent">
+                    ACTIONS
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="bg-white">
+                {Object.entries(groupedLeads).map(([groupKey, groupLeadsArr]) => (
+                  <React.Fragment key={groupKey}>
+                    {groupByField !== 'none' && groupKey && (
+                      <TableRow className="bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-150 border-b-2 border-gray-200">
+                        <TableCell colSpan={Object.values(visibleColumns).filter(Boolean).length + 2} className="h-14">
+                          <div className="flex items-center justify-between">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => toggleGroup(groupKey)} 
+                              className="flex items-center gap-2 font-bold text-gray-800 hover:text-gray-900 text-sm"
+                            >
+                              {collapsedGroups.includes(groupKey) ? (
+                                <ChevronRight className="h-4 w-4" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4" />
+                              )}
+                              <Layers className="h-4 w-4" />
+                              {groupKey} ({groupLeadsArr.length} leads)
                             </Button>
+                            <div className="flex items-center gap-4 text-sm text-gray-700 font-semibold">
+                              <span>Subtotal: {groupLeadsArr.length} leads</span>
+                              <div className="bg-white border border-gray-300 text-sm px-2 py-1 rounded">
+                                {filteredLeads.length > 0 ? Math.round(groupLeadsArr.length / filteredLeads.length * 100) : 0}% of total
+                              </div>
+                            </div>
                           </div>
                         </TableCell>
-                        {visibleColumns.name && <TableCell className="h-[40px] py-2 text-left align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}}>
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-6 w-6 border">
-                                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-teal-600 text-white text-xs font-bold">
-                                  {getInitials(lead.fullName)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex flex-col">
+                      </TableRow>
+                    )}
+                    
+                    {(groupByField === 'none' || !collapsedGroups.includes(groupKey)) && 
+                      groupLeadsArr.map((lead: Lead) => {
+                        const followUpStatus = getFollowUpStatus(lead);
+                        const allComments = getAllFollowUpComments(lead);
+                        
+                        return (
+                          <TableRow 
+                            key={lead.id} 
+                            className="h-16 hover:bg-gray-50/80 transition-all duration-200 cursor-pointer border-b border-gray-100 group" 
+                            onClick={() => onLeadClick(lead)}
+                          >
+                            <TableCell className="h-16 py-3 text-center border-r border-gray-100" onClick={e => e.stopPropagation()}>
+                              <div className="flex items-center justify-center gap-2">
+                                <Checkbox 
+                                  checked={selectedLeads.includes(lead.id)} 
+                                  onCheckedChange={checked => handleSelectLead(lead.id, checked === true)} 
+                                  className="h-4 w-4" 
+                                />
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className={`h-6 w-6 p-0 ${bookmarkedLeads.includes(lead.id) ? 'text-amber-500' : 'text-gray-400'}`} 
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    handleToggleBookmark(lead.id, !bookmarkedLeads.includes(lead.id));
+                                  }}
+                                >
+                                  {bookmarkedLeads.includes(lead.id) ? (
+                                    <BookmarkCheck className="h-4 w-4" />
+                                  ) : (
+                                    <Bookmark className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
+                            </TableCell>
+
+                            {visibleColumns.name && (
+                              <TableCell className="h-16 py-3 border-r border-gray-100">
+                                <div className="flex items-center gap-3">
+                                  <Avatar className="h-8 w-8 border-2 border-gray-200">
+                                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-teal-600 text-white text-sm font-bold">
+                                      {getInitials(lead.fullName)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex flex-col">
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <span className="font-semibold text-sm text-gray-800 truncate max-w-[200px] cursor-pointer">
+                                            {lead.fullName}
+                                          </span>
+                                        </TooltipTrigger>
+                                        <TooltipContent className="max-w-xs bg-gray-800 text-white">
+                                          <p className="font-semibold">{lead.fullName}</p>
+                                          <p className="text-sm">{lead.email}</p>
+                                          <p className="text-sm">{lead.phone}</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                      {lead.email && (
+                                        <div className="flex items-center gap-1">
+                                          <Mail className="h-3 w-3" />
+                                          <span className="truncate max-w-[160px]">{lead.email}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </TableCell>
+                            )}
+                            
+                            {visibleColumns.source && (
+                              <TableCell className="h-16 py-3 border-r border-gray-100">
+                                <div className="flex justify-start items-center">
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="inline-flex items-center gap-2 text-sm text-gray-700 font-medium">
+                                          <Globe className="h-4 w-4" />
+                                          {lead.source}
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent className="bg-gray-800 text-white">
+                                        <p>Source: {lead.source}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                </div>
+                              </TableCell>
+                            )}
+                            
+                            {visibleColumns.phone && (
+                              <TableCell className="h-16 py-3 border-r border-gray-100">
+                                <div className="flex justify-start items-center">
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="inline-flex items-center gap-2 text-sm text-gray-700 font-medium">
+                                          <Phone className="h-4 w-4" />
+                                          {lead.phone || 'N/A'}
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent className="bg-gray-800 text-white">
+                                        <p>Phone: {lead.phone || 'Not provided'}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                </div>
+                              </TableCell>
+                            )}
+                            
+                            {visibleColumns.created && (
+                              <TableCell className="h-16 py-3 border-r border-gray-100">
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <span className="font-bold text-xs text-gray-700 truncate max-w-[180px] cursor-pointer" style={{whiteSpace:'nowrap'}}>
-                                        {lead.fullName}
+                                      <span className="text-sm text-gray-700 font-medium cursor-pointer">
+                                        {formatDate(lead.createdAt)}
                                       </span>
                                     </TooltipTrigger>
-                                    <TooltipContent className="max-w-xs bg-slate-800 text-white">
-                                      <p className="font-semibold">{lead.fullName}</p>
-                                      <p className="text-xs">{lead.email}</p>
-                                      <p className="text-xs">{lead.phone}</p>
+                                    <TooltipContent className="bg-gray-800 text-white">
+                                      <p>Created: {formatDate(lead.createdAt)}</p>
                                     </TooltipContent>
                                   </Tooltip>
                                 </TooltipProvider>
-                                <div className="flex items-center gap-2 text-xs text-gray-600">
-                                  {lead.email && <div className="flex items-center gap-1">
-                                      <Mail className="h-2 w-2" />
-                                      <span className="truncate max-w-[120px]" style={{whiteSpace:'nowrap'}}>{lead.email}</span>
-                                    </div>}
+                              </TableCell>
+                            )}
+                            
+                            {visibleColumns.associate && (
+                              <TableCell className="h-16 py-3 border-r border-gray-100">
+                                <div className="flex items-center gap-2">
+                                  <Avatar className="h-6 w-6">
+                                    <AvatarFallback className="bg-gradient-to-br from-gray-500 to-gray-600 text-white text-sm font-bold">
+                                      {getInitials(lead.associate)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="truncate text-sm font-medium text-gray-700 max-w-[140px] cursor-pointer">
+                                          {lead.associate}
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent className="bg-gray-800 text-white">
+                                        <p>Associate: {lead.associate}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
                                 </div>
-                              </div>
-                            </div>
-                          </TableCell>}
-                        
-                        {visibleColumns.source && <TableCell className="h-[40px] py-2 text-left align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}}>
-                          <div className="flex justify-start items-center">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="inline-flex items-center gap-1 text-xs text-gray-700 font-semibold">
-                                    <Globe className="h-3 w-3" />
-                                    {lead.source}
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent className="bg-slate-800 text-white">
-                                  <p>Source: {lead.source}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                        </TableCell>}
-                        
-                        {visibleColumns.created && <TableCell className="h-[40px] py-2 text-left align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}}>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="text-xs text-gray-700 font-semibold cursor-pointer">
-                                    {formatDate(lead.createdAt)}
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent className="bg-slate-800 text-white">
-                                  <p>Created: {formatDate(lead.createdAt)}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </TableCell>}
-                        
-                        {visibleColumns.associate && <TableCell className="h-[40px] py-2 text-left align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}}>
-                            <div className="flex items-center gap-2">
-                              <Avatar className="h-5 w-5">
-                                <AvatarFallback className="bg-gradient-to-br from-slate-500 to-slate-600 text-white text-xs font-bold">
-                                  {getInitials(lead.associate)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="truncate text-xs font-semibold text-gray-700 max-w-[120px] cursor-pointer">
-                                      {lead.associate}
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="bg-slate-800 text-white">
-                                    <p>Associate: {lead.associate}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          </TableCell>}
-                        
-                        {visibleColumns.stage && <TableCell className="h-[40px] py-2 text-left align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}}>
-                          <div className="flex justify-start">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="inline-flex items-center gap-1 text-xs text-gray-700 font-semibold">
-                                    <Target className="h-3 w-3" />
-                                    {lead.stage}
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent className="bg-slate-800 text-white">
-                                  <p>Stage: {lead.stage}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                        </TableCell>}
-                        
-                        {visibleColumns.status && <TableCell className="h-[40px] py-2 text-left align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}}>
-                          <div className="flex justify-start">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="inline-flex items-center gap-1 text-xs text-gray-700 font-semibold">
-                                    <Activity className="h-3 w-3" />
-                                    {lead.status}
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent className="bg-slate-800 text-white">
-                                  <p>Status: {lead.status}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                        </TableCell>}
-                        
-                        {visibleColumns.remarks && <TableCell className="h-[40px] py-2 text-left align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}}>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="text-xs text-gray-700 truncate max-w-[180px] block cursor-pointer">
-                                    {lead.remarks || 'No remarks'}
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-xs bg-slate-800 text-white">
-                                  <p className="font-semibold">Remarks:</p>
-                                  <p>{lead.remarks || 'No remarks'}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </TableCell>}
-                        
-                        {/* Enhanced Follow-ups Column */}
-                        <TableCell className="h-[40px] py-2 text-left align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}} onClick={e => e.stopPropagation()}>
-                          <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-1">
-                              <MessageCircle className="h-3 w-3 text-blue-600" />
-                              <span className="text-xs font-semibold">
-                                {followUpStatus.completed}/{followUpStatus.total}
-                              </span>
-                            </div>
+                              </TableCell>
+                            )}
                             
-                            {followUpStatus.overdue > 0 && <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className="flex items-center gap-1">
-                                      <AlertTriangleIcon className="h-3 w-3 text-red-500" />
-                                      <span className="text-xs text-red-600 font-medium">
-                                        {followUpStatus.overdue}
+                            {visibleColumns.stage && (
+                              <TableCell className="h-16 py-3 border-r border-gray-100">
+                                <div className="flex justify-start">
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="inline-flex items-center gap-2 text-sm text-gray-700 font-medium">
+                                          <Target className="h-4 w-4" />
+                                          {lead.stage}
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent className="bg-gray-800 text-white">
+                                        <p>Stage: {lead.stage}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                </div>
+                              </TableCell>
+                            )}
+                            
+                            {visibleColumns.status && (
+                              <TableCell className="h-16 py-3 border-r border-gray-100">
+                                <div className="flex justify-start">
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="inline-flex items-center gap-2 text-sm text-gray-700 font-medium">
+                                          <Activity className="h-4 w-4" />
+                                          {lead.status}
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent className="bg-gray-800 text-white">
+                                        <p>Status: {lead.status}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                </div>
+                              </TableCell>
+                            )}
+                            
+                            {visibleColumns.remarks && (
+                              <TableCell className="h-16 py-3 border-r border-gray-100">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className="text-sm text-gray-700 truncate max-w-[180px] block cursor-pointer">
+                                        {lead.remarks || 'No remarks'}
                                       </span>
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="bg-red-600 text-white">
-                                    <p>{followUpStatus.overdue} follow-up(s) overdue</p>
-                                    <p>Lead created {followUpStatus.daysSinceCreated} days ago</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>}
+                                    </TooltipTrigger>
+                                    <TooltipContent className="max-w-xs bg-gray-800 text-white">
+                                      <p className="font-semibold">Remarks:</p>
+                                      <p>{lead.remarks || 'No remarks'}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </TableCell>
+                            )}
                             
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-5 w-5 p-0">
-                                  <Eye className="h-3 w-3" />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-96 rounded-xl shadow-xl border-0 bg-white/90 backdrop-blur-lg">
-                                <div className="space-y-4 p-2">
-                                  <h4 className="font-bold text-sm text-slate-700 mb-2 border-b border-slate-200 pb-1">Follow-up History</h4>
-                                  {followUpStatus.followUps.length === 0 && (
-                                    <div className="text-xs text-slate-400">No follow-ups found.</div>
+                            {visibleColumns.followUps && (
+                              <TableCell className="h-16 py-3 border-r border-gray-100" onClick={e => e.stopPropagation()}>
+                                <div className="flex items-center gap-3">
+                                  <div className="flex items-center gap-1">
+                                    <MessageCircle className="h-4 w-4 text-blue-600" />
+                                    <span className="text-sm font-semibold">
+                                      {followUpStatus.completed}/{followUpStatus.total}
+                                    </span>
+                                  </div>
+                                  
+                                  {followUpStatus.overdue > 0 && (
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <div className="flex items-center gap-1">
+                                            <AlertTriangleIcon className="h-4 w-4 text-red-500" />
+                                            <span className="text-sm text-red-600 font-medium">
+                                              {followUpStatus.overdue}
+                                            </span>
+                                          </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent className="bg-red-600 text-white">
+                                          <p>{followUpStatus.overdue} follow-up(s) overdue</p>
+                                          <p>Lead created {followUpStatus.daysSinceCreated} days ago</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
                                   )}
-                                  {followUpStatus.followUps.map((followUp, index) => {
-                                    const isOverdue = !followUp.isValid && followUpStatus.daysSinceCreated >= followUp.expectedDay;
-                                    return (
-                                      <div key={index} className={`p-3 rounded-xl border text-xs flex flex-col gap-1 ${isOverdue ? 'border-red-200 bg-red-50' : 'border-slate-200 bg-slate-50'}`} style={{boxShadow:'0 2px 8px 0 rgba(0,0,0,0.04)'}}>
-                                        <div className="flex items-center gap-2 mb-1">
-                                          <span className="font-semibold text-slate-700">Follow-up {index + 1}</span>
-                                          {isOverdue && <AlertTriangleIcon className="h-3 w-3 text-red-500" />}
-                                          {followUp.isValid && <CheckCircle className="h-3 w-3 text-green-500" />}
-                                          <Clock className="h-3 w-3 text-gray-500" />
-                                          <span className="text-xs text-gray-500">Day {followUp.expectedDay}</span>
-                                        </div>
-                                        {followUp.date ? (
-                                          <>
-                                            <p className="text-xs text-slate-600">Date: <span className="font-semibold">{formatDate(followUp.date)}</span></p>
-                                            <p className="text-xs text-slate-700">{followUp.comments || <span className="italic text-slate-400">No comments</span>}</p>
-                                          </>
+                                  
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                        <Eye className="h-4 w-4" />
+                                      </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-96 rounded-xl shadow-xl border-0 bg-white/90 backdrop-blur-lg">
+                                      <div className="space-y-4 p-2">
+                                        <h4 className="font-bold text-sm text-gray-700 mb-2 border-b border-gray-200 pb-1">Follow-up History</h4>
+                                        {followUpStatus.followUps.length === 0 && (
+                                          <div className="text-sm text-gray-400">No follow-ups found.</div>
+                                        )}
+                                        {followUpStatus.followUps.map((followUp, index) => {
+                                          const isOverdue = !followUp.isValid && followUpStatus.daysSinceCreated >= followUp.expectedDay;
+                                          return (
+                                            <div 
+                                              key={index} 
+                                              className={`p-3 rounded-xl border text-sm flex flex-col gap-1 ${
+                                                isOverdue ? 'border-red-200 bg-red-50' : 'border-gray-200 bg-gray-50'
+                                              }`} 
+                                              style={{boxShadow:'0 2px 8px 0 rgba(0,0,0,0.04)'}}
+                                            >
+                                              <div className="flex items-center gap-2 mb-1">
+                                                <span className="font-semibold text-gray-700">Follow-up {index + 1}</span>
+                                                {isOverdue && <AlertTriangleIcon className="h-4 w-4 text-red-500" />}
+                                                {followUp.isValid && <CheckCircle className="h-4 w-4 text-green-500" />}
+                                                <Clock className="h-4 w-4 text-gray-500" />
+                                                <span className="text-sm text-gray-500">Day {followUp.expectedDay}</span>
+                                              </div>
+                                              {followUp.date ? (
+                                                <>
+                                                  <p className="text-sm text-gray-600">Date: <span className="font-semibold">{formatDate(followUp.date)}</span></p>
+                                                  <p className="text-sm text-gray-700">{followUp.comments || <span className="italic text-gray-400">No comments</span>}</p>
+                                                </>
+                                              ) : (
+                                                <p className={`text-sm ${isOverdue ? 'text-red-600' : 'text-gray-500'}`}>
+                                                  {isOverdue ? `Overdue (expected day ${followUp.expectedDay})` : `Expected on day ${followUp.expectedDay}`}
+                                                </p>
+                                              )}
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </PopoverContent>
+                                  </Popover>
+                                </div>
+                              </TableCell>
+                            )}
+
+                            {visibleColumns.followUpComments && (
+                              <TableCell className="h-16 py-3 border-r border-gray-100">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className="text-sm text-gray-700 max-w-[280px]">
+                                        {allComments ? (
+                                          <p className="truncate cursor-pointer">{allComments}</p>
                                         ) : (
-                                          <p className={`text-xs ${isOverdue ? 'text-red-600' : 'text-slate-500'}`}>
-                                            {isOverdue ? `Overdue (expected day ${followUp.expectedDay})` : `Expected on day ${followUp.expectedDay}`}
-                                          </p>
+                                          <span className="italic text-gray-400">No follow-up comments</span>
                                         )}
                                       </div>
-                                    );
-                                  })}
-                                </div>
-                              </PopoverContent>
-                            </Popover>
-                          </div>
-                        </TableCell>
-                        
-                        <TableCell className="text-right h-[40px] py-2 align-middle" style={{maxHeight:'40px',whiteSpace:'nowrap'}} onClick={e => e.stopPropagation()}>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-5 w-5 p-0 hover:bg-slate-200">
-                                <MoreHorizontal className="h-3 w-3" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56">
-                              <DropdownMenuLabel className="text-xs">Actions</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => onLeadClick(lead)} className="text-xs">
-                                <Edit className="mr-2 h-3 w-3" />
-                                Edit Lead
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => toast.info("View details coming soon")} className="text-xs">
-                                <Eye className="mr-2 h-3 w-3" />
-                                View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-destructive focus:text-destructive text-xs" onClick={() => handleDeleteLead(lead.id)}>
-                                <Trash2 className="mr-2 h-3 w-3" />
-                                Delete Lead
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>;
-              })}
-                </React.Fragment>)}
-              
-              {Object.values(groupedLeads).flat().length === 0 && <TableRow>
-                  <TableCell colSpan={Object.values(visibleColumns).filter(Boolean).length + 3} className="text-center py-10 text-slate-500">
-                    {showBookmarkedOnly && bookmarkedLeads.length === 0 ? <div className="flex flex-col items-center gap-2">
-                        <Bookmark className="h-8 w-8 text-slate-400" />
-                        <p>No bookmarked leads found. Bookmark some leads to see them here.</p>
-                        <Button variant="outline" size="sm" onClick={() => setShowBookmarkedOnly(false)}>
-                          Show All Leads
-                        </Button>
-                      </div> : <>
-                        No leads found. {filteredLeads.length > 0 ? "Try adjusting your filters or pagination." : "Add some leads to get started."}
-                      </>}
-                  </TableCell>
-                </TableRow>}
-            </TableBody>
-          </Table>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="max-w-md bg-gray-800 text-white">
+                                      <p className="font-semibold">All Follow-up Comments:</p>
+                                      <p className="text-sm">{allComments || 'No follow-up comments available'}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </TableCell>
+                            )}
+                            
+                            <TableCell className="h-16 py-3 text-center" onClick={e => e.stopPropagation()}>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-gray-200">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-56">
+                                  <DropdownMenuLabel className="text-sm">Actions</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => onLeadClick(lead)} className="text-sm">
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Edit Lead
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => toast.info("View details coming soon")} className="text-sm">
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    View Details
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem 
+                                    className="text-destructive focus:text-destructive text-sm" 
+                                    onClick={() => handleDeleteLead(lead.id)}
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete Lead
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    }
+                  </React.Fragment>
+                ))}
+                
+                {Object.values(groupedLeads).flat().length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={Object.values(visibleColumns).filter(Boolean).length + 2} className="text-center py-12 text-gray-500">
+                      {showBookmarkedOnly && bookmarkedLeads.length === 0 ? (
+                        <div className="flex flex-col items-center gap-4">
+                          <Bookmark className="h-12 w-12 text-gray-400" />
+                          <p className="text-lg">No bookmarked leads found. Bookmark some leads to see them here.</p>
+                          <Button variant="outline" size="sm" onClick={() => setShowBookmarkedOnly(false)}>
+                            Show All Leads
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-4">
+                          <User className="h-12 w-12 text-gray-400" />
+                          <p className="text-lg">No leads found. {filteredLeads.length > 0 ? "Try adjusting your filters or pagination." : "Add some leads to get started."}</p>
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };

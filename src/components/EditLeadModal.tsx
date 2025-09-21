@@ -323,13 +323,13 @@ export function EditLeadModal({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-7xl h-[95vh] p-0 bg-white border-0 shadow-2xl rounded-2xl flex flex-col overflow-hidden">
         {/* Header - Fixed */}
-        <div className="flex-shrink-0 px-8 py-6 bg-gradient-to-r from-blue-600 to-teal-600 text-white shadow-lg">
+        <div className="flex-shrink-0 px-8 py-6 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white shadow-lg">
           <DialogHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="relative">
-                  <Avatar className="h-16 w-16 border-4 border-white/60 shadow-2xl ring-4 ring-blue-100/50">
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 via-teal-600 to-cyan-500 text-white font-bold text-lg">
+                  <Avatar className="h-16 w-16 border-4 border-white/20 shadow-2xl ring-4 ring-gray-700/50">
+                    <AvatarFallback className="bg-gradient-to-br from-gray-700 via-gray-600 to-gray-500 text-white font-bold text-lg">
                       {formData.fullName ? formData.fullName.split(' ').map(n => n[0]).join('').toUpperCase() : 'NL'}
                     </AvatarFallback>
                   </Avatar>
@@ -341,14 +341,14 @@ export function EditLeadModal({
                   <DialogTitle className="text-3xl font-bold text-white">
                     {lead?.id && !lead.id.startsWith('new-') ? 'Edit Lead Profile' : 'Create New Lead'}
                   </DialogTitle>
-                  <p className="text-blue-100 mt-2 font-medium">
+                  <p className="text-gray-300 mt-2 font-medium">
                     {formData.fullName || 'New Lead'} • {formData.source || 'No source'} • {formData.status || 'No status'}
                   </p>
                   {isAIConfigured && (
                     <div className="flex items-center gap-2 mt-1">
-                      <Brain className="h-4 w-4 text-purple-200" />
-                      <span className="text-purple-200 text-sm">AI Enhanced</span>
-                      <Sparkles className="h-3 w-3 text-purple-200" />
+                      <Brain className="h-4 w-4 text-purple-300" />
+                      <span className="text-purple-300 text-sm">AI Enhanced</span>
+                      <Sparkles className="h-3 w-3 text-purple-300" />
                     </div>
                   )}
                 </div>
@@ -356,7 +356,7 @@ export function EditLeadModal({
               
               <div className="flex items-center gap-6">
                 {/* Lead Score with Calculation */}
-                <div className="text-center bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/40 shadow-lg">
+                <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg">
                   <div className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
                     <Calculator className="h-4 w-4" />
                     Lead Score
@@ -365,7 +365,7 @@ export function EditLeadModal({
                     <Progress value={leadScoreCalculation.total} className="w-24 h-3 bg-white/20" />
                     <span className="text-2xl font-bold text-white">{leadScoreCalculation.total}%</span>
                   </div>
-                  <div className="text-xs text-blue-100 mt-1">
+                  <div className="text-xs text-gray-300 mt-1">
                     {leadScoreCalculation.total >= 80 ? 'Excellent' : 
                      leadScoreCalculation.total >= 60 ? 'Good' : 
                      leadScoreCalculation.total >= 40 ? 'Fair' : 'Needs Improvement'}
@@ -373,7 +373,7 @@ export function EditLeadModal({
                 </div>
                 
                 {/* Auto-save toggle */}
-                <div className="flex items-center gap-3 bg-white/20 backdrop-blur-sm rounded-xl p-3 border border-white/40 shadow-lg">
+                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 shadow-lg">
                   <Switch checked={autoSave} onCheckedChange={setAutoSave} />
                   <span className="text-sm font-medium text-white">Auto-save</span>
                 </div>
@@ -392,27 +392,27 @@ export function EditLeadModal({
             {/* Tab Navigation - Fixed */}
             <div className="flex-shrink-0 px-8 py-4 bg-gray-50 border-b border-gray-200">
               <TabsList className="grid grid-cols-7 w-full bg-white shadow-lg rounded-xl border border-gray-200">
-                <TabsTrigger value="overview" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-teal-600 data-[state=active]:text-white text-xs">
+                <TabsTrigger value="overview" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-700 data-[state=active]:to-gray-600 data-[state=active]:text-white text-xs">
                   <User className="h-4 w-4" />
                   Overview
                 </TabsTrigger>
-                <TabsTrigger value="details" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-teal-600 data-[state=active]:text-white text-xs">
+                <TabsTrigger value="details" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-700 data-[state=active]:to-gray-600 data-[state=active]:text-white text-xs">
                   <FileText className="h-4 w-4" />
                   Details
                 </TabsTrigger>
-                <TabsTrigger value="followups" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-teal-600 data-[state=active]:text-white text-xs">
+                <TabsTrigger value="followups" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-700 data-[state=active]:to-gray-600 data-[state=active]:text-white text-xs">
                   <MessageSquare className="h-4 w-4" />
                   Follow-ups
                 </TabsTrigger>
-                <TabsTrigger value="score" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-teal-600 data-[state=active]:text-white text-xs">
+                <TabsTrigger value="score" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-700 data-[state=active]:to-gray-600 data-[state=active]:text-white text-xs">
                   {isAIConfigured ? <Brain className="h-4 w-4" /> : <Calculator className="h-4 w-4" />}
                   {isAIConfigured ? 'AI Score' : 'Score'}
                 </TabsTrigger>
-                <TabsTrigger value="insights" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-teal-600 data-[state=active]:text-white text-xs">
+                <TabsTrigger value="insights" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-700 data-[state=active]:to-gray-600 data-[state=active]:text-white text-xs">
                   <BarChart3 className="h-4 w-4" />
                   Insights
                 </TabsTrigger>
-                <TabsTrigger value="activity" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-teal-600 data-[state=active]:text-white text-xs">
+                <TabsTrigger value="activity" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-700 data-[state=active]:to-gray-600 data-[state=active]:text-white text-xs">
                   <Activity className="h-4 w-4" />
                   Activity
                 </TabsTrigger>
@@ -433,8 +433,8 @@ export function EditLeadModal({
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       {/* Basic Information */}
                       <Card className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
-                        <CardHeader className="bg-gradient-to-r from-blue-50 to-teal-50">
-                          <CardTitle className="flex items-center gap-2 text-slate-800 text-sm">
+                        <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-700">
+                          <CardTitle className="flex items-center gap-2 text-white text-sm">
                             <User className="h-5 w-5" />
                             Basic Information
                           </CardTitle>
@@ -478,8 +478,8 @@ export function EditLeadModal({
 
                       {/* Lead Classification */}
                       <Card className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
-                        <CardHeader className="bg-gradient-to-r from-teal-50 to-cyan-50">
-                          <CardTitle className="flex items-center gap-2 text-slate-800 text-sm">
+                        <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-700">
+                          <CardTitle className="flex items-center gap-2 text-white text-sm">
                             <Target className="h-5 w-5" />
                             Lead Classification
                           </CardTitle>
@@ -845,7 +845,7 @@ export function EditLeadModal({
               <Button variant="outline" onClick={handleClose} disabled={isLoading} className="bg-white border-gray-300 hover:bg-gray-50 text-sm">
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={isLoading || !formData.fullName.trim()} className="bg-gradient-to-r from-blue-500 to-teal-600 hover:from-blue-600 hover:to-teal-700 shadow-lg text-sm">
+              <Button onClick={handleSave} disabled={isLoading || !formData.fullName.trim()} className="bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-800 hover:to-gray-700 shadow-lg text-sm">
                 {isLoading ? (
                   <>
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
