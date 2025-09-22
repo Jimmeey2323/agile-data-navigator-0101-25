@@ -84,30 +84,55 @@ export function EditLeadModal({
     }
     
     try {
-      // Handle various date formats from Google Sheets
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) {
-        // Try parsing DD-MMM format like "19-Sept"
-        const parts = dateString.trim().split('-');
-        if (parts.length === 2) {
-          const day = parts[0];
-          const monthAbbr = parts[1];
-          const monthMap: Record<string, string> = {
-            'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
-            'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
-            'Sep': '09', 'Sept': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
-          };
-          const month = monthMap[monthAbbr];
-          if (month) {
-            const year = new Date().getFullYear(); // Use current year
-            return `${year}-${month}-${day.padStart(2, '0')}`;
-          }
+      const trimmedDate = dateString.trim();
+      
+      // Handle DD/MM/YYYY format (like "20/09/2025")
+      if (trimmedDate.includes('/')) {
+        const parts = trimmedDate.split('/');
+        if (parts.length === 3) {
+          const day = parts[0].padStart(2, '0');
+          const month = parts[1].padStart(2, '0');
+          const year = parts[2];
+          // Convert DD/MM/YYYY to YYYY-MM-DD
+          return `${year}-${month}-${day}`;
         }
-        return '';
       }
       
-      // Convert to YYYY-MM-DD format
-      return date.toISOString().split('T')[0];
+      // Handle DD-MM-YYYY format (like "20-09-2025")
+      if (trimmedDate.includes('-') && trimmedDate.split('-').length === 3) {
+        const parts = trimmedDate.split('-');
+        if (parts.length === 3 && parts[2].length === 4) {
+          const day = parts[0].padStart(2, '0');
+          const month = parts[1].padStart(2, '0');
+          const year = parts[2];
+          return `${year}-${month}-${day}`;
+        }
+      }
+      
+      // Handle DD-MMM format like "19-Sept" (add current year)
+      if (trimmedDate.includes('-') && trimmedDate.split('-').length === 2) {
+        const parts = trimmedDate.split('-');
+        const day = parts[0];
+        const monthAbbr = parts[1];
+        const monthMap: Record<string, string> = {
+          'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
+          'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
+          'Sep': '09', 'Sept': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+        };
+        const month = monthMap[monthAbbr];
+        if (month) {
+          const year = new Date().getFullYear();
+          return `${year}-${month}-${day.padStart(2, '0')}`;
+        }
+      }
+      
+      // Try standard Date parsing as fallback
+      const date = new Date(trimmedDate);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString().split('T')[0];
+      }
+      
+      return '';
     } catch (error) {
       console.warn('Failed to parse date:', dateString, error);
       return '';
@@ -145,8 +170,8 @@ export function EditLeadModal({
         phone: '',
         source: sourceOptions[0] || '',
         associate: associateOptions[0] || '',
-        status: statusOptions[0] || 'New',
-        stage: stageOptions[0] || 'Initial Contact',
+        status: statusOptions[0] || '',
+        stage: stageOptions[0] || '',
         createdAt: new Date().toISOString().split('T')[0],
         center: centerOptions[0] || '',
         remarks: '',
@@ -571,69 +596,6 @@ export function EditLeadModal({
                       </Card>
                     </div>
 
-                    {/* Follow-up Summary */}
-                    <Card className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
-                      <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
-                        <CardTitle className="flex items-center gap-2 text-slate-800 text-sm">
-                          <MessageSquare className="h-5 w-5" />
-                          Follow-up Timeline
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-6">
-                        <div className="space-y-3">
-                          {[1, 2, 3, 4].map(num => {
-                            const dateField = `followUp${num}Date` as keyof Lead;
-                            const commentsField = `followUp${num}Comments` as keyof Lead;
-                            const date = formData[dateField] as string;
-                            const comments = formData[commentsField] as string;
-                            
-                            const hasValidDate = date && date.trim() !== '' && date.trim() !== '-';
-                            const hasValidComments = comments && comments.trim() !== '' && comments.trim() !== '-';
-                            
-                            if (!hasValidDate && !hasValidComments) return null;
-                            
-                            return (
-                              <div key={num} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                <div className="flex-shrink-0">
-                                  <Badge variant={hasValidDate ? "default" : "secondary"} className="text-xs">
-                                    Follow-up {num}
-                                  </Badge>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  {hasValidDate && (
-                                    <div className="text-sm font-medium text-gray-900 mb-1">
-                                      {formatDate(date)}
-                                    </div>
-                                  )}
-                                  {hasValidComments && (
-                                    <div className="text-sm text-gray-600">
-                                      {comments}
-                                    </div>
-                                  )}
-                                  {!hasValidDate && hasValidComments && (
-                                    <div className="text-xs text-amber-600 font-medium mb-1">
-                                      No date recorded
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                          {![1, 2, 3, 4].some(num => {
-                            const date = formData[`followUp${num}Date` as keyof Lead] as string;
-                            const comments = formData[`followUp${num}Comments` as keyof Lead] as string;
-                            return (date && date.trim() !== '' && date.trim() !== '-') || 
-                                   (comments && comments.trim() !== '' && comments.trim() !== '-');
-                          }) && (
-                            <div className="text-center py-8 text-gray-500">
-                              <MessageSquare className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                              <p className="text-sm">No follow-ups recorded yet</p>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-
                     {/* Engagement Chart */}
                     {engagementData.length > 0 && (
                       <Card className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
@@ -740,48 +702,93 @@ export function EditLeadModal({
                   </TabsContent>
 
                   <TabsContent value="followups" className="mt-0 space-y-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {[1, 2, 3, 4].map(num => {
-                        const dateField = `followUp${num}Date` as keyof Lead;
-                        const commentsField = `followUp${num}Comments` as keyof Lead;
-                        const dateValue = formData[dateField] as string || '';
-                        const commentsValue = formData[commentsField] as string || '';
-                        
-                        return (
-                          <Card key={num} className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
-                            <CardHeader className="bg-gradient-to-r from-orange-50 to-red-50">
-                              <CardTitle className="flex items-center gap-2 text-slate-800 text-sm">
-                                <MessageSquare className="h-5 w-5" />
-                                Follow-up {num}
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4 p-6">
-                              <div>
-                                <Label htmlFor={`followUp${num}Date`} className="text-xs font-semibold text-slate-700">Date</Label>
-                                <Input 
-                                  id={`followUp${num}Date`} 
-                                  type="date" 
-                                  value={dateValue} 
-                                  onChange={e => handleInputChange(`followUp${num}Date` as keyof Lead, e.target.value)} 
-                                  className="bg-white border-gray-300 mt-1 focus:ring-2 focus:ring-blue-500/50 text-sm" 
-                                />
+                    {/* Follow-up Timeline Overview */}
+                    <Card className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
+                      <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
+                        <CardTitle className="flex items-center gap-2 text-slate-800 text-base font-bold">
+                          <MessageSquare className="h-5 w-5" />
+                          Follow-up Timeline
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {[1, 2, 3, 4].map(num => {
+                            const dateField = `followUp${num}Date` as keyof Lead;
+                            const commentsField = `followUp${num}Comments` as keyof Lead;
+                            const date = formData[dateField] as string;
+                            const comments = formData[commentsField] as string;
+                            const rawDate = lead ? (lead[dateField] as string) : '';
+                            const hasValidDate = date && date.trim() !== '' && date.trim() !== '-';
+                            const hasValidComments = comments && comments.trim() !== '' && comments.trim() !== '-';
+                            
+                            // Debug logging for the first follow-up
+                            if (num === 1) {
+                              console.log('Follow-up 1 Debug:', {
+                                formDataDate: date,
+                                rawLeadDate: rawDate,
+                                hasValidDate,
+                                hasValidComments,
+                                leadObject: lead ? {
+                                  id: lead.id,
+                                  fullName: lead.fullName,
+                                  followUp1Date: lead.followUp1Date,
+                                  followUp1Comments: lead.followUp1Comments
+                                } : 'No lead'
+                              });
+                            }
+                            
+                            return (
+                              <div key={num} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                <div className="flex-shrink-0">
+                                  <Badge 
+                                    variant={hasValidDate ? "default" : hasValidComments ? "secondary" : "outline"} 
+                                    className="text-xs"
+                                  >
+                                    Follow-up {num}
+                                  </Badge>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  {hasValidDate && (
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                                        {formatDate(date)}
+                                      </Badge>
+                                    </div>
+                                  )}
+                                  {hasValidComments && (
+                                    <div className="text-sm text-gray-600 line-clamp-2">
+                                      {comments}
+                                    </div>
+                                  )}
+                                  {!hasValidDate && !hasValidComments && (
+                                    <div className="text-xs text-gray-400 italic">
+                                      No follow-up recorded
+                                    </div>
+                                  )}
+                                  {!hasValidDate && hasValidComments && (
+                                    <div className="text-xs text-amber-600 font-medium mb-1">
+                                      No date recorded
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                              
-                              <div>
-                                <Label htmlFor={`followUp${num}Comments`} className="text-xs font-semibold text-slate-700">Comments</Label>
-                                <Textarea 
-                                  id={`followUp${num}Comments`} 
-                                  value={commentsValue} 
-                                  onChange={e => handleInputChange(`followUp${num}Comments` as keyof Lead, e.target.value)} 
-                                  placeholder={`Add comments for follow-up ${num}...`} 
-                                  className="bg-white border-gray-300 mt-1 focus:ring-2 focus:ring-blue-500/50 min-h-[80px] text-sm" 
-                                />
-                              </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
+                            );
+                          })}
+                          {/* Fallback message if no follow-ups at all */}
+                          {![1,2,3,4].some(num => {
+                            const date = formData[`followUp${num}Date` as keyof Lead] as string;
+                            const comments = formData[`followUp${num}Comments` as keyof Lead] as string;
+                            return (date && date.trim() !== '' && date.trim() !== '-') || (comments && comments.trim() !== '' && comments.trim() !== '-');
+                          }) && (
+                            <div className="text-center py-8 text-gray-400">
+                              <MessageSquare className="h-10 w-10 mx-auto mb-2 text-gray-300" />
+                              <p className="text-sm">No follow-ups recorded yet</p>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+
                   </TabsContent>
 
                   <TabsContent value="score" className="mt-0 space-y-6">
