@@ -174,7 +174,7 @@ export function MetricsPanel() {
               title="Total Leads"
               value={totalLeads}
               change={weekOnWeekChange}
-              icon={<Users className="h-6 w-6 text-blue-600" />}
+              icon={<Users className="h-6 w-6" />}
               description={`${formatNumber(totalLeads)} of ${formatNumber(totalAllLeads)} total leads`}
               loading={loading}
               onDrillDown={() => openDrillDownModal({
@@ -204,7 +204,7 @@ export function MetricsPanel() {
                 activeLeads,
                 activeLeads > 5 ? activeLeads - Math.floor(Math.random() * 5) : activeLeads
               )}
-              icon={<Layers className="h-6 w-6 text-teal-600" />}
+              icon={<Layers className="h-6 w-6" />}
               description="Leads in active stages"
               loading={loading}
               onDrillDown={() => openDrillDownModal({
@@ -237,7 +237,7 @@ export function MetricsPanel() {
                 conversionRate,
                 conversionRate > 2 ? conversionRate - Math.random() * 2 : conversionRate
               )}
-              icon={<Activity className="h-6 w-6 text-green-600" />}
+              icon={<Activity className="h-6 w-6" />}
               description={`${convertedLeadsCount} converted leads`}
               loading={loading}
               isPercentage={true}
@@ -271,7 +271,7 @@ export function MetricsPanel() {
                 ltv,
                 ltv > 2000 ? ltv - Math.random() * 2000 : ltv
               )}
-              icon={<Star className="h-6 w-6 text-orange-600" />}
+              icon={<Star className="h-6 w-6" />}
               description="Total revenue from conversions"
               loading={loading}
               isCurrency={true}
@@ -303,7 +303,7 @@ export function MetricsPanel() {
               title="Avg Response Time"
               value={`${avgResponseTime}h`}
               change={responseTimeChange}
-              icon={<Clock className="h-6 w-6 text-red-600" />}
+              icon={<Clock className="h-6 w-6" />}
               description="Time to first response"
               loading={loading}
               onDrillDown={() => openDrillDownModal({
@@ -330,7 +330,7 @@ export function MetricsPanel() {
               title="Follow-up Rate"
               value={`${followUpRate}%`}
               change={followUpChange}
-              icon={<MessageSquare className="h-6 w-6 text-cyan-600" />}
+              icon={<MessageSquare className="h-6 w-6" />}
               description="Leads with follow-up activities"
               loading={loading}
               isPercentage={true}
@@ -505,20 +505,23 @@ function MetricCard({
 
   const cardContent = (
     <Card
-      className="overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-0 shadow-2xl transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:-translate-y-2 hover:scale-[1.02] group cursor-pointer rounded-2xl backdrop-blur-lg ring-1 ring-gray-700 hover:ring-gray-500 transform-gpu h-full"
+      className="overflow-hidden bg-white border-0 shadow-2xl transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:-translate-y-2 hover:scale-[1.02] group cursor-pointer rounded-2xl backdrop-blur-lg ring-1 ring-gradient-to-r ring-from-gray-800 ring-to-gray-600 hover:ring-from-blue-600 hover:ring-to-teal-600 transform-gpu h-full"
       onClick={onDrillDown}
       style={{ minHeight: 160 }}
     >
+      {/* Dark gradient header bar */}
+      <div className="h-1 w-full bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 group-hover:from-blue-600 group-hover:via-purple-600 group-hover:to-teal-600 transition-all duration-500" />
+      
       <CardContent className="p-6 relative overflow-hidden">
-        {/* Subtle animated background gradient */}
-        <div className="absolute inset-0 opacity-20 bg-gradient-to-br from-blue-400/20 via-transparent to-teal-400/20 group-hover:opacity-30 transition-opacity duration-500" />
+        {/* Subtle animated background accent */}
+        <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-gray-800/10 via-transparent to-gray-600/10 group-hover:opacity-10 transition-opacity duration-500" />
         
         <div className="flex justify-between items-start relative z-10">
           <div className="flex-1">
-            <p className="text-sm font-semibold text-gray-400 mb-2 tracking-wide uppercase group-hover:text-gray-300 transition-colors duration-300">{title}</p>
-            <h3 className="text-3xl font-extrabold text-white mb-1 group-hover:text-blue-100 transition-colors duration-300">
+            <p className="text-sm font-semibold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2 tracking-wide uppercase group-hover:from-blue-600 group-hover:to-teal-600 transition-all duration-300">{title}</p>
+            <h3 className="text-3xl font-extrabold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-1 group-hover:from-blue-700 group-hover:to-purple-700 transition-all duration-300">
               {loading ? (
-                <div className="h-8 w-24 bg-gray-700 animate-pulse rounded"></div>
+                <div className="h-8 w-24 bg-gray-200 animate-pulse rounded"></div>
               ) : (
                 <>
                   {isCurrency && !value.toString().includes('₹') ? '₹' : ''}
@@ -538,8 +541,8 @@ function MetricCard({
               <div className={cn(
                 "flex items-center text-xs font-semibold px-2 py-1 rounded-full transition-all duration-300",
                 positive 
-                  ? "text-emerald-400 bg-emerald-500/20 group-hover:bg-emerald-500/30" 
-                  : "text-red-400 bg-red-500/20 group-hover:bg-red-500/30"
+                  ? "text-emerald-700 bg-emerald-100 group-hover:bg-emerald-200 border border-emerald-300" 
+                  : "text-red-700 bg-red-100 group-hover:bg-red-200 border border-red-300"
               )}>
                 {positive ? (
                   <ArrowUpRight className="h-3 w-3 mr-1 animate-pulse" />
@@ -547,30 +550,32 @@ function MetricCard({
                   <ArrowDownRight className="h-3 w-3 mr-1 animate-pulse" />
                 )}
                 {loading ? (
-                  <div className="h-3 w-10 bg-gray-700 animate-pulse rounded"></div>
+                  <div className="h-3 w-10 bg-gray-200 animate-pulse rounded"></div>
                 ) : (
                   `${Math.abs(change).toFixed(1)}%`
                 )}
               </div>
-              <span className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
+              <span className="text-xs bg-gradient-to-r from-gray-600 to-gray-500 bg-clip-text text-transparent group-hover:from-gray-700 group-hover:to-gray-600 transition-all duration-300">
                 {loading ? (
-                  <div className="h-3 w-20 bg-gray-700 animate-pulse rounded"></div>
+                  <div className="h-3 w-20 bg-gray-200 animate-pulse rounded"></div>
                 ) : (
                   description
                 )}
               </span>
             </div>
           </div>
-          <div className="h-14 w-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-600 group-hover:from-blue-600 group-hover:to-teal-600 transition-all duration-500 shadow-lg group-hover:shadow-xl group-hover:scale-110 transform-gpu">
+          <div className="h-14 w-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-700 group-hover:from-blue-600 group-hover:to-teal-600 transition-all duration-500 shadow-lg group-hover:shadow-xl group-hover:scale-110 transform-gpu border border-gray-600 group-hover:border-blue-500">
             <div className="transform group-hover:scale-110 transition-transform duration-300">
-              {icon}
+              {React.cloneElement(icon as React.ReactElement, {
+                className: "h-6 w-6 text-white"
+              })}
             </div>
           </div>
         </div>
         {tooltip && (
           <div className="mt-3 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
-            <div className="flex items-center gap-1 text-xs text-gray-400 bg-gray-800/50 px-3 py-2 rounded-lg backdrop-blur-sm">
-              <Info className="h-3 w-3 animate-pulse" />
+            <div className="flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-3 py-2 rounded-lg backdrop-blur-sm border border-gray-200">
+              <Info className="h-3 w-3 animate-pulse text-gray-500" />
               <span>Click for detailed analytics</span>
             </div>
           </div>
@@ -578,7 +583,7 @@ function MetricCard({
         
         {/* Subtle shine effect on hover */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-1000" />
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-gray-800/5 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-1000" />
         </div>
       </CardContent>
     </Card>
