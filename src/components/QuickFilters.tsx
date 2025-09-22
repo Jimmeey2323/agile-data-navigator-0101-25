@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useLeads } from '@/contexts/LeadContext';
 import { 
   Clock, 
@@ -11,11 +12,14 @@ import {
   MapPin,
   Timer,
   CalendarClock,
-  User
+  User,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 export function QuickFilters() {
   const { setFilters, filters, centerOptions, associateOptions } = useLeads();
+  const [isCollapsed, setIsCollapsed] = useState(true); // Default to collapsed
 
   const getDateRange = (type: string) => {
     const now = new Date();
@@ -181,7 +185,26 @@ export function QuickFilters() {
 
   return (
     <Card className="p-4 shadow-xl border-0 bg-white/70 backdrop-blur-lg rounded-2xl">
-      <div className="flex flex-col space-y-4">
+      <Collapsible open={!isCollapsed} onOpenChange={(open) => setIsCollapsed(!open)}>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-slate-800">Quick Filters</h3>
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-slate-100 rounded-full"
+            >
+              {isCollapsed ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronUp className="h-4 w-4" />
+              )}
+            </Button>
+          </CollapsibleTrigger>
+        </div>
+        
+        <CollapsibleContent className="mt-4">
+          <div className="flex flex-col space-y-4">
         <div className="flex flex-col space-y-2">
           <h4 className="text-sm font-semibold text-slate-700 mb-1">Quick Date Filters</h4>
           <div className="flex flex-wrap gap-2">
@@ -267,6 +290,8 @@ export function QuickFilters() {
           </div>
         )}
       </div>
+      </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 }

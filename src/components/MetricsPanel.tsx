@@ -26,6 +26,20 @@ import {
   Download,
   X
 } from 'lucide-react';
+import { 
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip as ChartTooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import { useLeads } from '@/contexts/LeadContext';
 import { cn, formatNumber, calculatePercentageChange } from '@/lib/utils';
 import { Card, CardContent } from "@/components/ui/card";
@@ -33,6 +47,20 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import CountUp from 'react-countup';
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  ChartTooltip,
+  Legend,
+  Filler
+);
 
 export function MetricsPanel() {
   const { 
@@ -457,6 +485,132 @@ export function MetricsPanel() {
   );
 }
 
+// Generate chart data helper function
+const generateChartData = (type: 'line' | 'bar' | 'area' | 'doughnut', title: string) => {
+  const baseLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+  const isPositive = Math.random() > 0.3;
+  
+  let data;
+  if (type === 'doughnut') {
+    data = [65, 35];
+    return {
+      labels: ['Converted', 'Pending'],
+      datasets: [{
+        data,
+        backgroundColor: ['#10b981', '#6b7280'],
+        borderWidth: 0,
+      }]
+    };
+  } else {
+    data = baseLabels.map((_, i) => {
+      const base = 10 + Math.random() * 30;
+      const trend = isPositive ? i * 2 : (baseLabels.length - i) * 1.5;
+      return Math.max(5, base + trend + (Math.random() - 0.5) * 10);
+    });
+  }
+
+  const baseDataset = {
+    data,
+    borderWidth: 2,
+    pointRadius: 0,
+    pointHoverRadius: 3,
+  };
+
+  if (type === 'line') {
+    return {
+      labels: baseLabels,
+      datasets: [{
+        ...baseDataset,
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        fill: false,
+      }]
+    };
+  } else if (type === 'area') {
+    return {
+      labels: baseLabels,
+      datasets: [{
+        ...baseDataset,
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+        fill: true,
+      }]
+    };
+  } else if (type === 'bar') {
+    return {
+      labels: baseLabels,
+      datasets: [{
+        ...baseDataset,
+        backgroundColor: 'rgba(139, 92, 246, 0.8)',
+        borderColor: '#8b5cf6',
+        borderWidth: 1,
+      }]
+    };
+  }
+};
+
+// Mini chart components
+const MiniLineChart = ({ data }: { data: any }) => (
+  <Line
+    data={data}
+    options={{
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: {
+        x: { display: false },
+        y: { display: false }
+      },
+      elements: { point: { radius: 0 } },
+      interaction: { intersect: false }
+    }}
+  />
+);
+
+const MiniBarChart = ({ data }: { data: any }) => (
+  <Bar
+    data={data}
+    options={{
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: {
+        x: { display: false },
+        y: { display: false }
+      }
+    }}
+  />
+);
+
+const MiniAreaChart = ({ data }: { data: any }) => (
+  <Line
+    data={data}
+    options={{
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: {
+        x: { display: false },
+        y: { display: false }
+      },
+      elements: { point: { radius: 0 } },
+      interaction: { intersect: false }
+    }}
+  />
+);
+
+const MiniDoughnutChart = ({ data }: { data: any }) => (
+  <Doughnut
+    data={data}
+    options={{
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      cutout: '70%'
+    }}
+  />
+);
+
 interface MetricCardProps {
   title: string;
   value: string | number;
@@ -505,23 +659,23 @@ function MetricCard({
 
   const cardContent = (
     <Card
-      className="overflow-hidden bg-white border-0 shadow-2xl transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:-translate-y-2 hover:scale-[1.02] group cursor-pointer rounded-2xl backdrop-blur-lg ring-1 ring-gradient-to-r ring-from-gray-800 ring-to-gray-600 hover:ring-from-blue-600 hover:ring-to-teal-600 transform-gpu h-full"
+      className="overflow-hidden bg-white border-0 shadow-2xl transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:-translate-y-2 hover:scale-[1.02] group cursor-pointer rounded-2xl backdrop-blur-lg ring-1 ring-gradient-to-r ring-from-gray-800 ring-to-gray-600 hover:ring-from-blue-600 hover:ring-to-teal-600 transform-gpu"
       onClick={onDrillDown}
-      style={{ minHeight: 160 }}
+      style={{ height: 161 }} // Increased height by 15% (140 * 1.15 = 161)
     >
       {/* Dark gradient header bar */}
       <div className="h-1 w-full bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 group-hover:from-blue-600 group-hover:via-purple-600 group-hover:to-teal-600 transition-all duration-500" />
       
-      <CardContent className="p-6 relative overflow-hidden">
+      <CardContent className="p-4 relative overflow-hidden h-full flex flex-col"> {/* Reduced padding and flex layout */}
         {/* Subtle animated background accent */}
         <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-gray-800/10 via-transparent to-gray-600/10 group-hover:opacity-10 transition-opacity duration-500" />
         
-        <div className="flex justify-between items-start relative z-10">
-          <div className="flex-1">
-            <p className="text-sm font-semibold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2 tracking-wide uppercase group-hover:from-blue-600 group-hover:to-teal-600 transition-all duration-300">{title}</p>
-            <h3 className="text-3xl font-extrabold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-1 group-hover:from-blue-700 group-hover:to-purple-700 transition-all duration-300">
+        <div className="flex justify-between items-start relative z-10 flex-1">
+          <div className="flex-1 min-w-0"> {/* Added min-w-0 for text overflow */}
+            <p className="text-xs font-semibold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-1 tracking-wide uppercase group-hover:from-blue-600 group-hover:to-teal-600 transition-all duration-300">{title}</p>
+            <h3 className="text-2xl font-extrabold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-1 group-hover:from-blue-700 group-hover:to-purple-700 transition-all duration-300">
               {loading ? (
-                <div className="h-8 w-24 bg-gray-200 animate-pulse rounded"></div>
+                <div className="h-6 w-20 bg-gray-200 animate-pulse rounded"></div>
               ) : (
                 <>
                   {isCurrency && !value.toString().includes('₹') ? '₹' : ''}
@@ -537,49 +691,61 @@ function MetricCard({
                 </>
               )}
             </h3>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2">
               <div className={cn(
-                "flex items-center text-xs font-semibold px-2 py-1 rounded-full transition-all duration-300",
+                "flex items-center text-xs font-semibold px-2 py-0.5 rounded-full transition-all duration-300",
                 positive 
                   ? "text-emerald-700 bg-emerald-100 group-hover:bg-emerald-200 border border-emerald-300" 
                   : "text-red-700 bg-red-100 group-hover:bg-red-200 border border-red-300"
               )}>
                 {positive ? (
-                  <ArrowUpRight className="h-3 w-3 mr-1 animate-pulse" />
+                  <ArrowUpRight className="h-3 w-3 mr-1" />
                 ) : (
-                  <ArrowDownRight className="h-3 w-3 mr-1 animate-pulse" />
+                  <ArrowDownRight className="h-3 w-3 mr-1" />
                 )}
                 {loading ? (
-                  <div className="h-3 w-10 bg-gray-200 animate-pulse rounded"></div>
+                  <div className="h-3 w-8 bg-gray-200 animate-pulse rounded"></div>
                 ) : (
                   `${Math.abs(change).toFixed(1)}%`
                 )}
               </div>
-              <span className="text-xs bg-gradient-to-r from-gray-600 to-gray-500 bg-clip-text text-transparent group-hover:from-gray-700 group-hover:to-gray-600 transition-all duration-300">
-                {loading ? (
-                  <div className="h-3 w-20 bg-gray-200 animate-pulse rounded"></div>
-                ) : (
-                  description
-                )}
-              </span>
             </div>
           </div>
-          <div className="h-14 w-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-700 group-hover:from-blue-600 group-hover:to-teal-600 transition-all duration-500 shadow-lg group-hover:shadow-xl group-hover:scale-110 transform-gpu border border-gray-600 group-hover:border-blue-500">
+          <div className="h-10 w-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-700 group-hover:from-blue-600 group-hover:to-teal-600 transition-all duration-500 shadow-lg group-hover:shadow-xl group-hover:scale-110 transform-gpu border border-gray-600 group-hover:border-blue-500">
             <div className="transform group-hover:scale-110 transition-transform duration-300">
               {React.cloneElement(icon as React.ReactElement, {
-                className: "h-6 w-6 text-white"
+                className: "h-5 w-5 text-white"
               })}
             </div>
           </div>
         </div>
-        {tooltip && (
-          <div className="mt-3 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0">
-            <div className="flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-3 py-2 rounded-lg backdrop-blur-sm border border-gray-200">
-              <Info className="h-3 w-3 animate-pulse text-gray-500" />
-              <span>Click for detailed analytics</span>
-            </div>
-          </div>
-        )}
+        
+        {/* Chart section at the bottom */}
+        <div className="mt-2 h-12 w-full relative z-10"> {/* Fixed height chart area */}
+          {!loading && (() => {
+            const chartType = Math.random() > 0.75 ? 'doughnut' : 
+                             Math.random() > 0.5 ? 'bar' : 
+                             Math.random() > 0.25 ? 'area' : 'line';
+            const chartData = generateChartData(chartType, title);
+            
+            switch(chartType) {
+              case 'line':
+                return <MiniLineChart data={chartData} />;
+              case 'bar':
+                return <MiniBarChart data={chartData} />;
+              case 'area':
+                return <MiniAreaChart data={chartData} />;
+              case 'doughnut':
+                return (
+                  <div className="h-full w-12 mx-auto">
+                    <MiniDoughnutChart data={chartData} />
+                  </div>
+                );
+              default:
+                return <MiniLineChart data={chartData} />;
+            }
+          })()}
+        </div>
         
         {/* Subtle shine effect on hover */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">

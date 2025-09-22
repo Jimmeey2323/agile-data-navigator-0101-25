@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { formatDate, groupBy, getFollowUpStatus, formatRevenue } from '@/lib/utils';
+import { formatDate, groupBy, getFollowUpStatus, formatRevenue, formatDisplayText, formatFollowUpDate } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -248,16 +248,31 @@ export const LeadsTable = ({
     return name.split(' ').map(part => part[0]).join('').toUpperCase().substring(0, 2);
   };
 
-  // Function to aggregate all meaningful follow-up comments
+  // Function to aggregate all meaningful follow-up comments with dates
   const getAllFollowUpComments = (lead: Lead) => {
-    const comments = [
-      lead.followUp1Comments,
-      lead.followUp2Comments,
-      lead.followUp3Comments,
-      lead.followUp4Comments
-    ].filter(comment => comment && comment.trim() !== '' && comment.trim() !== '-');
+    const followUps = [
+      { date: lead.followUp1Date, comments: lead.followUp1Comments, number: 1 },
+      { date: lead.followUp2Date, comments: lead.followUp2Comments, number: 2 },
+      { date: lead.followUp3Date, comments: lead.followUp3Comments, number: 3 },
+      { date: lead.followUp4Date, comments: lead.followUp4Comments, number: 4 }
+    ];
     
-    return comments.join(' • ');
+    const formattedComments = followUps
+      .filter(followUp => 
+        followUp.comments && 
+        followUp.comments.trim() !== '' && 
+        followUp.comments.trim() !== '-'
+      )
+      .map(followUp => {
+        const formattedDate = followUp.date && followUp.date.trim() !== '' && followUp.date.trim() !== '-' 
+          ? formatFollowUpDate(followUp.date)
+          : 'No date';
+        const formattedComment = formatDisplayText(followUp.comments);
+        
+        return `${formattedDate} - ${formattedComment}`;
+      });
+    
+    return formattedComments.length > 0 ? formattedComments.join(' | ') : '';
   };
 
   if (loading) {
@@ -408,9 +423,9 @@ export const LeadsTable = ({
       </div>
 
       <CardContent className="p-0">
-        <div className="overflow-x-auto bg-white rounded-b-xl">
+        <div className="overflow-x-auto bg-white rounded-b-xl border-l-4 border-r-4 border-black max-w-[98vw]"> {/* Made table wider */}
           <div className="relative">
-            <Table className="w-full text-sm">
+            <Table className="w-full text-sm min-w-[1400px]"> {/* Added minimum width */}
               <TableHeader className="sticky top-0 z-20 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 shadow-lg">
                 <TableRow className="border-0 hover:bg-gradient-to-r hover:from-gray-800 hover:via-gray-700 hover:to-gray-800 transition-all duration-300">
                   <TableHead className="w-16 text-white font-bold text-center border-r border-white/10 h-14 bg-transparent">
@@ -457,7 +472,7 @@ export const LeadsTable = ({
                     </TableHead>
                   )}
                   {visibleColumns.stage && (
-                    <TableHead className="min-w-[160px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
+                    <TableHead className="min-w-[220px] text-white font-bold border-r border-white/10 h-14 bg-transparent"> {/* Increased from 160px to 220px */}
                       <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('stage')}>
                         <Target className="h-4 w-4 mr-2" />
                         STAGE
@@ -475,7 +490,7 @@ export const LeadsTable = ({
                     </TableHead>
                   )}
                   {visibleColumns.remarks && (
-                    <TableHead className="min-w-[200px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
+                    <TableHead className="min-w-[350px] text-white font-bold border-r border-white/10 h-14 bg-transparent"> {/* Increased from 200px to 350px */}
                       <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('remarks')}>
                         <FileText className="h-4 w-4 mr-2" />
                         REMARKS
@@ -492,7 +507,7 @@ export const LeadsTable = ({
                     </TableHead>
                   )}
                   {visibleColumns.followUpComments && (
-                    <TableHead className="min-w-[300px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
+                    <TableHead className="min-w-[450px] text-white font-bold border-r border-white/10 h-14 bg-transparent"> {/* Increased from 300px to 450px */}
                       <div className="flex items-center py-2">
                         <MessageCircle className="h-4 w-4 mr-2" />
                         FOLLOW-UP COMMENTS
@@ -544,10 +559,10 @@ export const LeadsTable = ({
                         return (
                           <TableRow 
                             key={lead.id} 
-                            className="h-16 hover:bg-gray-50/80 transition-all duration-200 cursor-pointer border-b border-gray-100 group" 
+                            className="max-h-10 hover:bg-gray-50/80 transition-all duration-200 cursor-pointer border-b border-gray-100 group" 
                             onClick={() => onLeadClick(lead)}
                           >
-                            <TableCell className="h-16 py-3 text-center border-r border-gray-100" onClick={e => e.stopPropagation()}>
+                            <TableCell className="max-h-10 py-1 text-center border-r border-gray-100" onClick={e => e.stopPropagation()}>
                               <div className="flex items-center justify-center gap-2">
                                 <Checkbox 
                                   checked={selectedLeads.includes(lead.id)} 
@@ -573,7 +588,7 @@ export const LeadsTable = ({
                             </TableCell>
 
                             {visibleColumns.name && (
-                              <TableCell className="h-16 py-3 border-r border-gray-100">
+                              <TableCell className="max-h-10 py-1 border-r border-gray-100">
                                 <div className="flex items-center gap-3">
                                   <Avatar className="h-8 w-8 border-2 border-gray-200">
                                     <AvatarFallback className="bg-gradient-to-br from-blue-500 to-teal-600 text-white text-sm font-bold">
@@ -615,7 +630,7 @@ export const LeadsTable = ({
                             )}
                             
                             {visibleColumns.source && (
-                              <TableCell className="h-16 py-3 border-r border-gray-100">
+                              <TableCell className="max-h-10 py-1 border-r border-gray-100">
                                 <div className="flex justify-start items-center">
                                   <TooltipProvider>
                                     <Tooltip>
@@ -635,7 +650,7 @@ export const LeadsTable = ({
                             )}
                             
                             {visibleColumns.created && (
-                              <TableCell className="h-16 py-3 border-r border-gray-100">
+                              <TableCell className="max-h-10 py-1 border-r border-gray-100">
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
@@ -652,7 +667,7 @@ export const LeadsTable = ({
                             )}
                             
                             {visibleColumns.associate && (
-                              <TableCell className="h-16 py-3 border-r border-gray-100">
+                              <TableCell className="max-h-10 py-1 border-r border-gray-100">
                                 <div className="flex items-center gap-2">
                                   <Avatar className="h-6 w-6">
                                     <AvatarFallback className="bg-gradient-to-br from-gray-500 to-gray-600 text-white text-sm font-bold">
@@ -676,7 +691,7 @@ export const LeadsTable = ({
                             )}
                             
                             {visibleColumns.stage && (
-                              <TableCell className="h-16 py-3 border-r border-gray-100">
+                              <TableCell className="max-h-10 py-1 border-r border-gray-100">
                                 <div className="flex justify-start">
                                   <TooltipProvider>
                                     <Tooltip>
@@ -696,7 +711,7 @@ export const LeadsTable = ({
                             )}
                             
                             {visibleColumns.status && (
-                              <TableCell className="h-16 py-3 border-r border-gray-100">
+                              <TableCell className="max-h-10 py-1 border-r border-gray-100">
                                 <div className="flex justify-start">
                                   <TooltipProvider>
                                     <Tooltip>
@@ -716,17 +731,17 @@ export const LeadsTable = ({
                             )}
                             
                             {visibleColumns.remarks && (
-                              <TableCell className="h-16 py-3 border-r border-gray-100">
+                              <TableCell className="max-h-10 py-1 border-r border-gray-100">
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <span className="text-sm text-gray-700 truncate max-w-[180px] block cursor-pointer">
-                                        {lead.remarks || 'No remarks'}
+                                      <span className="text-sm text-gray-700 truncate max-w-[300px] block cursor-pointer">
+                                        {lead.remarks ? formatDisplayText(lead.remarks) : 'No remarks'}
                                       </span>
                                     </TooltipTrigger>
                                     <TooltipContent className="max-w-xs bg-gray-800 text-white">
                                       <p className="font-semibold">Remarks:</p>
-                                      <p>{lead.remarks || 'No remarks'}</p>
+                                      <p>{lead.remarks ? formatDisplayText(lead.remarks) : 'No remarks'}</p>
                                     </TooltipContent>
                                   </Tooltip>
                                 </TooltipProvider>
@@ -734,7 +749,7 @@ export const LeadsTable = ({
                             )}
                             
                             {visibleColumns.followUps && (
-                              <TableCell className="h-16 py-3 border-r border-gray-100" onClick={e => e.stopPropagation()}>
+                              <TableCell className="max-h-10 py-1 border-r border-gray-100" onClick={e => e.stopPropagation()}>
                                 <div className="flex items-center gap-3">
                                   <div className="flex items-center gap-1">
                                     <MessageCircle className="h-4 w-4 text-blue-600" />
@@ -812,11 +827,11 @@ export const LeadsTable = ({
                             )}
 
                             {visibleColumns.followUpComments && (
-                              <TableCell className="h-16 py-3 border-r border-gray-100">
+                              <TableCell className="max-h-10 py-1 border-r border-gray-100">
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <div className="text-sm text-gray-700 max-w-[280px]">
+                                      <div className="text-sm text-gray-700 max-w-[400px]">
                                         {allComments ? (
                                           <p className="truncate cursor-pointer">{allComments}</p>
                                         ) : (
@@ -824,16 +839,24 @@ export const LeadsTable = ({
                                         )}
                                       </div>
                                     </TooltipTrigger>
-                                    <TooltipContent className="max-w-md bg-gray-800 text-white">
+                                    <TooltipContent className="max-w-2xl bg-gray-800 text-white">
                                       <p className="font-semibold">All Follow-up Comments:</p>
-                                      <p className="text-sm">{allComments || 'No follow-up comments available'}</p>
+                                      <div className="text-sm whitespace-pre-line max-h-64 overflow-y-auto">
+                                        {allComments ? (
+                                          allComments.split(' | ').map((comment, index) => (
+                                            <p key={index} className="mb-2 last:mb-0">{comment}</p>
+                                          ))
+                                        ) : (
+                                          'No follow-up comments available'
+                                        )}
+                                      </div>
                                     </TooltipContent>
                                   </Tooltip>
                                 </TooltipProvider>
                               </TableCell>
                             )}
                             
-                            <TableCell className="h-16 py-3 text-center" onClick={e => e.stopPropagation()}>
+                            <TableCell className="max-h-10 py-1 text-center" onClick={e => e.stopPropagation()}>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-gray-200">

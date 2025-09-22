@@ -34,6 +34,57 @@ export function formatDate(dateString: string | Date, format?: string): string {
   });
 }
 
+export function formatFollowUpDate(dateString: string): string {
+  if (!dateString || dateString.trim() === '' || dateString.trim() === '-') {
+    return 'No date';
+  }
+  
+  // Try to parse different date formats
+  let date: Date | null = null;
+  
+  // Try parsing as-is first
+  date = new Date(dateString);
+  
+  // If that fails, try common date formats
+  if (isNaN(date.getTime())) {
+    // Try DD/MM/YYYY format
+    const ddmmyyyy = dateString.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (ddmmyyyy) {
+      const [, day, month, year] = ddmmyyyy;
+      date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    }
+    
+    // Try MM/DD/YYYY format
+    if (isNaN(date.getTime())) {
+      const mmddyyyy = dateString.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (mmddyyyy) {
+        const [, month, day, year] = mmddyyyy;
+        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      }
+    }
+    
+    // Try YYYY-MM-DD format
+    if (isNaN(date.getTime())) {
+      const yyyymmdd = dateString.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+      if (yyyymmdd) {
+        const [, year, month, day] = yyyymmdd;
+        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      }
+    }
+  }
+  
+  if (isNaN(date.getTime())) {
+    console.warn('Could not parse date:', dateString);
+    return dateString; // Return original if we can't parse it
+  }
+  
+  // Format as DD-MMM (e.g., "25-Dec")
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short'
+  }).replace(' ', '-');
+}
+
 export function parseDate(dateString: string): Date | null {
   if (!dateString) return null;
   
@@ -88,15 +139,28 @@ export function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
 }
 
 // Format revenue values with Indian currency notation
-export function formatRevenue(value: number): string {
-  if (value >= 10000000) { // 1 Crore
-    return `₹${(value / 10000000).toFixed(1)}Cr`;
-  } else if (value >= 100000) { // 1 Lakh
-    return `₹${(value / 100000).toFixed(1)}L`;
-  } else if (value >= 1000) { // 1 Thousand
-    return `₹${(value / 1000).toFixed(1)}K`;
+export function formatDisplayText(text: string): string {
+  if (!text || typeof text !== 'string') return '';
+  
+  return text
+    .trim() // Remove leading/trailing spaces
+    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+    .toLowerCase() // Convert to lowercase first
+    .replace(/^\w/, c => c.toUpperCase()) // Capitalize first letter
+    .replace(/\.\s*\w/g, match => match.toUpperCase()) // Capitalize after periods
+    .replace(/!\s*\w/g, match => match.toUpperCase()) // Capitalize after exclamation marks
+    .replace(/\?\s*\w/g, match => match.toUpperCase()); // Capitalize after question marks
+}
+
+export function formatRevenue(amount: number): string {
+  if (amount >= 10000000) { // 1 Crore
+    return `₹${(amount / 10000000).toFixed(1)}Cr`;
+  } else if (amount >= 100000) { // 1 Lakh
+    return `₹${(amount / 100000).toFixed(1)}L`;
+  } else if (amount >= 1000) { // 1 Thousand
+    return `₹${(amount / 1000).toFixed(1)}K`;
   } else {
-    return `₹${value}`;
+    return `₹${amount}`;
   }
 }
 

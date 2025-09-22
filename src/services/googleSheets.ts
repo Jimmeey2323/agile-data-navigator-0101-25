@@ -135,6 +135,15 @@ export const fetchLeads = async (): Promise<Lead[]> => {
     // First row contains headers
     const headers = rows[0];
     console.log('Sheet headers:', headers);
+    console.log('Looking for follow-up date headers...');
+    
+    // Check which follow-up headers are present
+    headers.forEach((header: string, index: number) => {
+      const normalizedHeader = header.toLowerCase().trim();
+      if (normalizedHeader.includes('follow') && normalizedHeader.includes('date')) {
+        console.log(`Found follow-up date header at column ${index}: "${header}" (normalized: "${normalizedHeader}")`);
+      }
+    });
     
     // Map sheet data to Lead objects
     const leads: Lead[] = rows.slice(1).map((row: any[], index: number) => {
@@ -143,8 +152,9 @@ export const fetchLeads = async (): Promise<Lead[]> => {
       // Map each column value to the corresponding field based on headers
       headers.forEach((header: string, colIndex: number) => {
         const value = row[colIndex] || '';
+        const normalizedHeader = header.toLowerCase().trim();
         
-        switch(header.toLowerCase()) {
+        switch(normalizedHeader) {
           case 'id':
             lead.id = value || `lead-${index + 1}`;
             break;
@@ -194,27 +204,75 @@ export const fetchLeads = async (): Promise<Lead[]> => {
             lead.remarks = value;
             break;
           case 'follow up 1 date':
+          case 'followup 1 date':
+          case 'follow-up 1 date':
+          case 'follow_up_1_date':
+          case 'fu1 date':
+          case 'followup1date':
+            console.log(`Mapping follow-up 1 date: header="${header}", value="${value}"`);
             lead.followUp1Date = value;
             break;
           case 'follow up comments (1)':
+          case 'follow up 1 comments':
+          case 'followup 1 comments':
+          case 'follow-up 1 comments':
+          case 'follow_up_1_comments':
+          case 'fu1 comments':
+          case 'followup1comments':
             lead.followUp1Comments = value;
             break;
           case 'follow up 2 date':
+          case 'followup 2 date':
+          case 'follow-up 2 date':
+          case 'follow_up_2_date':
+          case 'fu2 date':
+          case 'followup2date':
+            console.log(`Mapping follow-up 2 date: header="${header}", value="${value}"`);
             lead.followUp2Date = value;
             break;
           case 'follow up comments (2)':
+          case 'follow up 2 comments':
+          case 'followup 2 comments':
+          case 'follow-up 2 comments':
+          case 'follow_up_2_comments':
+          case 'fu2 comments':
+          case 'followup2comments':
             lead.followUp2Comments = value;
             break;
           case 'follow up 3 date':
+          case 'followup 3 date':
+          case 'follow-up 3 date':
+          case 'follow_up_3_date':
+          case 'fu3 date':
+          case 'followup3date':
+            console.log(`Mapping follow-up 3 date: header="${header}", value="${value}"`);
             lead.followUp3Date = value;
             break;
           case 'follow up comments (3)':
+          case 'follow up 3 comments':
+          case 'followup 3 comments':
+          case 'follow-up 3 comments':
+          case 'follow_up_3_comments':
+          case 'fu3 comments':
+          case 'followup3comments':
             lead.followUp3Comments = value;
             break;
           case 'follow up 4 date':
+          case 'followup 4 date':
+          case 'follow-up 4 date':
+          case 'follow_up_4_date':
+          case 'fu4 date':
+          case 'followup4date':
+            console.log(`Mapping follow-up 4 date: header="${header}", value="${value}"`);
             lead.followUp4Date = value;
             break;
           case 'follow up comments (4)':
+          case 'follow up 4 comments':
+          case 'followup 4 comments':
+          case 'follow-up 4 comments':
+          case 'follow_up_4_comments':
+          case 'fu4 comments':
+          case 'followup4comments':
             lead.followUp4Comments = value;
             break;
           default:
