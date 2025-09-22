@@ -257,20 +257,32 @@ export const LeadsTable = ({
       { date: lead.followUp4Date, comments: lead.followUp4Comments, number: 4 }
     ];
     
-    const formattedComments = followUps
-      .filter(followUp => 
-        followUp.comments && 
+    const validFollowUps = followUps.filter(followUp => {
+      // Only include follow-ups that have BOTH meaningful comments AND valid dates
+      const hasValidComments = followUp.comments && 
+        typeof followUp.comments === 'string' &&
         followUp.comments.trim() !== '' && 
-        followUp.comments.trim() !== '-'
-      )
-      .map(followUp => {
-        const formattedDate = followUp.date && followUp.date.trim() !== '' && followUp.date.trim() !== '-' 
-          ? formatFollowUpDate(followUp.date)
-          : 'No date';
-        const formattedComment = formatDisplayText(followUp.comments);
+        followUp.comments.trim() !== '-' &&
+        followUp.comments.toLowerCase().trim() !== 'no comments' &&
+        followUp.comments.toLowerCase().trim() !== 'n/a';
         
-        return `${formattedDate} - ${formattedComment}`;
-      });
+      const hasValidDate = followUp.date && 
+        typeof followUp.date === 'string' &&
+        followUp.date.trim() !== '' && 
+        followUp.date.trim() !== '-' &&
+        followUp.date.toLowerCase().trim() !== 'no date' &&
+        followUp.date.toLowerCase().trim() !== 'n/a' &&
+        followUp.date !== '1900-01-01'; // Avoid placeholder dates
+      
+      return hasValidComments && hasValidDate;
+    });
+    
+    const formattedComments = validFollowUps.map(followUp => {
+      const formattedDate = formatFollowUpDate(followUp.date);
+      const formattedComment = formatDisplayText(followUp.comments);
+      
+      return `${formattedDate} - ${formattedComment}`;
+    });
     
     return formattedComments.length > 0 ? formattedComments.join(' | ') : '';
   };

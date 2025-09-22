@@ -134,16 +134,19 @@ export const fetchLeads = async (): Promise<Lead[]> => {
     
     // First row contains headers
     const headers = rows[0];
-    console.log('Sheet headers:', headers);
-    console.log('Looking for follow-up date headers...');
+    console.log('Sheet headers found:', headers.length, 'columns');
     
     // Check which follow-up headers are present
+    const followUpHeaders = [];
     headers.forEach((header: string, index: number) => {
       const normalizedHeader = header.toLowerCase().trim();
-      if (normalizedHeader.includes('follow') && normalizedHeader.includes('date')) {
-        console.log(`Found follow-up date header at column ${index}: "${header}" (normalized: "${normalizedHeader}")`);
+      if (normalizedHeader.includes('follow')) {
+        followUpHeaders.push({ index, header, normalized: normalizedHeader });
       }
     });
+    if (followUpHeaders.length > 0) {
+      console.log('Follow-up related headers found:', followUpHeaders.length);
+    }
     
     // Map sheet data to Lead objects
     const leads: Lead[] = rows.slice(1).map((row: any[], index: number) => {
@@ -209,7 +212,6 @@ export const fetchLeads = async (): Promise<Lead[]> => {
           case 'follow_up_1_date':
           case 'fu1 date':
           case 'followup1date':
-            console.log(`Mapping follow-up 1 date: header="${header}", value="${value}"`);
             lead.followUp1Date = value;
             break;
           case 'follow up comments (1)':
@@ -281,13 +283,12 @@ export const fetchLeads = async (): Promise<Lead[]> => {
         }
       });
       
-      // Log the first few leads to debug follow-up comments
-      if (index < 3) {
-        console.log(`Lead ${index + 1} follow-up data:`, {
-          followUp1Date: lead.followUp1Date,
-          followUp1Comments: lead.followUp1Comments,
-          followUp2Date: lead.followUp2Date,
-          followUp2Comments: lead.followUp2Comments
+      // Log sample of processed leads for verification
+      if (index < 2) {
+        console.log(`Lead ${index + 1} processed:`, {
+          fullName: lead.fullName,
+          hasFollowUp1: !!(lead.followUp1Date && lead.followUp1Comments),
+          hasFollowUp2: !!(lead.followUp2Date && lead.followUp2Comments)
         });
       }
       
@@ -304,14 +305,15 @@ export const fetchLeads = async (): Promise<Lead[]> => {
         createdAt: lead.createdAt || new Date().toISOString().split('T')[0],
         center: lead.center || '',
         remarks: lead.remarks || '',
-        followUp1Date: lead.followUp1Date || '',
-        followUp1Comments: lead.followUp1Comments || '',
-        followUp2Date: lead.followUp2Date || '',
-        followUp2Comments: lead.followUp2Comments || '',
-        followUp3Date: lead.followUp3Date || '',
-        followUp3Comments: lead.followUp3Comments || '',
-        followUp4Date: lead.followUp4Date || '',
-        followUp4Comments: lead.followUp4Comments || '',
+        // Only include follow-up data if it's meaningful (not empty, dash, or placeholder)
+        followUp1Date: (lead.followUp1Date && lead.followUp1Date.trim() !== '' && lead.followUp1Date.trim() !== '-') ? lead.followUp1Date : '',
+        followUp1Comments: (lead.followUp1Comments && lead.followUp1Comments.trim() !== '' && lead.followUp1Comments.trim() !== '-') ? lead.followUp1Comments : '',
+        followUp2Date: (lead.followUp2Date && lead.followUp2Date.trim() !== '' && lead.followUp2Date.trim() !== '-') ? lead.followUp2Date : '',
+        followUp2Comments: (lead.followUp2Comments && lead.followUp2Comments.trim() !== '' && lead.followUp2Comments.trim() !== '-') ? lead.followUp2Comments : '',
+        followUp3Date: (lead.followUp3Date && lead.followUp3Date.trim() !== '' && lead.followUp3Date.trim() !== '-') ? lead.followUp3Date : '',
+        followUp3Comments: (lead.followUp3Comments && lead.followUp3Comments.trim() !== '' && lead.followUp3Comments.trim() !== '-') ? lead.followUp3Comments : '',
+        followUp4Date: (lead.followUp4Date && lead.followUp4Date.trim() !== '' && lead.followUp4Date.trim() !== '-') ? lead.followUp4Date : '',
+        followUp4Comments: (lead.followUp4Comments && lead.followUp4Comments.trim() !== '' && lead.followUp4Comments.trim() !== '-') ? lead.followUp4Comments : '',
         ...lead
       } as Lead;
     });
@@ -646,6 +648,27 @@ function getSampleLeads(): Lead[] {
       followUp1Comments: "Left voicemail, will try again tomorrow.",
       followUp2Date: "2023-09-13",
       followUp2Comments: "Discussed class options, she prefers weekends.",
+      followUp3Date: "",
+      followUp3Comments: "",
+      followUp4Date: "",
+      followUp4Comments: ""
+    },
+    {
+      id: "lead-3",
+      fullName: "David Rodriguez",
+      email: "david.r@example.com",
+      phone: "+1 555-456-7890",
+      source: "Facebook Ad",
+      associate: "Lisa Park",
+      status: "Cold",
+      stage: "Not Interested",
+      createdAt: "2023-09-08",
+      center: "Eastside Branch",
+      remarks: "Inquired about group classes but hasn't responded to follow-ups",
+      followUp1Date: "",
+      followUp1Comments: "",
+      followUp2Date: "",
+      followUp2Comments: "",
       followUp3Date: "",
       followUp3Comments: "",
       followUp4Date: "",

@@ -77,12 +77,59 @@ export function EditLeadModal({
   const [isAIConfigured, setIsAIConfigured] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
 
+  // Helper function to convert date to HTML input format (YYYY-MM-DD)
+  const formatDateForInput = (dateString: string): string => {
+    if (!dateString || dateString.trim() === '' || dateString.trim() === '-') {
+      return '';
+    }
+    
+    try {
+      // Handle various date formats from Google Sheets
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        // Try parsing DD-MMM format like "19-Sept"
+        const parts = dateString.trim().split('-');
+        if (parts.length === 2) {
+          const day = parts[0];
+          const monthAbbr = parts[1];
+          const monthMap: Record<string, string> = {
+            'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
+            'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
+            'Sep': '09', 'Sept': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+          };
+          const month = monthMap[monthAbbr];
+          if (month) {
+            const year = new Date().getFullYear(); // Use current year
+            return `${year}-${month}-${day.padStart(2, '0')}`;
+          }
+        }
+        return '';
+      }
+      
+      // Convert to YYYY-MM-DD format
+      return date.toISOString().split('T')[0];
+    } catch (error) {
+      console.warn('Failed to parse date:', dateString, error);
+      return '';
+    }
+  };
+
   // Initialize form data when lead changes
   useEffect(() => {
     setIsAIConfigured(aiService.isConfigured());
     
     if (lead) {
-      setFormData(lead);
+      // Convert dates to proper format for HTML inputs
+      const formattedLead = {
+        ...lead,
+        followUp1Date: formatDateForInput(lead.followUp1Date || ''),
+        followUp2Date: formatDateForInput(lead.followUp2Date || ''),
+        followUp3Date: formatDateForInput(lead.followUp3Date || ''),
+        followUp4Date: formatDateForInput(lead.followUp4Date || ''),
+        createdAt: formatDateForInput(lead.createdAt || '')
+      };
+      
+      setFormData(formattedLead);
       setHasUnsavedChanges(false);
       
       // Load AI suggestions if configured
@@ -524,6 +571,69 @@ export function EditLeadModal({
                       </Card>
                     </div>
 
+                    {/* Follow-up Summary */}
+                    <Card className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
+                      <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
+                        <CardTitle className="flex items-center gap-2 text-slate-800 text-sm">
+                          <MessageSquare className="h-5 w-5" />
+                          Follow-up Timeline
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-6">
+                        <div className="space-y-3">
+                          {[1, 2, 3, 4].map(num => {
+                            const dateField = `followUp${num}Date` as keyof Lead;
+                            const commentsField = `followUp${num}Comments` as keyof Lead;
+                            const date = formData[dateField] as string;
+                            const comments = formData[commentsField] as string;
+                            
+                            const hasValidDate = date && date.trim() !== '' && date.trim() !== '-';
+                            const hasValidComments = comments && comments.trim() !== '' && comments.trim() !== '-';
+                            
+                            if (!hasValidDate && !hasValidComments) return null;
+                            
+                            return (
+                              <div key={num} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                <div className="flex-shrink-0">
+                                  <Badge variant={hasValidDate ? "default" : "secondary"} className="text-xs">
+                                    Follow-up {num}
+                                  </Badge>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  {hasValidDate && (
+                                    <div className="text-sm font-medium text-gray-900 mb-1">
+                                      {formatDate(date)}
+                                    </div>
+                                  )}
+                                  {hasValidComments && (
+                                    <div className="text-sm text-gray-600">
+                                      {comments}
+                                    </div>
+                                  )}
+                                  {!hasValidDate && hasValidComments && (
+                                    <div className="text-xs text-amber-600 font-medium mb-1">
+                                      No date recorded
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                          {![1, 2, 3, 4].some(num => {
+                            const date = formData[`followUp${num}Date` as keyof Lead] as string;
+                            const comments = formData[`followUp${num}Comments` as keyof Lead] as string;
+                            return (date && date.trim() !== '' && date.trim() !== '-') || 
+                                   (comments && comments.trim() !== '' && comments.trim() !== '-');
+                          }) && (
+                            <div className="text-center py-8 text-gray-500">
+                              <MessageSquare className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                              <p className="text-sm">No follow-ups recorded yet</p>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+
                     {/* Engagement Chart */}
                     {engagementData.length > 0 && (
                       <Card className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
@@ -631,39 +741,46 @@ export function EditLeadModal({
 
                   <TabsContent value="followups" className="mt-0 space-y-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {[1, 2, 3, 4].map(num => (
-                        <Card key={num} className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
-                          <CardHeader className="bg-gradient-to-r from-orange-50 to-red-50">
-                            <CardTitle className="flex items-center gap-2 text-slate-800 text-sm">
-                              <MessageSquare className="h-5 w-5" />
-                              Follow-up {num}
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="space-y-4 p-6">
-                            <div>
-                              <Label htmlFor={`followUp${num}Date`} className="text-xs font-semibold text-slate-700">Date</Label>
-                              <Input 
-                                id={`followUp${num}Date`} 
-                                type="date" 
-                                value={formData[`followUp${num}Date` as keyof Lead] as string || ''} 
-                                onChange={e => handleInputChange(`followUp${num}Date` as keyof Lead, e.target.value)} 
-                                className="bg-white border-gray-300 mt-1 focus:ring-2 focus:ring-blue-500/50 text-sm" 
-                              />
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor={`followUp${num}Comments`} className="text-xs font-semibold text-slate-700">Comments</Label>
-                              <Textarea 
-                                id={`followUp${num}Comments`} 
-                                value={formData[`followUp${num}Comments` as keyof Lead] as string || ''} 
-                                onChange={e => handleInputChange(`followUp${num}Comments` as keyof Lead, e.target.value)} 
-                                placeholder={`Add comments for follow-up ${num}...`} 
-                                className="bg-white border-gray-300 mt-1 focus:ring-2 focus:ring-blue-500/50 min-h-[80px] text-sm" 
-                              />
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
+                      {[1, 2, 3, 4].map(num => {
+                        const dateField = `followUp${num}Date` as keyof Lead;
+                        const commentsField = `followUp${num}Comments` as keyof Lead;
+                        const dateValue = formData[dateField] as string || '';
+                        const commentsValue = formData[commentsField] as string || '';
+                        
+                        return (
+                          <Card key={num} className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
+                            <CardHeader className="bg-gradient-to-r from-orange-50 to-red-50">
+                              <CardTitle className="flex items-center gap-2 text-slate-800 text-sm">
+                                <MessageSquare className="h-5 w-5" />
+                                Follow-up {num}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4 p-6">
+                              <div>
+                                <Label htmlFor={`followUp${num}Date`} className="text-xs font-semibold text-slate-700">Date</Label>
+                                <Input 
+                                  id={`followUp${num}Date`} 
+                                  type="date" 
+                                  value={dateValue} 
+                                  onChange={e => handleInputChange(`followUp${num}Date` as keyof Lead, e.target.value)} 
+                                  className="bg-white border-gray-300 mt-1 focus:ring-2 focus:ring-blue-500/50 text-sm" 
+                                />
+                              </div>
+                              
+                              <div>
+                                <Label htmlFor={`followUp${num}Comments`} className="text-xs font-semibold text-slate-700">Comments</Label>
+                                <Textarea 
+                                  id={`followUp${num}Comments`} 
+                                  value={commentsValue} 
+                                  onChange={e => handleInputChange(`followUp${num}Comments` as keyof Lead, e.target.value)} 
+                                  placeholder={`Add comments for follow-up ${num}...`} 
+                                  className="bg-white border-gray-300 mt-1 focus:ring-2 focus:ring-blue-500/50 min-h-[80px] text-sm" 
+                                />
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
                     </div>
                   </TabsContent>
 
