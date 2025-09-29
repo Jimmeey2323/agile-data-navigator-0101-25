@@ -444,18 +444,23 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Apply date range filter
     if (filters.dateRange.start || filters.dateRange.end) {
       result = result.filter(lead => {
-        const createdDate = new Date(lead.createdAt);
+        // Normalize the lead's created date to midnight local time for proper comparison
+        const createdDate = new Date(lead.createdAt + 'T00:00:00');
         
-        if (filters.dateRange.start && filters.dateRange.end) {
-          return createdDate >= filters.dateRange.start && createdDate <= filters.dateRange.end;
+        // Normalize filter dates to midnight for accurate day-level comparison
+        const startDate = filters.dateRange.start ? new Date(filters.dateRange.start.getFullYear(), filters.dateRange.start.getMonth(), filters.dateRange.start.getDate()) : null;
+        const endDate = filters.dateRange.end ? new Date(filters.dateRange.end.getFullYear(), filters.dateRange.end.getMonth(), filters.dateRange.end.getDate()) : null;
+        
+        if (startDate && endDate) {
+          return createdDate >= startDate && createdDate <= endDate;
         }
         
-        if (filters.dateRange.start) {
-          return createdDate >= filters.dateRange.start;
+        if (startDate) {
+          return createdDate >= startDate;
         }
         
-        if (filters.dateRange.end) {
-          return createdDate <= filters.dateRange.end;
+        if (endDate) {
+          return createdDate <= endDate;
         }
         
         return true;
