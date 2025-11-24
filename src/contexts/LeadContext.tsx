@@ -197,6 +197,9 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // State for search history
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   
+  // Track if default filters have been applied to prevent reapplication
+  const defaultFiltersApplied = React.useRef(false);
+  
   // Function to refresh data
   const fetchData = useCallback(async () => {
     console.log('Starting data fetch...');
@@ -243,9 +246,9 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     fetchData();
   }, [fetchData]);
 
-  // Set smart default filters after data loads
+  // Set smart default filters after data loads - only once
   useEffect(() => {
-    if (leads.length > 0) {
+    if (leads.length > 0 && !defaultFiltersApplied.current) {
       // Check if we have center data and if "Kenkere House" exists
       const uniqueCenters = getUniqueValues(leads, 'center');
       const hasKenkereHouse = uniqueCenters.includes('Kenkere House');
@@ -258,9 +261,10 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           center: hasKenkereHouse ? ['Kenkere House'] : [], // Only set if it exists in data
           dateRange: lastWeekRange // Set last week as default
         }));
+        defaultFiltersApplied.current = true; // Mark as applied
       }
     }
-  }, [leads.length, setFilters]); // Only depend on leads.length to avoid infinite loops
+  }, [leads.length]); // Removed setFilters from dependencies
   
   // Update lead
   const handleUpdateLead = async (lead: Lead) => {
