@@ -124,12 +124,15 @@ export const LeadsTable = ({
   };
 
   // Group leads if grouping is enabled
+  // Note: displayedLeads already includes sorting from filteredLeads
   const groupedLeads: Record<string, Lead[]> = useMemo(() => {
     if (groupByFields.length === 0) {
+      // When no grouping, apply pagination to already-sorted leads
       return {
         '': displayedLeads.slice(startIndex, startIndex + pageSize)
       };
     }
+    // When grouping, use all leads (sorted) and group them
     return createMultiLevelGroups(displayedLeads, groupByFields);
   }, [displayedLeads, groupByFields, startIndex, pageSize]);
 
@@ -452,7 +455,15 @@ export const LeadsTable = ({
                       <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('fullName')}>
                         <User className="h-4 w-4 mr-2" />
                         FULL NAME
-                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                        {sortConfig?.key === 'fullName' ? (
+                          sortConfig.direction === 'asc' ? (
+                            <ChevronUp className="ml-2 h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                        )}
                       </div>
                     </TableHead>
                   )}
@@ -461,7 +472,15 @@ export const LeadsTable = ({
                       <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('source')}>
                         <Globe className="h-4 w-4 mr-2" />
                         SOURCE
-                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                        {sortConfig?.key === 'source' ? (
+                          sortConfig.direction === 'asc' ? (
+                            <ChevronUp className="ml-2 h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                        )}
                       </div>
                     </TableHead>
                   )}
@@ -470,7 +489,15 @@ export const LeadsTable = ({
                       <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('createdAt')}>
                         <Calendar className="h-4 w-4 mr-2" />
                         CREATED
-                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                        {sortConfig?.key === 'createdAt' ? (
+                          sortConfig.direction === 'asc' ? (
+                            <ChevronUp className="ml-2 h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                        )}
                       </div>
                     </TableHead>
                   )}
@@ -479,7 +506,15 @@ export const LeadsTable = ({
                       <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('associate')}>
                         <User className="h-4 w-4 mr-2" />
                         ASSOCIATE
-                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                        {sortConfig?.key === 'associate' ? (
+                          sortConfig.direction === 'asc' ? (
+                            <ChevronUp className="ml-2 h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                        )}
                       </div>
                     </TableHead>
                   )}
@@ -488,7 +523,15 @@ export const LeadsTable = ({
                       <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('stage')}>
                         <Target className="h-4 w-4 mr-2" />
                         STAGE
-                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                        {sortConfig?.key === 'stage' ? (
+                          sortConfig.direction === 'asc' ? (
+                            <ChevronUp className="ml-2 h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                        )}
                       </div>
                     </TableHead>
                   )}
@@ -497,7 +540,15 @@ export const LeadsTable = ({
                       <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('status')}>
                         <Activity className="h-4 w-4 mr-2" />
                         STATUS
-                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                        {sortConfig?.key === 'status' ? (
+                          sortConfig.direction === 'asc' ? (
+                            <ChevronUp className="ml-2 h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                        )}
                       </div>
                     </TableHead>
                   )}
@@ -506,7 +557,15 @@ export const LeadsTable = ({
                       <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('remarks')}>
                         <FileText className="h-4 w-4 mr-2" />
                         REMARKS
-                        <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                        {sortConfig?.key === 'remarks' ? (
+                          sortConfig.direction === 'asc' ? (
+                            <ChevronUp className="ml-2 h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="ml-2 h-4 w-4 opacity-60" />
+                        )}
                       </div>
                     </TableHead>
                   )}
