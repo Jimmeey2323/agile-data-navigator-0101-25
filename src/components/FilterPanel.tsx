@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import type { DateRange } from 'react-day-picker';
 
 export function FilterPanel() {
   const { 
@@ -135,22 +136,12 @@ export function FilterPanel() {
     setFilters({ ...filters, status: [] });
   };
 
-  const handleStartDateChange = (date: Date | null) => {
+  const handleDateRangeChange = (range: DateRange | undefined) => {
     setFilters({
       ...filters,
       dateRange: {
-        ...filters.dateRange,
-        start: date,
-      },
-    });
-  };
-
-  const handleEndDateChange = (date: Date | null) => {
-    setFilters({
-      ...filters,
-      dateRange: {
-        ...filters.dateRange,
-        end: date,
+        start: range?.from || null,
+        end: range?.to || null,
       },
     });
   };
@@ -352,83 +343,62 @@ export function FilterPanel() {
                 Date Range
                 {(filters.dateRange.start || filters.dateRange.end) && (
                   <Badge className="ml-1 bg-gradient-to-r from-blue-500 to-teal-400 text-white shadow">
-                    {filters.dateRange.start && filters.dateRange.end ? '2' : '1'}
+                    ✓
                   </Badge>
                 )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 rounded-xl shadow-xl border-0 bg-white/95 backdrop-blur-lg" align="start">
               <div className="flex flex-col space-y-4 p-4">
-                <div className="grid gap-4">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-slate-700">Start Date</label>
-                    {filters.dateRange.start && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 hover:bg-red-100"
-                        onClick={() => handleStartDateChange(null)}
-                      >
-                        <X className="h-3 w-3 text-red-500" />
-                      </Button>
-                    )}
+                <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                  <div>
+                    <h4 className="font-semibold text-slate-800">Select Date Range</h4>
+                    <p className="text-xs text-slate-500 mt-0.5">Click start date, then end date</p>
                   </div>
-                  <Calendar
-                    mode="single"
-                    selected={filters.dateRange.start || undefined}
-                    onSelect={handleStartDateChange}
-                    initialFocus
-                    disabled={(date) => 
-                      filters.dateRange.end 
-                        ? date > filters.dateRange.end 
-                        : false
-                    }
-                    className="rounded-lg border-0"
-                  />
+                  {(filters.dateRange.start || filters.dateRange.end) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs hover:bg-red-50 text-red-600"
+                      onClick={handleClearDateRange}
+                    >
+                      <X className="h-3 w-3 mr-1" />
+                      Clear
+                    </Button>
+                  )}
                 </div>
                 
-                <div className="grid gap-4">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-slate-700">End Date</label>
-                    {filters.dateRange.end && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 hover:bg-red-100"
-                        onClick={() => handleEndDateChange(null)}
-                      >
-                        <X className="h-3 w-3 text-red-500" />
-                      </Button>
-                    )}
-                  </div>
-                  <Calendar
-                    mode="single"
-                    selected={filters.dateRange.end || undefined}
-                    onSelect={handleEndDateChange}
-                    disabled={(date) => 
-                      filters.dateRange.start 
-                        ? date < filters.dateRange.start 
-                        : false
-                    }
-                    className="rounded-lg border-0"
-                  />
-                </div>
+                <Calendar
+                  mode="range"
+                  selected={{
+                    from: filters.dateRange.start || undefined,
+                    to: filters.dateRange.end || undefined,
+                  }}
+                  onSelect={handleDateRangeChange}
+                  numberOfMonths={2}
+                  initialFocus
+                  className="rounded-lg border-0"
+                />
                 
-                <div className="flex justify-between pt-2 border-t border-slate-200">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="border-slate-300 hover:bg-slate-100"
-                    onClick={handleClearDateRange}
-                  >
-                    Clear Range
-                  </Button>
+                {(filters.dateRange.start || filters.dateRange.end) && (
+                  <div className="bg-slate-50 rounded-lg p-3 text-sm border border-slate-200">
+                    <div className="font-medium text-slate-700 mb-1">Selected Range:</div>
+                    <div className="text-slate-600">
+                      {filters.dateRange.start && format(filters.dateRange.start, 'PPP')}
+                      {filters.dateRange.start && filters.dateRange.end && ' → '}
+                      {filters.dateRange.end && format(filters.dateRange.end, 'PPP')}
+                      {filters.dateRange.start && !filters.dateRange.end && ' → (Select end date)'}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex justify-end pt-2 border-t border-slate-200">
                   <Button 
                     size="sm" 
                     className="bg-gradient-to-r from-blue-500 to-teal-400 text-white shadow hover:from-blue-600 hover:to-teal-500"
                     onClick={() => setDatePopoverOpen(false)}
                   >
-                    Apply
+                    Apply Filter
                   </Button>
                 </div>
               </div>
@@ -443,12 +413,6 @@ export function FilterPanel() {
               <Badge variant="outline" className="bg-blue-50 hover:bg-blue-100 gap-1 border-blue-200 text-blue-700">
                 Source: {filters.source.length}
                 <X className="h-3 w-3 cursor-pointer" onClick={() => setFilters({ ...filters, source: [] })} />
-              </Badge>
-            )}
-            {filters.associate.length > 0 && (
-              <Badge variant="outline" className="bg-green-50 hover:bg-green-100 gap-1 border-green-200 text-green-700">
-                Associate: {filters.associate.length}
-                <X className="h-3 w-3 cursor-pointer" onClick={() => setFilters({ ...filters, associate: [] })} />
               </Badge>
             )}
             {filters.center.length > 0 && (

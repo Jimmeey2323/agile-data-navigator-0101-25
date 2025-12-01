@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { formatDate, groupBy, getFollowUpStatus, formatRevenue, formatDisplayText, formatFollowUpDate } from '@/lib/utils';
+import { formatDate, groupBy, getFollowUpStatus, formatRevenue, formatDisplayText, formatFollowUpDate, getFollowUpQuestions } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -626,15 +626,54 @@ export const LeadsTable = ({
                       groupLeadsArr.map((lead: Lead) => {
                         const followUpStatus = getFollowUpStatus(lead);
                         const allComments = getAllFollowUpComments(lead);
+                        const followUpQuestions = getFollowUpQuestions(lead);
+                        const hasDelayedFollowUps = followUpQuestions.length > 0;
                         
                         return (
                           <TableRow 
-                            key={lead.id} 
-                            className="max-h-10 hover:bg-gray-50/80 transition-all duration-200 cursor-pointer border-b border-gray-100 group" 
+                            key={lead.id}
+                            className={`max-h-10 hover:bg-gray-50/80 transition-all duration-200 cursor-pointer border-b border-gray-100 group ${
+                              hasDelayedFollowUps ? 'border-l-4 border-l-amber-500 relative' : ''
+                            }`}
                             onClick={() => onLeadClick(lead)}
                           >
                             <TableCell className="max-h-10 py-1 text-center border-r border-gray-100" onClick={e => e.stopPropagation()}>
                               <div className="flex items-center justify-center gap-2">
+                                {hasDelayedFollowUps && (
+                                  <TooltipProvider>
+                                    <Tooltip delayDuration={200}>
+                                      <TooltipTrigger asChild>
+                                        <div className="flex items-center justify-center">
+                                          <AlertTriangleIcon className="h-4 w-4 text-amber-500 animate-pulse" />
+                                        </div>
+                                      </TooltipTrigger>
+                                      <TooltipContent 
+                                        side="right" 
+                                        className="max-w-md bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-400 shadow-2xl p-4 rounded-xl z-50"
+                                      >
+                                        <div className="space-y-3">
+                                          <div className="flex items-center gap-2 pb-2 border-b border-amber-300">
+                                            <AlertTriangleIcon className="h-5 w-5 text-amber-600" />
+                                            <h4 className="font-bold text-amber-900">Follow-up Issues Detected</h4>
+                                          </div>
+                                          <div className="space-y-2">
+                                            {followUpQuestions.map((question, idx) => (
+                                              <div 
+                                                key={idx} 
+                                                className="p-2.5 bg-white/80 rounded-lg border border-amber-200 text-sm text-amber-900"
+                                              >
+                                                {question}
+                                              </div>
+                                            ))}
+                                          </div>
+                                          <div className="pt-2 text-xs text-amber-700 italic border-t border-amber-200">
+                                            💡 Click on the row to edit and update follow-ups
+                                          </div>
+                                        </div>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                )}
                                 <Checkbox 
                                   checked={selectedLeads.includes(lead.id)} 
                                   onCheckedChange={checked => handleSelectLead(lead.id, checked === true)} 
