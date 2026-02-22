@@ -136,6 +136,10 @@ export const fetchLeads = async (): Promise<Lead[]> => {
       }
     });
     
+    // Debug: Log follow-up headers found
+    console.log('Follow-up headers found:', followUpHeaders);
+    console.log('All headers:', headers.map((h, i) => ({ index: i, header: h })));
+    
     // Map sheet data to Lead objects
     const leads: Lead[] = rows.slice(1).map((row: any[], index: number) => {
       const lead: Partial<Lead> = { id: `lead-${index + 1}` };
@@ -200,6 +204,16 @@ export const fetchLeads = async (): Promise<Lead[]> => {
           case 'follow_up_1_date':
           case 'fu1 date':
           case 'followup1date':
+          case 'follow up date 1':
+          case 'follow-up date 1':
+          case 'followup date 1':
+          case 'follow up1 date':
+          case 'follow-up1 date':
+          case 'followup1 date':
+          case 'first follow up date':
+          case 'first followup date':
+          case '1st follow up date':
+          case '1st followup date':
             lead.followUp1Date = value;
             break;
           case 'follow up comments (1)':
@@ -217,6 +231,16 @@ export const fetchLeads = async (): Promise<Lead[]> => {
           case 'follow_up_2_date':
           case 'fu2 date':
           case 'followup2date':
+          case 'follow up date 2':
+          case 'follow-up date 2':
+          case 'followup date 2':
+          case 'follow up2 date':
+          case 'follow-up2 date':
+          case 'followup2 date':
+          case 'second follow up date':
+          case 'second followup date':
+          case '2nd follow up date':
+          case '2nd followup date':
             lead.followUp2Date = value;
             break;
           case 'follow up comments (2)':
@@ -234,6 +258,16 @@ export const fetchLeads = async (): Promise<Lead[]> => {
           case 'follow_up_3_date':
           case 'fu3 date':
           case 'followup3date':
+          case 'follow up date 3':
+          case 'follow-up date 3':
+          case 'followup date 3':
+          case 'follow up3 date':
+          case 'follow-up3 date':
+          case 'followup3 date':
+          case 'third follow up date':
+          case 'third followup date':
+          case '3rd follow up date':
+          case '3rd followup date':
             lead.followUp3Date = value;
             break;
           case 'follow up comments (3)':
@@ -251,6 +285,16 @@ export const fetchLeads = async (): Promise<Lead[]> => {
           case 'follow_up_4_date':
           case 'fu4 date':
           case 'followup4date':
+          case 'follow up date 4':
+          case 'follow-up date 4':
+          case 'followup date 4':
+          case 'follow up4 date':
+          case 'follow-up4 date':
+          case 'followup4 date':
+          case 'fourth follow up date':
+          case 'fourth followup date':
+          case '4th follow up date':
+          case '4th followup date':
             lead.followUp4Date = value;
             break;
           case 'follow up comments (4)':
@@ -263,8 +307,32 @@ export const fetchLeads = async (): Promise<Lead[]> => {
             lead.followUp4Comments = value;
             break;
           default:
-            // Store additional columns as custom fields
-            lead[header] = value;
+            // Try to match follow-up date patterns using regex for unmatched headers
+            const followUpDateRegex = /follow.*up.*(\d+).*date|follow.*(\d+).*date|fu(\d+).*date/i;
+            const followUpCommentRegex = /follow.*up.*(\d+).*(comment|remark)|follow.*(\d+).*(comment|remark)|fu(\d+).*(comment|remark)/i;
+            
+            const dateMatch = normalizedHeader.match(followUpDateRegex);
+            const commentMatch = normalizedHeader.match(followUpCommentRegex);
+            
+            if (dateMatch) {
+              const num = dateMatch[1] || dateMatch[2] || dateMatch[3];
+              if (num === '1') lead.followUp1Date = value;
+              else if (num === '2') lead.followUp2Date = value;
+              else if (num === '3') lead.followUp3Date = value;
+              else if (num === '4') lead.followUp4Date = value;
+              console.log(`Matched follow-up ${num} date with header: ${header}`);
+            } else if (commentMatch) {
+              const num = commentMatch[1] || commentMatch[2] || commentMatch[3] || commentMatch[4] || commentMatch[5];
+              if (num === '1') lead.followUp1Comments = value;
+              else if (num === '2') lead.followUp2Comments = value;
+              else if (num === '3') lead.followUp3Comments = value;
+              else if (num === '4') lead.followUp4Comments = value;
+              console.log(`Matched follow-up ${num} comments with header: ${header}`);
+            } else {
+              // Store additional columns as custom fields
+              lead[header] = value;
+            }
+            break;
         }
       });
       
@@ -296,6 +364,17 @@ export const fetchLeads = async (): Promise<Lead[]> => {
     });
     
     console.log('Successfully fetched leads from Google Sheets, count:', leads.length);
+    
+    // Debug: Log sample follow-up data
+    console.log('Sample lead follow-up data:', leads.slice(0, 3).map(lead => ({
+      name: lead.fullName,
+      followUp1Date: lead.followUp1Date,
+      followUp2Date: lead.followUp2Date,
+      followUp3Date: lead.followUp3Date,
+      followUp4Date: lead.followUp4Date,
+      followUp1Comments: lead.followUp1Comments,
+      followUp2Comments: lead.followUp2Comments
+    })));
     
     // Update cache
     currentLeads = leads;

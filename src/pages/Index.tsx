@@ -29,7 +29,8 @@ import {
   Activity,
   UserCheck,
   Brain,
-  Sparkles
+  Sparkles,
+  MessageSquare
 } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 import { SearchBar } from "@/components/SearchBar";
@@ -39,6 +40,7 @@ import { FilterPanel } from "@/components/FilterPanel";
 import { EditLeadModal } from "@/components/EditLeadModal";
 import { LeadsCardView } from "@/components/LeadsCardView";
 import { LeadsKanbanView } from "@/components/LeadsKanbanView";
+import { LeadsFollowUpView } from "@/components/LeadsFollowUpView";
 import { PivotView } from "@/components/PivotView";
 import { CSVUploadView } from "@/components/CSVUploadView";
 import { LeadAnalytics } from "@/components/LeadAnalytics";
@@ -46,8 +48,11 @@ import { AIInsightsView } from "@/components/AIInsightsView";
 import { LeadPerformanceView } from "@/components/LeadPerformanceView";
 import { LeadTrendsView } from "@/components/LeadTrendsView";
 import { AssociateAnalytics } from "@/components/AssociateAnalytics";
+import { AssociatesDashboard } from "@/components/AssociatesDashboard";
+import { OnboardingFlow } from "@/components/OnboardingFlow";
 import { AISettingsModal } from "@/components/AISettingsModal";
 import { useLeads } from "@/contexts/LeadContext";
+import { ThemeToggle, useTheme } from "@/contexts/ThemeContext";
 import { PaginationControls } from "@/components/PaginationControls";
 import { aiService } from "@/services/aiService";
 import {
@@ -67,6 +72,7 @@ import { QuickFilters } from "@/components/QuickFilters";
 
 const Index = () => {
   const { refreshData, isRefreshing, settings, updateSettings, addLead } = useLeads();
+  const { isDark } = useTheme();
   const [showFilters, setShowFilters] = useState(false);
   const [selectedView, setSelectedView] = useState<string>("table");
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -75,6 +81,7 @@ const Index = () => {
   const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
   const [compactMode, setCompactMode] = useState(false);
   const [isAIConfigured, setIsAIConfigured] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     setIsAIConfigured(aiService.isConfigured());
@@ -141,15 +148,37 @@ const Index = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900/80 dark:to-gray-900">
-      <header className="sticky top-0 z-20 bg-white dark:bg-gray-900 border-b backdrop-blur-sm bg-white/80 dark:bg-gray-900/80">
+    <div className="flex flex-col min-h-screen">
+      <header className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-700 backdrop-blur-md">
         <div className="container py-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 bg-gradient-to-r from-blue-500 to-teal-600 bg-clip-text text-transparent">Lead Management Portal</h1>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="gap-2">
+            <div className="flex items-center gap-4">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-teal-600 bg-clip-text text-transparent">
+                Agile Data Navigator
+              </h1>
+              <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-blue-100 to-teal-100 dark:from-blue-900/50 dark:to-teal-900/50 rounded-full text-sm font-medium text-blue-700 dark:text-blue-300">
+                <Activity className="w-4 h-4" />
+                Lead Management Portal
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" className="gap-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur border-slate-200 dark:border-slate-700">
                 <Clock className="w-4 h-4" />
                 <span className="hidden sm:inline">Last updated 2 min ago</span>
+              </Button>
+              
+              {/* Theme Toggle */}
+              <ThemeToggle />
+              
+              {/* Help/Onboarding Button */}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowOnboarding(true)}
+                className="gap-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur border-slate-200 dark:border-slate-700"
+              >
+                <HelpCircle className="w-4 h-4" />
+                <span className="hidden sm:inline">Help</span>
               </Button>
               
               {/* AI Settings Button */}
@@ -157,7 +186,7 @@ const Index = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={handleAISettings}
-                className={`gap-2 ${isAIConfigured ? 'bg-purple-50 border-purple-200 text-purple-700' : ''}`}
+                className={`gap-2 bg-white/60 dark:bg-slate-800/60 backdrop-blur border-slate-200 dark:border-slate-700 ${isAIConfigured ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300' : ''}`}
               >
                 <Brain className="w-4 h-4" />
                 <span className="hidden sm:inline">
@@ -249,7 +278,7 @@ const Index = () => {
       <div className="container flex-1 py-4 pb-8">
         <Tabs defaultValue="leads-main" className="w-full">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-            <TabsList className="grid grid-cols-5 md:grid-cols-10 w-full sm:w-auto bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-1 rounded-xl shadow-sm">
+            <TabsList className="grid grid-cols-5 md:grid-cols-11 w-full sm:w-auto bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-1 rounded-xl shadow-sm">
               <TabsTrigger value="leads-main" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
                 <Table className="w-4 h-4" />
                 <span className="hidden md:inline">Leads</span>
@@ -261,6 +290,10 @@ const Index = () => {
               <TabsTrigger value="kanban-view" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
                 <Kanban className="w-4 h-4" />
                 <span className="hidden md:inline">Kanban</span>
+              </TabsTrigger>
+              <TabsTrigger value="followup-view" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
+                <MessageSquare className="w-4 h-4" />
+                <span className="hidden md:inline">Follow-ups</span>
               </TabsTrigger>
               <TabsTrigger value="pivot-view" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
                 <FileSpreadsheet className="w-4 h-4" />
@@ -433,6 +466,23 @@ const Index = () => {
             <LeadsKanbanView onLeadClick={handleLeadClick} />
           </TabsContent>
 
+          <TabsContent value="followup-view" className="mt-0">
+            <Card className="shadow-md border-border/30 mb-4 glass-card">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5" />
+                    Follow-up Comments View
+                  </CardTitle>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  View all leads with their follow-up comments and interaction history.
+                </p>
+              </CardHeader>
+            </Card>
+            <LeadsFollowUpView onLeadClick={handleLeadClick} />
+          </TabsContent>
+
           <TabsContent value="pivot-view" className="mt-0">
             <Card className="shadow-md border-border/30 mb-4 glass-card">
               <CardHeader className="pb-3">
@@ -532,17 +582,7 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="associates" className="mt-0">
-            <Card className="shadow-md border-border/30 mb-4 glass-card">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">Associate Performance Analytics</CardTitle>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Detailed analysis of individual associate performance with AI-powered insights and custom period comparisons.
-                </p>
-              </CardHeader>
-            </Card>
-            <AssociateAnalytics />
+            <AssociatesDashboard />
           </TabsContent>
         </Tabs>
       </div>
@@ -563,18 +603,39 @@ const Index = () => {
         }}
       />
 
-      <footer className="border-t bg-white dark:bg-gray-900">
-        <div className="container py-3">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">© 2023 Lead Management Portal</p>
+      <OnboardingFlow 
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        onComplete={() => {
+          setShowOnboarding(false);
+          toast.success("Welcome! Explore your enhanced lead management system.");
+        }}
+      />
+
+      <footer className="border-t border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+        <div className="container py-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-teal-600 flex items-center justify-center">
+                <Activity className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-800 dark:text-slate-200">Agile Data Navigator</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400">Powered by AI • Built with ❤️</p>
+              </div>
+            </div>
+            
             <div className="flex items-center gap-4">
               {isAIConfigured && (
-                <div className="flex items-center gap-2 text-sm text-purple-600">
-                  <Sparkles className="h-4 w-4" />
-                  <span>AI Enhanced</span>
+                <div className="flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/50 dark:to-pink-900/50 rounded-full">
+                  <Sparkles className="h-3 w-3 text-purple-600 dark:text-purple-400" />
+                  <span className="text-xs font-medium text-purple-700 dark:text-purple-300">AI Enhanced</span>
                 </div>
               )}
-              <p className="text-sm text-muted-foreground">Auto-refreshes every 15 minutes</p>
+              
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                Last synced: {new Date().toLocaleTimeString()}
+              </div>
             </div>
           </div>
         </div>

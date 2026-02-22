@@ -5,6 +5,40 @@ export interface AIConfig {
   temperature: number;
 }
 
+export interface SentimentAnalysis {
+  sentiment: 'positive' | 'neutral' | 'negative';
+  confidence: number;
+  keywords: string[];
+  category: string;
+  emotion?: string;
+  urgency?: 'low' | 'medium' | 'high';
+}
+
+export interface FollowUpAnalysis {
+  overallSentiment: SentimentAnalysis;
+  commentBreakdown: {
+    comment: string;
+    sentiment: SentimentAnalysis;
+    date: string;
+    followUpStage: number;
+  }[];
+  insights: string[];
+  recommendations: string[];
+}
+
+export interface AssociatePerformanceInsights {
+  associate: string;
+  strengths: string[];
+  improvementAreas: string[];
+  coachingRecommendations: string[];
+  sentimentTrends: {
+    week: string;
+    averageSentiment: number;
+    totalInteractions: number;
+  }[];
+  nextActions: string[];
+}
+
 export interface AIInsight {
   id: string;
   type: 'insight' | 'recommendation' | 'prediction' | 'analysis';
@@ -65,7 +99,247 @@ class AIService {
     return this.config !== null && this.config.apiKey !== '';
   }
 
-  // Make OpenAI API call
+  // Analyze sentiment of follow-up comments
+  async analyzeSentiment(text: string): Promise<SentimentAnalysis> {
+    if (!this.isConfigured()) {
+      // Fallback to simple keyword-based analysis
+      return this.fallbackSentimentAnalysis(text);
+    }
+
+    const systemPrompt = `You are an expert sentiment analyzer specializing in customer service and sales interactions. 
+    Analyze the sentiment, emotion, and urgency of customer communications.
+    Consider context, tone, and underlying emotions beyond just positive/negative classification.`;
+
+    const prompt = `Analyze this customer comment for sentiment, emotion, and urgency:
+
+"${text}"
+
+Provide analysis as JSON:
+{
+  "sentiment": "positive|neutral|negative",
+  "confidence": 0.85,
+  "keywords": ["relevant", "keywords"],
+  "category": "interest|objection|timing|price|information",
+  "emotion": "excited|concerned|frustrated|curious|etc",
+  "urgency": "low|medium|high"
+}`;
+
+    try {
+      const response = await this.callOpenAI(prompt, systemPrompt);
+      const analysis = JSON.parse(response);
+      return analysis;
+    } catch (error) {
+      console.error('Sentiment analysis failed:', error);
+      return this.fallbackSentimentAnalysis(text);
+    }
+  }
+
+  // Fallback sentiment analysis using keyword matching
+  private fallbackSentimentAnalysis(text: string): SentimentAnalysis {
+    if (!text || text.trim().length === 0) {
+      return {
+        sentiment: 'neutral',
+        confidence: 0.5,
+        keywords: [],
+        category: 'no-response'
+      };
+    }
+
+    const lowerText = text.toLowerCase();
+    
+    // Define keyword patterns
+    const positiveWords = ['interested', 'great', 'excellent', 'good', 'positive', 'excited', 'ready', 'yes', 'perfect', 'amazing'];
+    const negativeWords = ['not', 'no', 'busy', 'later', 'maybe', 'unsure', 'difficult', 'problem', 'expensive', 'cancel'];
+    const urgencyWords = ['urgent', 'asap', 'immediately', 'quick', 'fast', 'soon', 'today', 'now'];
+    const interestWords = ['interested', 'curious', 'want', 'need', 'like', 'love'];
+    const objectionWords = ['expensive', 'cost', 'price', 'budget', 'think', 'consider'];
+    
+    const positiveCount = positiveWords.filter(word => lowerText.includes(word)).length;
+    const negativeCount = negativeWords.filter(word => lowerText.includes(word)).length;
+    const urgencyCount = urgencyWords.filter(word => lowerText.includes(word)).length;
+    
+    let sentiment: 'positive' | 'neutral' | 'negative' = 'neutral';
+    let confidence = 0.6;
+    let category = 'general';
+    
+    if (positiveCount > negativeCount) {
+      sentiment = 'positive';
+      confidence = Math.min(0.8, 0.5 + positiveCount * 0.1);
+    } else if (negativeCount > positiveCount) {
+      sentiment = 'negative';
+      confidence = Math.min(0.8, 0.5 + negativeCount * 0.1);
+    }
+    
+    // Determine category
+    if (interestWords.some(word => lowerText.includes(word))) {
+      category = 'interest';
+    } else if (objectionWords.some(word => lowerText.includes(word))) {
+      category = 'objection';
+    } else if (lowerText.includes('busy') || lowerText.includes('time')) {
+      category = 'timing';
+    } else if (lowerText.includes('information') || lowerText.includes('detail')) {
+      category = 'information';
+    }
+    
+    const urgency = urgencyCount > 0 ? 'high' : 
+                   (lowerText.includes('soon') || lowerText.includes('quick')) ? 'medium' : 'low';
+    
+    return {
+      sentiment,
+      confidence,
+      keywords: [...positiveWords, ...negativeWords, ...urgencyWords].filter(word => lowerText.includes(word)),
+      category,
+      urgency: urgency as 'low' | 'medium' | 'high'
+    };
+  }
+
+  // Analyze multiple follow-up comments for a lead
+  async analyzeFollowUpComments(lead: any): Promise<FollowUpAnalysis> {
+    const comments = [
+      { text: lead.followUp1Comment, date: lead.followUp1Date, stage: 1 },
+      { text: lead.followUp2Comment, date: lead.followUp2Date, stage: 2 },
+      { text: lead.followUp3Comment, date: lead.followUp3Date, stage: 3 },
+      { text: lead.followUp4Comment, date: lead.followUp4Date, stage: 4 }
+    ].filter(comment => comment.text && comment.text.trim().length > 0);
+
+    if (comments.length === 0) {
+      return {
+        overallSentiment: {
+          sentiment: 'neutral',
+          confidence: 0.5,
+          keywords: [],
+          category: 'no-comments'
+        },
+        commentBreakdown: [],
+        insights: ['No follow-up comments available for analysis'],
+        recommendations: ['Encourage detailed follow-up documentation']
+      };
+    }
+
+    const commentAnalysis = await Promise.all(
+      comments.map(async (comment) => ({
+        comment: comment.text,
+        sentiment: await this.analyzeSentiment(comment.text),
+        date: comment.date,
+        followUpStage: comment.stage
+      }))
+    );
+
+    // Calculate overall sentiment
+    const sentiments = commentAnalysis.map(c => c.sentiment);
+    const avgConfidence = sentiments.reduce((sum, s) => sum + s.confidence, 0) / sentiments.length;
+    const positiveCount = sentiments.filter(s => s.sentiment === 'positive').length;
+    const negativeCount = sentiments.filter(s => s.sentiment === 'negative').length;
+    
+    let overallSentiment: 'positive' | 'neutral' | 'negative' = 'neutral';
+    if (positiveCount > negativeCount) overallSentiment = 'positive';
+    else if (negativeCount > positiveCount) overallSentiment = 'negative';
+
+    // Generate insights
+    const insights = [];
+    const recommendations = [];
+
+    if (overallSentiment === 'positive') {
+      insights.push('Customer shows positive engagement throughout follow-up process');
+      recommendations.push('Continue with current approach and move towards closing');
+    } else if (overallSentiment === 'negative') {
+      insights.push('Customer sentiment declining - needs immediate attention');
+      recommendations.push('Schedule a personal call to address concerns');
+    }
+
+    if (sentiments.some(s => s.category === 'objection')) {
+      insights.push('Price or feature concerns identified in communications');
+      recommendations.push('Prepare value proposition and address specific objections');
+    }
+
+    if (sentiments.some(s => s.urgency === 'high')) {
+      insights.push('High urgency detected - customer has immediate needs');
+      recommendations.push('Prioritize this lead for immediate follow-up');
+    }
+
+    return {
+      overallSentiment: {
+        sentiment: overallSentiment,
+        confidence: avgConfidence,
+        keywords: [...new Set(sentiments.flatMap(s => s.keywords))],
+        category: sentiments[sentiments.length - 1]?.category || 'general'
+      },
+      commentBreakdown: commentAnalysis,
+      insights,
+      recommendations
+    };
+  }
+
+  // Generate performance insights for associates
+  async generateAssociateInsights(associate: string, leads: any[]): Promise<AssociatePerformanceInsights> {
+    const associateLeads = leads.filter(lead => lead.associate === associate);
+    
+    if (associateLeads.length === 0) {
+      return {
+        associate,
+        strengths: [],
+        improvementAreas: ['Insufficient data for analysis'],
+        coachingRecommendations: ['Assign more leads to generate meaningful insights'],
+        sentimentTrends: [],
+        nextActions: ['Monitor performance with increased lead volume']
+      };
+    }
+
+    // Analyze conversion patterns
+    const conversions = associateLeads.filter(lead => lead.stage === 'Membership Sold');
+    const conversionRate = (conversions.length / associateLeads.length) * 100;
+    
+    // Analyze follow-up patterns
+    const followUpAnalysis = await Promise.all(
+      associateLeads.map(lead => this.analyzeFollowUpComments(lead))
+    );
+    
+    const strengths = [];
+    const improvementAreas = [];
+    const coachingRecommendations = [];
+    const nextActions = [];
+
+    // Analyze performance patterns
+    if (conversionRate > 30) {
+      strengths.push('High conversion rate indicates excellent closing skills');
+    } else if (conversionRate < 15) {
+      improvementAreas.push('Below-average conversion rate needs improvement');
+      coachingRecommendations.push('Focus on qualifying leads better and improving closing techniques');
+    }
+
+    // Analyze sentiment patterns
+    const positiveInteractions = followUpAnalysis.filter(a => a.overallSentiment.sentiment === 'positive').length;
+    const negativeInteractions = followUpAnalysis.filter(a => a.overallSentiment.sentiment === 'negative').length;
+    
+    if (positiveInteractions > negativeInteractions * 2) {
+      strengths.push('Excellent customer rapport and communication skills');
+    } else if (negativeInteractions > positiveInteractions) {
+      improvementAreas.push('Customer sentiment analysis shows room for improvement');
+      coachingRecommendations.push('Work on empathy, active listening, and objection handling');
+    }
+
+    // Generate week-over-week sentiment trends (mock data for now)
+    const sentimentTrends = Array.from({ length: 8 }, (_, i) => ({
+      week: `Week ${i + 1}`,
+      averageSentiment: 0.6 + Math.random() * 0.3,
+      totalInteractions: Math.floor(Math.random() * 15) + 5
+    }));
+
+    // Default recommendations
+    if (nextActions.length === 0) {
+      nextActions.push('Continue monitoring performance metrics');
+      nextActions.push('Schedule weekly one-on-one review meetings');
+    }
+
+    return {
+      associate,
+      strengths,
+      improvementAreas,
+      coachingRecommendations,
+      sentimentTrends,
+      nextActions
+    };
+  }
   private async callOpenAI(prompt: string, systemPrompt?: string): Promise<string> {
     if (!this.config) {
       throw new Error('AI service not configured');
