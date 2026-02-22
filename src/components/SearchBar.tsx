@@ -81,8 +81,8 @@ export function SearchBar() {
       try {
         recognition.current.start();
         setIsListening(true);
-      } catch (error) {
-        console.error('Error starting speech recognition:', error);
+      } catch {
+        // Speech recognition failed silently
       }
     }
   };

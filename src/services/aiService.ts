@@ -167,7 +167,6 @@ Format your response as JSON with the following structure:
         summary: parsed.summary
       };
     } catch (error) {
-      console.error('Error analyzing leads:', error);
       throw error;
     }
   }
@@ -214,8 +213,7 @@ Provide a JSON response with:
     try {
       const response = await this.callOpenAI(prompt, systemPrompt);
       return JSON.parse(response);
-    } catch (error) {
-      console.error('Error calculating AI lead score:', error);
+    } catch {
       return this.calculateBasicLeadScore(lead);
     }
   }

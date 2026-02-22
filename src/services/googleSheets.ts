@@ -32,9 +32,9 @@ const SHEET_NAME = '◉ Leads';
 const SHEET_RANGE = `${SHEET_NAME}!A:AF`; // Updated range to include more columns (A to AF)
 
 // OAuth credentials
-const CLIENT_ID = '416630995185-007ermh3iidknbbtdmu5vct207mdlbaa.apps.googleusercontent.com';
-const CLIENT_SECRET = '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';
-const REFRESH_TOKEN = '1//04w4V2xMUIMzACgYIARAAGAQSNwF-L9Ir5__pXDmZVYaHKOSqyauTDVmTvrCvgaL2beep4gmp8_lVED0ppM9BPWDDimHyQKk50EY';
+const CLIENT_ID = '581427527932-f6d4m2ollrro6ttnid0g69t7crppbdt7.apps.googleusercontent.com';
+const CLIENT_SECRET = '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';
+const REFRESH_TOKEN = '1//04fQo2Xgv3I26CgYIARAAGAQSNwF-L9IrlezyhDGLxIDmQkDNZgOo2WmH54p5rwqHA6D2VTjLvLAefriciqMVG99okFBle4QYMLo';
 
 // Token storage
 let tokenData = {
@@ -58,8 +58,6 @@ const getAccessToken = async (): Promise<string> => {
   }
   
   try {
-    console.log('Refreshing access token...');
-    
     const response = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: {
@@ -86,23 +84,18 @@ const getAccessToken = async (): Promise<string> => {
       expiration_time: now + (data.expires_in * 1000)
     };
     
-    console.log('Token refreshed successfully');
     return tokenData.access_token;
   } catch (error) {
-    console.error('Error refreshing token:', error);
     throw error;
   }
 };
 
 // Function to fetch all leads from Google Sheets
 export const fetchLeads = async (): Promise<Lead[]> => {
-  console.log('Fetching leads from Google Sheets...');
-  
   try {
     // Check if we have a cached version that's still fresh
     const now = Date.now();
     if (currentLeads.length > 0 && (now - lastFetchTime) < CACHE_DURATION) {
-      console.log('Using cached leads data, count:', currentLeads.length);
       return currentLeads;
     }
     
@@ -128,13 +121,11 @@ export const fetchLeads = async (): Promise<Lead[]> => {
     const rows = data.values || [];
     
     if (rows.length < 2) {
-      console.log('Sheet is empty or has only headers');
       return [];
     }
     
     // First row contains headers
     const headers = rows[0];
-    console.log('Sheet headers found:', headers.length, 'columns');
     
     // Check which follow-up headers are present
     const followUpHeaders = [];
@@ -144,9 +135,6 @@ export const fetchLeads = async (): Promise<Lead[]> => {
         followUpHeaders.push({ index, header, normalized: normalizedHeader });
       }
     });
-    if (followUpHeaders.length > 0) {
-      console.log('Follow-up related headers found:', followUpHeaders.length);
-    }
     
     // Map sheet data to Lead objects
     const leads: Lead[] = rows.slice(1).map((row: any[], index: number) => {
@@ -229,7 +217,6 @@ export const fetchLeads = async (): Promise<Lead[]> => {
           case 'follow_up_2_date':
           case 'fu2 date':
           case 'followup2date':
-            console.log(`Mapping follow-up 2 date: header="${header}", value="${value}"`);
             lead.followUp2Date = value;
             break;
           case 'follow up comments (2)':
@@ -247,7 +234,6 @@ export const fetchLeads = async (): Promise<Lead[]> => {
           case 'follow_up_3_date':
           case 'fu3 date':
           case 'followup3date':
-            console.log(`Mapping follow-up 3 date: header="${header}", value="${value}"`);
             lead.followUp3Date = value;
             break;
           case 'follow up comments (3)':
@@ -265,7 +251,6 @@ export const fetchLeads = async (): Promise<Lead[]> => {
           case 'follow_up_4_date':
           case 'fu4 date':
           case 'followup4date':
-            console.log(`Mapping follow-up 4 date: header="${header}", value="${value}"`);
             lead.followUp4Date = value;
             break;
           case 'follow up comments (4)':
@@ -283,14 +268,6 @@ export const fetchLeads = async (): Promise<Lead[]> => {
         }
       });
       
-      // Log sample of processed leads for verification
-      if (index < 2) {
-        console.log(`Lead ${index + 1} processed:`, {
-          fullName: lead.fullName,
-          hasFollowUp1: !!(lead.followUp1Date && lead.followUp1Comments),
-          hasFollowUp2: !!(lead.followUp2Date && lead.followUp2Comments)
-        });
-      }
       
       // Ensure all required fields have defaults
       return {
@@ -490,8 +467,6 @@ export const addLead = async (lead: Lead): Promise<Lead> => {
 
 // Function to delete a lead
 export const deleteLead = async (leadId: string): Promise<void> => {
-  console.log('Deleting lead from Google Sheets:', leadId);
-  
   try {
     // Get access token
     const accessToken = await getAccessToken();
@@ -509,10 +484,7 @@ export const deleteLead = async (leadId: string): Promise<void> => {
     
     // Simulate API delay
     await delay(600);
-    
-    console.log('Lead deleted successfully from Google Sheets');
   } catch (error) {
-    console.error('Error deleting lead from Google Sheets:', error);
     throw error;
   }
 };

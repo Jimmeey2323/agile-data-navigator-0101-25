@@ -133,8 +133,7 @@ export function EditLeadModal({
       }
       
       return '';
-    } catch (error) {
-      console.warn('Failed to parse date:', dateString, error);
+    } catch {
       return '';
     }
   };
@@ -192,8 +191,8 @@ export function EditLeadModal({
     try {
       const suggestions = await aiService.generateFollowUpSuggestions(leadData);
       setAiSuggestions(suggestions);
-    } catch (error) {
-      console.error('Error loading AI suggestions:', error);
+    } catch {
+      // Failed to load suggestions silently
     }
   };
 
@@ -370,8 +369,7 @@ export function EditLeadModal({
       setHasUnsavedChanges(false);
       onClose();
       clearSelection?.();
-    } catch (error) {
-      console.error('Error saving lead:', error);
+    } catch {
       toast.error('Failed to save lead');
     } finally {
       setIsLoading(false);
@@ -720,22 +718,6 @@ export function EditLeadModal({
                             const rawDate = lead ? (lead[dateField] as string) : '';
                             const hasValidDate = date && date.trim() !== '' && date.trim() !== '-';
                             const hasValidComments = comments && comments.trim() !== '' && comments.trim() !== '-';
-                            
-                            // Debug logging for the first follow-up
-                            if (num === 1) {
-                              console.log('Follow-up 1 Debug:', {
-                                formDataDate: date,
-                                rawLeadDate: rawDate,
-                                hasValidDate,
-                                hasValidComments,
-                                leadObject: lead ? {
-                                  id: lead.id,
-                                  fullName: lead.fullName,
-                                  followUp1Date: lead.followUp1Date,
-                                  followUp1Comments: lead.followUp1Comments
-                                } : 'No lead'
-                              });
-                            }
                             
                             return (
                               <div key={num} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">

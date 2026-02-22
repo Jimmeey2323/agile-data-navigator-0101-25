@@ -74,7 +74,6 @@ export function formatFollowUpDate(dateString: string): string {
   }
   
   if (isNaN(date.getTime())) {
-    console.warn('Could not parse date:', dateString);
     return dateString; // Return original if we can't parse it
   }
   

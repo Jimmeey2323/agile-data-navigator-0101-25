@@ -157,9 +157,8 @@ export const LeadsTable = ({
         if (bookmarkedLeads.includes(id)) {
           handleToggleBookmark(id, false);
         }
-      }).catch(error => {
+      }).catch(() => {
         toast.error("Failed to delete lead");
-        console.error(error);
       });
     }
   };
