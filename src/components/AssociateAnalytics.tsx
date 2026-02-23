@@ -684,7 +684,6 @@ export function AssociateAnalytics() {
                                   </Badge>
                                 </>
                               )}
-                              )}
                             </div>
                           </TableCell>
                           
