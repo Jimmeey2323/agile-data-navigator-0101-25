@@ -16,7 +16,10 @@ import {
   Activity,
   Eye,
   Zap,
-  Star
+  Star,
+  ThumbsUp,
+  ThumbsDown,
+  Meh
 } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { formatDate } from '@/lib/utils';

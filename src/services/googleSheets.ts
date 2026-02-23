@@ -36,6 +36,30 @@ const CLIENT_ID = '581427527932-f6d4m2ollrro6ttnid0g69t7crppbdt7.apps.googleuser
 const CLIENT_SECRET = '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';
 const REFRESH_TOKEN = '1//04fQo2Xgv3I26CgYIARAAGAQSNwF-L9IrlezyhDGLxIDmQkDNZgOo2WmH54p5rwqHA6D2VTjLvLAefriciqMVG99okFBle4QYMLo';
 
+// Helper functions for processing follow-up data
+const normalizeFollowUpDate = (dateValue: string | undefined): string => {
+  if (!dateValue || typeof dateValue !== 'string') return '';
+  
+  const trimmed = dateValue.trim();
+  if (trimmed === '' || trimmed === '-' || trimmed.toLowerCase() === 'n/a' || trimmed.toLowerCase() === 'na') {
+    return '';
+  }
+  
+  // Return the cleaned date string for parsing by formatters
+  return trimmed;
+};
+
+const normalizeFollowUpComment = (commentValue: string | undefined): string => {
+  if (!commentValue || typeof commentValue !== 'string') return '';
+  
+  const trimmed = commentValue.trim();
+  if (trimmed === '' || trimmed === '-' || trimmed.toLowerCase() === 'n/a' || trimmed.toLowerCase() === 'na') {
+    return '';
+  }
+  
+  return trimmed;
+};
+
 // Token storage
 let tokenData = {
   access_token: '',
@@ -350,15 +374,15 @@ export const fetchLeads = async (): Promise<Lead[]> => {
         createdAt: lead.createdAt || new Date().toISOString().split('T')[0],
         center: lead.center || '',
         remarks: lead.remarks || '',
-        // Only include follow-up data if it's meaningful (not empty, dash, or placeholder)
-        followUp1Date: (lead.followUp1Date && lead.followUp1Date.trim() !== '' && lead.followUp1Date.trim() !== '-') ? lead.followUp1Date : '',
-        followUp1Comments: (lead.followUp1Comments && lead.followUp1Comments.trim() !== '' && lead.followUp1Comments.trim() !== '-') ? lead.followUp1Comments : '',
-        followUp2Date: (lead.followUp2Date && lead.followUp2Date.trim() !== '' && lead.followUp2Date.trim() !== '-') ? lead.followUp2Date : '',
-        followUp2Comments: (lead.followUp2Comments && lead.followUp2Comments.trim() !== '' && lead.followUp2Comments.trim() !== '-') ? lead.followUp2Comments : '',
-        followUp3Date: (lead.followUp3Date && lead.followUp3Date.trim() !== '' && lead.followUp3Date.trim() !== '-') ? lead.followUp3Date : '',
-        followUp3Comments: (lead.followUp3Comments && lead.followUp3Comments.trim() !== '' && lead.followUp3Comments.trim() !== '-') ? lead.followUp3Comments : '',
-        followUp4Date: (lead.followUp4Date && lead.followUp4Date.trim() !== '' && lead.followUp4Date.trim() !== '-') ? lead.followUp4Date : '',
-        followUp4Comments: (lead.followUp4Comments && lead.followUp4Comments.trim() !== '' && lead.followUp4Comments.trim() !== '-') ? lead.followUp4Comments : '',
+        // Process and validate follow-up data
+        followUp1Date: normalizeFollowUpDate(lead.followUp1Date),
+        followUp1Comments: normalizeFollowUpComment(lead.followUp1Comments),
+        followUp2Date: normalizeFollowUpDate(lead.followUp2Date),
+        followUp2Comments: normalizeFollowUpComment(lead.followUp2Comments),
+        followUp3Date: normalizeFollowUpDate(lead.followUp3Date),
+        followUp3Comments: normalizeFollowUpComment(lead.followUp3Comments),
+        followUp4Date: normalizeFollowUpDate(lead.followUp4Date),
+        followUp4Comments: normalizeFollowUpComment(lead.followUp4Comments),
         ...lead
       } as Lead;
     });

@@ -35,7 +35,7 @@ import {
 } from 'lucide-react';
 import { useLeads } from '@/contexts/LeadContext';
 import { Lead } from '@/services/googleSheets';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatFollowUpDate } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
 interface LeadsFollowUpViewProps {
@@ -87,19 +87,6 @@ const getStageColor = (stage: string) => {
     'Customer': 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/10 dark:text-green-300 dark:border-green-800'
   };
   return colors[stage] || colors['Lead'];
-};
-
-const formatFollowUpDate = (dateString: string | undefined): string => {
-  if (!dateString || dateString.trim() === '' || dateString.trim() === '-') {
-    return '';
-  }
-  
-  try {
-    return formatDate(dateString);
-  } catch (error) {
-    console.log('Error formatting date:', dateString, error);
-    return dateString; // Return original string if formatting fails
-  }
 };
 
 const getFollowUps = (lead: Lead): boolean => {

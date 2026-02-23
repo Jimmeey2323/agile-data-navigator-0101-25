@@ -12,7 +12,19 @@ export function delay(ms: number) {
 export function formatDate(dateString: string | Date, format?: string): string {
   if (!dateString) return '';
   
-  const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+  let date: Date;
+  
+  if (typeof dateString === 'string') {
+    // For follow-up dates, use our enhanced parsing
+    const parsedDate = parseFollowUpDate(dateString);
+    if (parsedDate) {
+      date = parsedDate;
+    } else {
+      date = new Date(dateString);
+    }
+  } else {
+    date = dateString;
+  }
   
   if (isNaN(date.getTime())) {
     return '';
@@ -34,51 +46,105 @@ export function formatDate(dateString: string | Date, format?: string): string {
   });
 }
 
+// Enhanced date parsing function that handles multiple formats
+function parseFollowUpDate(dateString: string): Date | null {
+  if (!dateString || dateString.trim() === '' || dateString.trim() === '-') {
+    return null;
+  }
+
+  const cleanDate = dateString.trim();
+  let parsedDate: Date | null = null;
+
+  // Try direct parsing first (handles ISO formats like YYYY-MM-DD)
+  parsedDate = new Date(cleanDate);
+  if (!isNaN(parsedDate.getTime()) && cleanDate.includes('-') && cleanDate.length >= 8) {
+    return parsedDate;
+  }
+
+  // Try DD/MM/YYYY format (common in Google Sheets)
+  const ddmmyyyyMatch = cleanDate.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (ddmmyyyyMatch) {
+    const [, day, month, year] = ddmmyyyyMatch;
+    const dayNum = parseInt(day);
+    const monthNum = parseInt(month);
+    const yearNum = parseInt(year);
+    
+    // Validate date components
+    if (dayNum >= 1 && dayNum <= 31 && monthNum >= 1 && monthNum <= 12) {
+      // Assume DD/MM/YYYY format (day first) if day > 12
+      if (dayNum > 12) {
+        parsedDate = new Date(yearNum, monthNum - 1, dayNum);
+      } else {
+        // For ambiguous cases (both <= 12), try DD/MM/YYYY first
+        parsedDate = new Date(yearNum, monthNum - 1, dayNum);
+        // Validate the parsed date makes sense
+        if (parsedDate.getDate() !== dayNum || parsedDate.getMonth() !== monthNum - 1) {
+          // Try MM/DD/YYYY format instead
+          parsedDate = new Date(yearNum, dayNum - 1, monthNum);
+        }
+      }
+      
+      if (!isNaN(parsedDate.getTime())) {
+        return parsedDate;
+      }
+    }
+  }
+
+  // Try MM/DD/YYYY format
+  const mmddyyyyMatch = cleanDate.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (mmddyyyyMatch) {
+    const [, month, day, year] = mmddyyyyMatch;
+    const dayNum = parseInt(day);
+    const monthNum = parseInt(month);
+    const yearNum = parseInt(year);
+    
+    if (dayNum >= 1 && dayNum <= 31 && monthNum >= 1 && monthNum <= 12) {
+      parsedDate = new Date(yearNum, monthNum - 1, dayNum);
+      if (!isNaN(parsedDate.getTime())) {
+        return parsedDate;
+      }
+    }
+  }
+
+  // Try DD-MM-YYYY or DD.MM.YYYY formats
+  const ddmmyyyyDashMatch = cleanDate.match(/^(\d{1,2})[-.](\d{1,2})[-.](\d{4})$/);
+  if (ddmmyyyyDashMatch) {
+    const [, day, month, year] = ddmmyyyyDashMatch;
+    const dayNum = parseInt(day);
+    const monthNum = parseInt(month);
+    const yearNum = parseInt(year);
+    
+    if (dayNum >= 1 && dayNum <= 31 && monthNum >= 1 && monthNum <= 12) {
+      parsedDate = new Date(yearNum, monthNum - 1, dayNum);
+      if (!isNaN(parsedDate.getTime())) {
+        return parsedDate;
+      }
+    }
+  }
+
+  // Try parsing with natural language (e.g., "Jan 15, 2024", "15 Jan 2024")
+  const naturalDate = new Date(cleanDate);
+  if (!isNaN(naturalDate.getTime())) {
+    return naturalDate;
+  }
+
+  return null;
+}
+
 export function formatFollowUpDate(dateString: string): string {
   if (!dateString || dateString.trim() === '' || dateString.trim() === '-') {
     return 'No date';
   }
   
-  // Try to parse different date formats
-  let date: Date | null = null;
+  const parsedDate = parseFollowUpDate(dateString);
   
-  // Try parsing as-is first
-  date = new Date(dateString);
-  
-  // If that fails, try common date formats
-  if (isNaN(date.getTime())) {
-    // Try DD/MM/YYYY format
-    const ddmmyyyy = dateString.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if (ddmmyyyy) {
-      const [, day, month, year] = ddmmyyyy;
-      date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    }
-    
-    // Try MM/DD/YYYY format
-    if (isNaN(date.getTime())) {
-      const mmddyyyy = dateString.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-      if (mmddyyyy) {
-        const [, month, day, year] = mmddyyyy;
-        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-      }
-    }
-    
-    // Try YYYY-MM-DD format
-    if (isNaN(date.getTime())) {
-      const yyyymmdd = dateString.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-      if (yyyymmdd) {
-        const [, year, month, day] = yyyymmdd;
-        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-      }
-    }
-  }
-  
-  if (isNaN(date.getTime())) {
-    return dateString; // Return original if we can't parse it
+  if (!parsedDate) {
+    // If we can't parse it, return the original string
+    return dateString;
   }
   
   // Format as DD-MMM (e.g., "25-Dec")
-  return date.toLocaleDateString('en-GB', {
+  return parsedDate.toLocaleDateString('en-GB', {
     day: '2-digit',
     month: 'short'
   }).replace(' ', '-');
