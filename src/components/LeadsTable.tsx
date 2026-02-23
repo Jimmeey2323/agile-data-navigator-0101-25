@@ -259,31 +259,30 @@ export const LeadsTable = ({
       { date: lead.followUp4Date, comments: lead.followUp4Comments, number: 4 }
     ];
     
+    // Use the same logic as getFollowUpStatus for consistency
     const validFollowUps = followUps.filter(followUp => {
-      // Only include follow-ups that have BOTH meaningful comments AND valid dates
+      // Check if there's a valid date
+      const hasValidDate = followUp.date && 
+        typeof followUp.date === 'string' &&
+        followUp.date.trim() !== '' && 
+        followUp.date.trim() !== '-';
+        
+      // Check if there are valid comments using the same logic as getFollowUpStatus
       const hasValidComments = followUp.comments && 
         typeof followUp.comments === 'string' &&
         followUp.comments.trim() !== '' && 
         followUp.comments.trim() !== '-' &&
-        followUp.comments.toLowerCase().trim() !== 'no comments' &&
-        followUp.comments.toLowerCase().trim() !== 'n/a';
-        
-      const hasValidDate = followUp.date && 
-        typeof followUp.date === 'string' &&
-        followUp.date.trim() !== '' && 
-        followUp.date.trim() !== '-' &&
-        followUp.date.toLowerCase().trim() !== 'no date' &&
-        followUp.date.toLowerCase().trim() !== 'n/a' &&
-        followUp.date !== '1900-01-01'; // Avoid placeholder dates
+        followUp.comments.trim() !== '.';
       
-      return hasValidComments && hasValidDate;
+      // Return follow-ups that have both date and comments (same as count logic)
+      return hasValidDate && hasValidComments;
     });
     
     const formattedComments = validFollowUps.map(followUp => {
       const formattedDate = formatFollowUpDate(followUp.date);
       const formattedComment = formatDisplayText(followUp.comments);
       
-      return `${formattedDate} - ${formattedComment}`;
+      return `Follow-up ${followUp.number} (${formattedDate}): ${formattedComment}`;
     });
     
     return formattedComments.length > 0 ? formattedComments.join(' | ') : '';

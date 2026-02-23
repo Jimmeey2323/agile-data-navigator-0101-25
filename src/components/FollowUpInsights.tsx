@@ -16,13 +16,7 @@ import {
   Activity,
   Eye,
   Zap,
-  Star,
-  Heart,
-  Frown,
-  Meh,
-  Smile,
-  ThumbsUp,
-  ThumbsDown
+  Star
 } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { formatDate } from '@/lib/utils';
@@ -58,24 +52,9 @@ interface FollowUpAnalysis {
 const SENTIMENT_COLORS = ['#10b981', '#f59e0b', '#ef4444']; // green, yellow, red
 const FOLLOW_UP_COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b']; // blue, purple, green, yellow
 
-// Mock AI sentiment analysis - in real app, this would call the AI service
-const analyzeSentiment = (comment: string): 'positive' | 'neutral' | 'negative' => {
-  if (!comment) return 'neutral';
-  const lowerComment = comment.toLowerCase();
-  
-  const positiveWords = ['interested', 'great', 'excellent', 'good', 'positive', 'excited', 'ready', 'yes'];
-  const negativeWords = ['not', 'no', 'busy', 'later', 'maybe', 'unsure', 'difficult', 'problem'];
-  
-  const positiveCount = positiveWords.filter(word => lowerComment.includes(word)).length;
-  const negativeCount = negativeWords.filter(word => lowerComment.includes(word)).length;
-  
-  if (positiveCount > negativeCount) return 'positive';
-  if (negativeCount > positiveCount) return 'negative';
-  return 'neutral';
-};
-
+// Simple comment categorization based on content
 const categorizeComment = (comment: string): string => {
-  if (!comment) return 'No Response';
+  if (!comment || comment.trim() === '' || comment.trim() === '-') return 'No Response';
   const lowerComment = comment.toLowerCase();
   
   if (lowerComment.includes('interested') || lowerComment.includes('ready')) return 'High Interest';
@@ -85,6 +64,15 @@ const categorizeComment = (comment: string): string => {
   if (lowerComment.includes('call') || lowerComment.includes('meeting')) return 'Wants Contact';
   if (lowerComment.includes('information') || lowerComment.includes('details')) return 'Needs Info';
   return 'General Response';
+};
+
+const getResponseSentiment = (comment: string): 'positive' | 'neutral' | 'negative' => {
+  if (!comment || comment.trim() === '' || comment.trim() === '-') return 'neutral';
+  const category = categorizeComment(comment);
+  
+  if (category === 'High Interest' || category === 'Wants Contact') return 'positive';
+  if (category === 'Timing Issues' || category === 'Price Concerns') return 'negative';
+  return 'neutral';
 };
 
 export function FollowUpInsights() {
@@ -134,7 +122,7 @@ export function FollowUpInsights() {
                          day === 5 ? lead.followUp3Comment : lead.followUp4Comment;
           
           if (comment) {
-            const sentiment = analyzeSentiment(comment);
+            const sentiment = getResponseSentiment(comment);
             sentimentCounts[sentiment]++;
             
             const category = categorizeComment(comment);
@@ -193,7 +181,7 @@ export function FollowUpInsights() {
         associate,
         totalFollowUps,
         completionRate: totalFollowUps > 0 ? (completedFollowUps / totalFollowUps) * 100 : 0,
-        avgDaysToComplete: 2.5, // Mock calculation
+        avgDaysToComplete: 0, // Would need real time tracking for accurate data
         sentimentBreakdown: {
           positive: sentimentCounts.positive,
           neutral: sentimentCounts.neutral,
@@ -272,14 +260,14 @@ export function FollowUpInsights() {
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {followUpAnalysis.map(analysis => (
-              <Card key={analysis.associate} className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">
+              <Card key={analysis.associate}>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">{analysis.associate}</CardTitle>
+                  <CardTitle className="text-lg text-slate-900">{analysis.associate}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-slate-600">Completion Rate</span>
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                    <Badge variant="secondary">
                       {analysis.completionRate.toFixed(1)}%
                     </Badge>
                   </div>
@@ -292,7 +280,7 @@ export function FollowUpInsights() {
                   
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-600">Avg. Days</span>
-                    <span className="font-semibold">{analysis.avgDaysToComplete}</span>
+                    <span className="font-semibold">{analysis.avgDaysToComplete || 'N/A'}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -302,8 +290,8 @@ export function FollowUpInsights() {
           {/* Follow-up Timeline */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 text-slate-900">
+                <Calendar className="h-5 w-5 text-slate-600" />
                 Follow-up Timeline Analysis
               </CardTitle>
             </CardHeader>
@@ -328,8 +316,8 @@ export function FollowUpInsights() {
             {/* Sentiment Overview */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-pink-600" />
+                <CardTitle className="flex items-center gap-2 text-slate-900">
+                  <Activity className="h-5 w-5 text-slate-600" />
                   Sentiment Distribution
                 </CardTitle>
               </CardHeader>

@@ -30,7 +30,8 @@ import {
   UserCheck,
   Brain,
   Sparkles,
-  MessageSquare
+  MessageSquare,
+  Download
 } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 import { SearchBar } from "@/components/SearchBar";
@@ -43,14 +44,11 @@ import { LeadsKanbanView } from "@/components/LeadsKanbanView";
 import { LeadsFollowUpView } from "@/components/LeadsFollowUpView";
 import { PivotView } from "@/components/PivotView";
 import { CSVUploadView } from "@/components/CSVUploadView";
-import { LeadAnalytics } from "@/components/LeadAnalytics";
-import { AIInsightsView } from "@/components/AIInsightsView";
-import { LeadPerformanceView } from "@/components/LeadPerformanceView";
-import { LeadTrendsView } from "@/components/LeadTrendsView";
-import { AssociateAnalytics } from "@/components/AssociateAnalytics";
 import { AssociatesDashboard } from "@/components/AssociatesDashboard";
 import { OnboardingFlow } from "@/components/OnboardingFlow";
 import { AISettingsModal } from "@/components/AISettingsModal";
+import { ExportModal } from "@/components/ExportModal";
+import { ConsolidatedInsightsView } from "@/components/ConsolidatedInsightsView";
 import { useLeads } from "@/contexts/LeadContext";
 import { ThemeToggle, useTheme } from "@/contexts/ThemeContext";
 import { PaginationControls } from "@/components/PaginationControls";
@@ -82,6 +80,7 @@ const Index = () => {
   const [compactMode, setCompactMode] = useState(false);
   const [isAIConfigured, setIsAIConfigured] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
 
   useEffect(() => {
     setIsAIConfigured(aiService.isConfigured());
@@ -278,7 +277,7 @@ const Index = () => {
       <div className="container flex-1 py-4 pb-8">
         <Tabs defaultValue="leads-main" className="w-full">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-            <TabsList className="grid grid-cols-5 md:grid-cols-11 w-full sm:w-auto bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-1 rounded-xl shadow-sm">
+            <TabsList className="grid grid-cols-4 md:grid-cols-8 w-full sm:w-auto bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-1 rounded-xl shadow-sm">
               <TabsTrigger value="leads-main" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
                 <Table className="w-4 h-4" />
                 <span className="hidden md:inline">Leads</span>
@@ -303,21 +302,10 @@ const Index = () => {
                 <Upload className="w-4 h-4" />
                 <span className="hidden md:inline">CSV Upload</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
-                <BarChart3 className="w-4 h-4" />
-                <span className="hidden md:inline">Analytics</span>
-              </TabsTrigger>
-              <TabsTrigger value="ai-insights" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
+              <TabsTrigger value="insights" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
                 <BrainCircuit className="w-4 h-4" />
-                <span className="hidden md:inline">AI Insights</span>
-              </TabsTrigger>
-              <TabsTrigger value="performance" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
-                <TrendingUp className="w-4 h-4" />
-                <span className="hidden md:inline">Performance</span>
-              </TabsTrigger>
-              <TabsTrigger value="trends" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
-                <Activity className="w-4 h-4" />
-                <span className="hidden md:inline">Trends</span>
+                <span className="hidden md:inline">Insights</span>
+                {isAIConfigured && <Sparkles className="w-3 h-3" />}
               </TabsTrigger>
               <TabsTrigger value="associates" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
                 <UserCheck className="w-4 h-4" />
@@ -387,6 +375,15 @@ const Index = () => {
                   <span>Bulk Edit ({selectedLeads.length})</span>
                 </Button>
               )}
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="gap-2"
+                onClick={() => setExportModalOpen(true)}
+              >
+                <Download className="w-4 h-4" />
+                <span>Export</span>
+              </Button>
               <Button 
                 size="sm" 
                 className="gap-2"
@@ -511,74 +508,8 @@ const Index = () => {
             <CSVUploadView />
           </TabsContent>
 
-          <TabsContent value="analytics" className="mt-0">
-            <Card className="shadow-md border-border/30 mb-4 glass-card">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">Analytics</CardTitle>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Visualize your lead data with interactive charts and reports.
-                </p>
-              </CardHeader>
-            </Card>
-            <LeadAnalytics />
-          </TabsContent>
-
-          <TabsContent value="ai-insights" className="mt-0">
-            <Card className="shadow-md border-border/30 mb-4 glass-card">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">AI Insights</CardTitle>
-                  {!isAIConfigured && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={handleAISettings}
-                      className="gap-2 border-purple-200 text-purple-700 hover:bg-purple-50"
-                    >
-                      <Brain className="h-4 w-4" />
-                      Setup AI
-                    </Button>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {isAIConfigured 
-                    ? 'Gain AI-powered insights from your lead data with advanced analysis and recommendations.'
-                    : 'Configure OpenAI integration to unlock AI-powered insights and recommendations.'
-                  }
-                </p>
-              </CardHeader>
-            </Card>
-            <AIInsightsView />
-          </TabsContent>
-
-          <TabsContent value="performance" className="mt-0">
-            <Card className="shadow-md border-border/30 mb-4 glass-card">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">Lead Performance Analytics</CardTitle>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Month-on-month performance comparison across different metrics and channels.
-                </p>
-              </CardHeader>
-            </Card>
-            <LeadPerformanceView />
-          </TabsContent>
-
-          <TabsContent value="trends" className="mt-0">
-            <Card className="shadow-md border-border/30 mb-4 glass-card">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">Lead Trends & Insights</CardTitle>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Comprehensive trend analysis and performance comparisons over time.
-                </p>
-              </CardHeader>
-            </Card>
-            <LeadTrendsView />
+          <TabsContent value="insights" className="mt-0">
+            <ConsolidatedInsightsView />
           </TabsContent>
 
           <TabsContent value="associates" className="mt-0">
@@ -610,6 +541,11 @@ const Index = () => {
           setShowOnboarding(false);
           toast.success("Welcome! Explore your enhanced lead management system.");
         }}
+      />
+
+      <ExportModal 
+        isOpen={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
       />
 
       <footer className="border-t border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">

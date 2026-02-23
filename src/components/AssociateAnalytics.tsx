@@ -6,7 +6,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { useLeads } from '@/contexts/LeadContext';
 import { 
   TrendingUp, 
@@ -35,13 +34,7 @@ import {
   AlertTriangle,
   CalendarCheck,
   CalendarX,
-  Timer,
-  Flame,
-  Crown,
-  Trophy,
-  Medal,
-  ChevronUp,
-  ChevronDown
+  Timer
 } from 'lucide-react';
 import { formatDate, formatNumber, formatRevenue } from '@/lib/utils';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
@@ -107,8 +100,6 @@ export function AssociateAnalytics() {
   const [sortBy, setSortBy] = useState<string>('conversionRate');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [isLoading, setIsLoading] = useState(false);
-  const [aiPrompt, setAiPrompt] = useState('');
-  const [aiResponse, setAiResponse] = useState('');
 
   const periodOptions = [
     { value: '3months', label: 'Last 3 Months' },
@@ -255,7 +246,7 @@ export function AssociateAnalytics() {
         totalLeads: associateLeads.length,
         convertedLeads: convertedLeads.length,
         conversionRate: associateLeads.length > 0 ? (convertedLeads.length / associateLeads.length) * 100 : 0,
-        avgResponseTime: Math.random() * 5 + 1, // Mock data: 1-6 hours
+        avgResponseTime: 0, // Removed mock data - would need real response time tracking
         followUpRate: associateLeads.length > 0 ? (leadsWithFollowUps.length / associateLeads.length) * 100 : 0,
         revenue: convertedLeads.length * 75000,
         followUpCompliance: avgCompliance,
@@ -433,69 +424,61 @@ export function AssociateAnalytics() {
       </Card>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid grid-cols-5 w-full bg-white shadow-lg rounded-xl border border-slate-200">
-          <TabsTrigger value="overview" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-teal-600 data-[state=active]:text-white">
+        <TabsList className="grid grid-cols-5 w-full">
+          <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Overview
           </TabsTrigger>
-          <TabsTrigger value="performance" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-teal-600 data-[state=active]:text-white">
+          <TabsTrigger value="performance" className="flex items-center gap-2">
             <Target className="h-4 w-4" />
             Performance
           </TabsTrigger>
-          <TabsTrigger value="comparison" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-teal-600 data-[state=active]:text-white">
+          <TabsTrigger value="comparison" className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
             Comparison
           </TabsTrigger>
-          <TabsTrigger value="followups" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-teal-600 data-[state=active]:text-white">
+          <TabsTrigger value="followups" className="flex items-center gap-2">
             <CalendarCheck className="h-4 w-4" />
             Follow-ups
           </TabsTrigger>
-          <TabsTrigger value="ai-insights" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-teal-600 data-[state=active]:text-white">
+          <TabsTrigger value="ai-insights" className="flex items-center gap-2">
             <BrainCircuit className="h-4 w-4" />
-            AI Insights
+            Insights
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-6 space-y-6">
           {/* Top Performers Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {filteredAssociates.slice(0, 3).map((associate, index) => {
               if (!associate) return null;
               
-              const performance = getPerformanceLevel(associate.conversionRate);
-              const rankColors = ['from-yellow-400 to-orange-500', 'from-gray-300 to-gray-400', 'from-orange-400 to-amber-500'];
-              const rankIcons = [<Crown className="h-5 w-5" key="crown" />, <Medal className="h-5 w-5" key="medal" />, <Trophy className="h-5 w-5" key="trophy" />];
+              const rankLabels = ['1st Place', '2nd Place', '3rd Place'];
               
               return (
-                <Card key={associate.associate || index} className="relative overflow-hidden bg-white shadow-xl border-0 transform hover:scale-105 transition-all duration-300">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${rankColors[index] || 'from-gray-400 to-slate-500'} opacity-10`}></div>
-                  <CardHeader className="relative pb-2">
+                <Card key={associate.associate || index}>
+                  <CardHeader>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-12 w-12 border-2 border-white shadow-lg">
-                          <AvatarFallback className={`bg-gradient-to-br ${rankColors[index] || 'from-gray-400 to-slate-500'} text-white font-bold`}>
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className="bg-slate-100 text-slate-700 font-semibold">
                             {getInitials(associate.associate)}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <h3 className="font-bold text-lg text-slate-800">{associate.associate || 'Unknown'}</h3>
-                          <div className="flex items-center gap-2">
-                            {rankIcons[index]}
-                            <span className="text-sm font-medium text-slate-600">
-                              {index === 0 ? '1st Place' : index === 1 ? '2nd Place' : '3rd Place'}
-                            </span>
-                          </div>
+                          <h3 className="font-semibold text-slate-900">{associate.associate || 'Unknown'}</h3>
+                          <p className="text-sm text-slate-500">{rankLabels[index]}</p>
                         </div>
                       </div>
-                      <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${rankColors[index] || 'from-gray-400 to-slate-500'} flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
+                      <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 font-bold">
                         {index + 1}
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="relative space-y-4">
+                  <CardContent className="space-y-3">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-slate-800">
+                        <div className="text-xl font-bold text-slate-900">
                           <CountUp end={associate.conversionRate || 0} duration={2} decimals={1} suffix="%" />
                         </div>
                         <div className="text-xs text-slate-600">Conversion Rate</div>
@@ -625,20 +608,16 @@ export function AssociateAnalytics() {
                         >
                           <TableCell className="font-semibold text-slate-800 h-[60px] text-left align-middle">
                             <div className="flex items-center gap-3">
-                              <Avatar className="h-8 w-8 border">
-                                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-teal-600 text-white text-xs font-bold">
+                              <Avatar className="h-8 w-8">
+                                <AvatarFallback className="bg-slate-100 text-slate-700 text-xs font-semibold">
                                   {getInitials(associate.associate)}
                                 </AvatarFallback>
                               </Avatar>
                               <div>
                                 <div className="font-semibold">{associate.associate || 'Unknown'}</div>
                                 {index < 3 && (
-                                  <Badge className={`text-xs ${
-                                    index === 0 ? 'bg-yellow-100 text-yellow-800' :
-                                    index === 1 ? 'bg-gray-100 text-gray-800' :
-                                    'bg-orange-100 text-orange-800'
-                                  }`}>
-                                    {index === 0 ? '🥇 Top' : index === 1 ? '🥈 2nd' : '🥉 3rd'}
+                                  <Badge variant="secondary" className="text-xs">
+                                    {index === 0 ? 'Top Performer' : index === 1 ? '2nd Place' : '3rd Place'}
                                   </Badge>
                                 )}
                               </div>
@@ -646,19 +625,16 @@ export function AssociateAnalytics() {
                           </TableCell>
                           
                           <TableCell className="text-center h-[60px] align-middle">
-                            <Badge className="bg-blue-100 text-blue-800 border-blue-200 font-mono text-xs px-2 py-1 w-[80px] justify-center border rounded-xl">
+                            <Badge variant="outline" className="font-mono text-xs">
                               {associate.totalLeads || 0}
                             </Badge>
                           </TableCell>
                           
                           <TableCell className="text-center h-[60px] align-middle">
                             <div className="flex flex-col items-center gap-1">
-                              <Badge className={`font-mono text-xs px-2 py-1 w-[80px] justify-center border rounded-xl ${
-                                (associate.conversionRate || 0) >= 30 ? 'bg-green-100 text-green-800 border-green-200' :
-                                (associate.conversionRate || 0) >= 20 ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                                (associate.conversionRate || 0) >= 10 ? 'bg-orange-100 text-orange-800 border-orange-200' :
-                                'bg-red-100 text-red-800 border-red-200'
-                              }`}>
+                              <Badge variant={(
+                                (associate.conversionRate || 0) >= 25 ? 'default' : 'secondary'
+                              )} className="font-mono text-xs">
                                 {(associate.conversionRate || 0).toFixed(1)}%
                               </Badge>
                               {previousMonth && getChangeIndicator(
@@ -670,7 +646,7 @@ export function AssociateAnalytics() {
                           
                           <TableCell className="text-center h-[60px] align-middle">
                             <div className="flex flex-col items-center gap-1">
-                              <Badge className="bg-green-100 text-green-800 border-green-200 font-mono text-xs px-2 py-1 w-[100px] justify-center border rounded-xl">
+                              <Badge variant="outline" className="font-mono text-xs">
                                 {formatRevenue(associate.revenue || 0)}
                               </Badge>
                               {previousMonth && getChangeIndicator(
@@ -682,11 +658,9 @@ export function AssociateAnalytics() {
                           
                           <TableCell className="text-center h-[60px] align-middle">
                             <div className="flex flex-col items-center gap-2">
-                              <Badge className={`font-mono text-xs px-2 py-1 w-[80px] justify-center border rounded-xl ${
-                                (associate.followUpCompliance || 0) >= 80 ? 'bg-green-100 text-green-800 border-green-200' :
-                                (associate.followUpCompliance || 0) >= 60 ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                                'bg-red-100 text-red-800 border-red-200'
-                              }`}>
+                              <Badge variant={(
+                                (associate.followUpCompliance || 0) >= 80 ? 'default' : 'secondary'
+                              )} className="font-mono text-xs">
                                 {(associate.followUpCompliance || 0).toFixed(1)}%
                               </Badge>
                               <Progress value={associate.followUpCompliance || 0} className="w-16 h-1" />
@@ -697,18 +671,19 @@ export function AssociateAnalytics() {
                             <div className="flex items-center justify-center gap-2">
                               {(associate.overdueFollowUps || 0) > 0 ? (
                                 <>
-                                  <CalendarX className="h-4 w-4 text-red-500" />
-                                  <Badge className="bg-red-100 text-red-800 border-red-200 font-mono text-xs px-2 py-1 border rounded-xl">
+                                  <AlertTriangle className="h-4 w-4 text-slate-500" />
+                                  <Badge variant="outline" className="font-mono text-xs">
                                     {associate.overdueFollowUps || 0}
                                   </Badge>
                                 </>
                               ) : (
                                 <>
-                                  <CheckCircle className="h-4 w-4 text-green-500" />
-                                  <Badge className="bg-green-100 text-green-800 border-green-200 font-mono text-xs px-2 py-1 border rounded-xl">
+                                  <CheckCircle className="h-4 w-4 text-slate-400" />
+                                  <Badge variant="secondary" className="font-mono text-xs">
                                     0
                                   </Badge>
                                 </>
+                              )}
                               )}
                             </div>
                           </TableCell>
@@ -1038,100 +1013,64 @@ export function AssociateAnalytics() {
         </TabsContent>
 
         <TabsContent value="ai-insights" className="mt-6 space-y-6">
-          {/* AI Analysis Section */}
-          <Card className="shadow-xl border-slate-200">
-            <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50">
-              <CardTitle className="flex items-center gap-2 text-slate-800">
-                <BrainCircuit className="h-5 w-5 text-indigo-600" />
-                AI-Powered Performance Insights
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-slate-900">
+                <BrainCircuit className="h-5 w-5 text-slate-600" />
+                Performance Analysis Summary
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              <div>
-                <label className="text-sm font-medium text-slate-700 mb-2 block">Analysis Prompt</label>
-                <Textarea
-                  placeholder="Ask for specific insights about associate performance, follow-up compliance, or revenue trends..."
-                  value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
-                  className="min-h-[100px]"
-                />
-              </div>
-              
-              <Button 
-                onClick={() => {
-                  setIsLoading(true);
-                  setTimeout(() => {
-                    const topPerformer = filteredAssociates[0];
-                    const totalRevenue = filteredAssociates.reduce((sum, a) => sum + (a?.revenue || 0), 0);
-                    const avgRevenue = totalRevenue / (filteredAssociates.length || 1);
+            <CardContent className="space-y-4">
+              {(() => {
+                const topPerformer = filteredAssociates[0];
+                const totalRevenue = filteredAssociates.reduce((sum, a) => sum + (a?.revenue || 0), 0);
+                const avgConversion = filteredAssociates.reduce((sum, a) => sum + (a?.conversionRate || 0), 0) / filteredAssociates.length;
+                const avgFollowUpCompliance = filteredAssociates.reduce((sum, a) => sum + (a?.followUpCompliance || 0), 0) / filteredAssociates.length;
+                
+                return (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-4 bg-slate-50 rounded-lg">
+                        <h4 className="font-semibold text-slate-900 mb-2">🏆 Top Performer</h4>
+                        <p className="text-sm text-slate-700">
+                          {topPerformer?.associate || 'N/A'} leads with {(topPerformer?.conversionRate || 0).toFixed(1)}% conversion rate
+                        </p>
+                      </div>
+                      
+                      <div className="p-4 bg-slate-50 rounded-lg">
+                        <h4 className="font-semibold text-slate-900 mb-2">💰 Team Revenue</h4>
+                        <p className="text-sm text-slate-700">
+                          Total: {formatRevenue(totalRevenue)} across {filteredAssociates.length} associates
+                        </p>
+                      </div>
+                      
+                      <div className="p-4 bg-slate-50 rounded-lg">
+                        <h4 className="font-semibold text-slate-900 mb-2">📈 Team Average</h4>
+                        <p className="text-sm text-slate-700">
+                          Conversion Rate: {avgConversion.toFixed(1)}%
+                        </p>
+                      </div>
+                      
+                      <div className="p-4 bg-slate-50 rounded-lg">
+                        <h4 className="font-semibold text-slate-900 mb-2">⏰ Follow-up Compliance</h4>
+                        <p className="text-sm text-slate-700">
+                          Team Average: {avgFollowUpCompliance.toFixed(1)}%
+                        </p>
+                      </div>
+                    </div>
                     
-                    setAiResponse(`Based on the comprehensive associate performance analysis, here are key insights:
-
-**🏆 Top Performers Analysis:**
-- ${topPerformer?.associate || 'N/A'} leads with ${(topPerformer?.conversionRate || 0).toFixed(1)}% conversion rate and ${formatRevenue(topPerformer?.revenue || 0)} in revenue
-- Top 3 performers generate ${formatRevenue(filteredAssociates.slice(0, 3).reduce((sum, a) => sum + (a?.revenue || 0), 0))} (${totalRevenue > 0 ? ((filteredAssociates.slice(0, 3).reduce((sum, a) => sum + (a?.revenue || 0), 0) / totalRevenue) * 100).toFixed(1) : 0}% of total revenue)
-
-**📈 Performance Gaps:**
-- Performance gap: Top performer converts ${filteredAssociates.length > 1 ? ((topPerformer?.conversionRate || 0) / (filteredAssociates[filteredAssociates.length - 1]?.conversionRate || 1)).toFixed(1) : 1}x better than lowest
-- ${filteredAssociates.filter(a => (a?.conversionRate || 0) < 15).length} associates need immediate performance improvement
-
-**⏰ Follow-up Compliance:**
-- ${filteredAssociates.filter(a => (a?.followUpCompliance || 0) >= 80).length} associates maintain excellent follow-up compliance (80%+)
-- ${filteredAssociates.reduce((sum, a) => sum + (a?.overdueFollowUps || 0), 0)} total overdue follow-ups across the team
-- Associates with 80%+ compliance show 2.3x better conversion rates
-
-**💰 Revenue Impact:**
-- Total team revenue: ${formatRevenue(totalRevenue)}
-- Average revenue per associate: ${formatRevenue(avgRevenue)}
-
-**🎯 Actionable Recommendations:**
-1. **Immediate Actions:**
-   - Implement follow-up automation for associates with <60% compliance
-   - Schedule one-on-one coaching for bottom 20% performers
-   - Create best practice sharing sessions led by top performers
-
-2. **Strategic Initiatives:**
-   - Develop mentorship program pairing high/low performers
-   - Implement real-time follow-up tracking dashboard
-   - Set up automated reminders for follow-up schedule (Day 1, 3, 5, 7)
-
-3. **Performance Targets:**
-   - Aim for 80%+ follow-up compliance across all associates
-   - Target 25%+ conversion rate as team baseline
-   - Reduce performance gap to 2x between top and bottom performers
-
-**📊 Trend Analysis:**
-Team performance has ${trendsData.length > 1 && trendsData[trendsData.length - 1]?.conversionRate > trendsData[0]?.conversionRate ? 'improved' : 'declined'} over the selected period, with follow-up compliance being the strongest predictor of success.`);
-                    setIsLoading(false);
-                  }, 2000);
-                }}
-                disabled={isLoading || !aiPrompt}
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
-              >
-                {isLoading ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Analyzing Performance Data...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Generate AI Insights
-                  </>
-                )}
-              </Button>
-              
-              {aiResponse && (
-                <div className="mt-6 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200">
-                  <div className="flex items-start gap-2 mb-3">
-                    <BrainCircuit className="h-5 w-5 text-indigo-600 mt-1" />
-                    <h4 className="font-semibold text-slate-800">AI Performance Analysis</h4>
+                    <div className="p-4 bg-slate-100 rounded-lg">
+                      <h4 className="font-semibold mb-2 text-slate-900">🎯 Key Insights</h4>
+                      <ul className="text-sm text-slate-700 space-y-1">
+                        <li>• {filteredAssociates.filter(a => (a?.conversionRate || 0) >= 30).length} associates have conversion rates above 30%</li>
+                        <li>• {filteredAssociates.filter(a => (a?.followUpCompliance || 0) >= 80).length} associates maintain excellent follow-up compliance (80%+)</li>
+                        <li>• {filteredAssociates.reduce((sum, a) => sum + (a?.overdueFollowUps || 0), 0)} total overdue follow-ups need attention</li>
+                        <li>• Top 3 performers generate {((filteredAssociates.slice(0, 3).reduce((sum, a) => sum + (a?.revenue || 0), 0) / totalRevenue) * 100).toFixed(1)}% of total revenue</li>
+                      </ul>
+                    </div>
                   </div>
-                  <div className="prose prose-sm max-w-none">
-                    <pre className="whitespace-pre-wrap text-sm text-slate-700 font-sans leading-relaxed">{aiResponse}</pre>
-                  </div>
-                </div>
-              )}
+                );
+              })()}
             </CardContent>
           </Card>
         </TabsContent>

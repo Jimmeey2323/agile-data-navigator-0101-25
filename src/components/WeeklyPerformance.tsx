@@ -97,15 +97,15 @@ const getPerformanceLevel = (value: number, metric: string) => {
 };
 
 const getTrendIcon = (change: number) => {
-  if (change > 5) return <ArrowUpRight className="h-4 w-4 text-green-600" />;
-  if (change < -5) return <ArrowDownRight className="h-4 w-4 text-red-600" />;
-  return <Activity className="h-4 w-4 text-yellow-600" />;
+  if (change > 5) return <ArrowUpRight className="h-4 w-4 text-slate-600" />;
+  if (change < -5) return <ArrowDownRight className="h-4 w-4 text-slate-600" />;
+  return <Activity className="h-4 w-4 text-slate-500" />;
 };
 
 const getTrendColor = (change: number) => {
-  if (change > 5) return 'text-green-600 bg-green-50 border-green-200';
-  if (change < -5) return 'text-red-600 bg-red-50 border-red-200';
-  return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+  if (change > 5) return 'text-slate-700 bg-slate-50 border-slate-200';
+  if (change < -5) return 'text-slate-700 bg-slate-100 border-slate-300';
+  return 'text-slate-600 bg-slate-50 border-slate-200';
 };
 
 export function WeeklyPerformance() {
@@ -166,8 +166,8 @@ export function WeeklyPerformance() {
           followUpsCompleted: followUpsCompleted.length,
           followUpsScheduled: weekLeads.length,
           followUpRate,
-          avgResponseTime: Math.random() * 4 + 1, // Mock data: 1-5 hours
-          customerSatisfaction: 75 + Math.random() * 20, // Mock: 75-95%
+          avgResponseTime: 0, // Would need real response time tracking
+          customerSatisfaction: 0, // Would need customer feedback system
           weekOverWeekChange
         });
       }
