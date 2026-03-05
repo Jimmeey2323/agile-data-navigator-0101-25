@@ -27,14 +27,14 @@ export interface Lead {
 }
 
 // Google Sheets API configuration
-const SPREADSHEET_ID = '1dQMNF69WnXVQdhlLvUZTig3kL97NA21k6eZ9HRu6xiQ';
-const SHEET_NAME = '◉ Leads';
+const SPREADSHEET_ID = import.meta.env.VITE_SPREADSHEET_ID;
+const SHEET_NAME = import.meta.env.VITE_SHEET_NAME;
 const SHEET_RANGE = `${SHEET_NAME}!A:AF`; // Updated range to include more columns (A to AF)
 
 // OAuth credentials
-const CLIENT_ID = '581427527932-f6d4m2ollrro6ttnid0g69t7crppbdt7.apps.googleusercontent.com';
-const CLIENT_SECRET = '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';
-const REFRESH_TOKEN = '1//04lQ0H7y71KrICgYIARAAGAQSNwF-L9IrUalJW-kU5F9VBWdDYuKwpKZmdRkRj0B-XTEefRguhXtmfw1iVyI43uxpQPysQ3ZqisI';
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const CLIENT_SECRET = import.meta.env.VITE_GOOGLE_CLIENT_SECRET;
+const REFRESH_TOKEN = import.meta.env.VITE_GOOGLE_REFRESH_TOKEN;
 
 // Helper functions for processing follow-up data
 const normalizeFollowUpDate = (dateValue: string | undefined): string => {

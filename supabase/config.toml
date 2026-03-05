@@ -1,1 +1,2 @@
-project_id = "rszlyaouqcwfyexggbmt"
+# Injected via .env file
+# project_id = "${SUPABASE_PROJECT_ID}"
