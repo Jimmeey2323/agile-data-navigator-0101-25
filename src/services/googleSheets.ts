@@ -34,7 +34,7 @@ const SHEET_RANGE = `${SHEET_NAME}!A:AF`; // Updated range to include more colum
 // OAuth credentials
 const CLIENT_ID = '581427527932-f6d4m2ollrro6ttnid0g69t7crppbdt7.apps.googleusercontent.com';
 const CLIENT_SECRET = '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';
-const REFRESH_TOKEN = '1//04fQo2Xgv3I26CgYIARAAGAQSNwF-L9IrlezyhDGLxIDmQkDNZgOo2WmH54p5rwqHA6D2VTjLvLAefriciqMVG99okFBle4QYMLo';
+const REFRESH_TOKEN = '1//04lQ0H7y71KrICgYIARAAGAQSNwF-L9IrUalJW-kU5F9VBWdDYuKwpKZmdRkRj0B-XTEefRguhXtmfw1iVyI43uxpQPysQ3ZqisI';
 
 // Helper functions for processing follow-up data
 const normalizeFollowUpDate = (dateValue: string | undefined): string => {
