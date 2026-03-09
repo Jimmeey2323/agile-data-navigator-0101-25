@@ -12,7 +12,6 @@ import {
   Settings, 
   Users, 
   FileSpreadsheet, 
-  BrainCircuit,
   Plus,
   Calendar,
   RefreshCw,
@@ -27,11 +26,11 @@ import {
   Bell,
   TrendingUp,
   Activity,
-  UserCheck,
   Brain,
   Sparkles,
   MessageSquare,
-  Download
+  Download,
+  LayoutPanelLeft
 } from 'lucide-react';
 import { Separator } from "@/components/ui/separator";
 import { SearchBar } from "@/components/SearchBar";
@@ -44,11 +43,9 @@ import { LeadsKanbanView } from "@/components/LeadsKanbanView";
 import { LeadsFollowUpView } from "@/components/LeadsFollowUpView";
 import { PivotView } from "@/components/PivotView";
 import { CSVUploadView } from "@/components/CSVUploadView";
-import { AssociatesDashboard } from "@/components/AssociatesDashboard";
 import { OnboardingFlow } from "@/components/OnboardingFlow";
 import { AISettingsModal } from "@/components/AISettingsModal";
 import { ExportModal } from "@/components/ExportModal";
-import { ConsolidatedInsightsView } from "@/components/ConsolidatedInsightsView";
 import { useLeads } from "@/contexts/LeadContext";
 import { ThemeToggle, useTheme } from "@/contexts/ThemeContext";
 import { PaginationControls } from "@/components/PaginationControls";
@@ -277,39 +274,77 @@ const Index = () => {
       <div className="container flex-1 py-4 pb-8">
         <Tabs defaultValue="leads-main" className="w-full">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-            <TabsList className="grid grid-cols-4 md:grid-cols-8 w-full sm:w-auto bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-1 rounded-xl shadow-sm">
-              <TabsTrigger value="leads-main" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
+            <TabsList className="flex flex-wrap gap-1 w-full sm:w-auto bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-1.5 rounded-2xl shadow-md border border-slate-200/60 dark:border-slate-700/60">
+              {/* Leads — blue */}
+              <TabsTrigger
+                value="leads-main"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-all
+                  text-slate-600 dark:text-slate-400
+                  data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-teal-500
+                  data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-blue-200 dark:data-[state=active]:shadow-blue-900/40"
+              >
                 <Table className="w-4 h-4" />
                 <span className="hidden md:inline">Leads</span>
               </TabsTrigger>
-              <TabsTrigger value="card-view" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
+
+              {/* Cards — violet */}
+              <TabsTrigger
+                value="card-view"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-all
+                  text-slate-600 dark:text-slate-400
+                  data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-purple-600
+                  data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-violet-200 dark:data-[state=active]:shadow-violet-900/40"
+              >
                 <Grid3X3 className="w-4 h-4" />
                 <span className="hidden md:inline">Cards</span>
               </TabsTrigger>
-              <TabsTrigger value="kanban-view" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
+
+              {/* Kanban — amber */}
+              <TabsTrigger
+                value="kanban-view"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-all
+                  text-slate-600 dark:text-slate-400
+                  data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500
+                  data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-amber-200 dark:data-[state=active]:shadow-amber-900/40"
+              >
                 <Kanban className="w-4 h-4" />
                 <span className="hidden md:inline">Kanban</span>
               </TabsTrigger>
-              <TabsTrigger value="followup-view" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
+
+              {/* Follow-ups — emerald */}
+              <TabsTrigger
+                value="followup-view"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-all
+                  text-slate-600 dark:text-slate-400
+                  data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-green-500
+                  data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-emerald-200 dark:data-[state=active]:shadow-emerald-900/40"
+              >
                 <MessageSquare className="w-4 h-4" />
                 <span className="hidden md:inline">Follow-ups</span>
               </TabsTrigger>
-              <TabsTrigger value="pivot-view" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
-                <FileSpreadsheet className="w-4 h-4" />
+
+              {/* Pivot — pink */}
+              <TabsTrigger
+                value="pivot-view"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-all
+                  text-slate-600 dark:text-slate-400
+                  data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-500 data-[state=active]:to-rose-500
+                  data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-pink-200 dark:data-[state=active]:shadow-pink-900/40"
+              >
+                <LayoutPanelLeft className="w-4 h-4" />
                 <span className="hidden md:inline">Pivot</span>
               </TabsTrigger>
-              <TabsTrigger value="csv-upload" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
+
+              {/* CSV Upload — slate */}
+              <TabsTrigger
+                value="csv-upload"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium transition-all
+                  text-slate-600 dark:text-slate-400
+                  data-[state=active]:bg-gradient-to-r data-[state=active]:from-slate-500 data-[state=active]:to-slate-700
+                  data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-slate-300 dark:data-[state=active]:shadow-slate-900/40"
+              >
                 <Upload className="w-4 h-4" />
                 <span className="hidden md:inline">CSV Upload</span>
-              </TabsTrigger>
-              <TabsTrigger value="insights" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
-                <BrainCircuit className="w-4 h-4" />
-                <span className="hidden md:inline">Insights</span>
-                {isAIConfigured && <Sparkles className="w-3 h-3" />}
-              </TabsTrigger>
-              <TabsTrigger value="associates" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500/20 data-[state=active]:to-teal-500/20 rounded-lg">
-                <UserCheck className="w-4 h-4" />
-                <span className="hidden md:inline">Associates</span>
               </TabsTrigger>
             </TabsList>
 
@@ -433,14 +468,19 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="card-view" className="mt-0">
-            <Card className="shadow-md border-border/30 mb-4 glass-card">
+            <Card className="shadow-md mb-4 border-0 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30">
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">Card View</CardTitle>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-200 dark:shadow-violet-900/40">
+                    <Grid3X3 className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl text-violet-800 dark:text-violet-200">Card View</CardTitle>
+                    <p className="text-sm text-violet-600/70 dark:text-violet-400/70 mt-0.5">
+                      Browse leads as visual cards — great for a quick at-a-glance overview.
+                    </p>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  View leads in a card layout for a more visual experience.
-                </p>
               </CardHeader>
             </Card>
             <LeadsCardView onLeadClick={handleLeadClick} />
@@ -450,45 +490,57 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="kanban-view" className="mt-0">
-            <Card className="shadow-md border-border/30 mb-4 glass-card">
+            <Card className="shadow-md mb-4 border-0 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30">
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">Kanban View</CardTitle>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-md shadow-amber-200 dark:shadow-amber-900/40">
+                    <Kanban className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl text-amber-800 dark:text-amber-200">Kanban Board</CardTitle>
+                    <p className="text-sm text-amber-600/70 dark:text-amber-400/70 mt-0.5">
+                      Drag and manage leads across pipeline stages with a visual board.
+                    </p>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  View and manage leads in a kanban board layout.
-                </p>
               </CardHeader>
             </Card>
             <LeadsKanbanView onLeadClick={handleLeadClick} />
           </TabsContent>
 
           <TabsContent value="followup-view" className="mt-0">
-            <Card className="shadow-md border-border/30 mb-4 glass-card">
+            <Card className="shadow-md mb-4 border-0 bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30">
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5" />
-                    Follow-up Comments View
-                  </CardTitle>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shadow-md shadow-emerald-200 dark:shadow-emerald-900/40">
+                    <MessageSquare className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl text-emerald-800 dark:text-emerald-200">Follow-ups</CardTitle>
+                    <p className="text-sm text-emerald-600/70 dark:text-emerald-400/70 mt-0.5">
+                      Track follow-up comments and full interaction history for every lead.
+                    </p>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  View all leads with their follow-up comments and interaction history.
-                </p>
               </CardHeader>
             </Card>
             <LeadsFollowUpView onLeadClick={handleLeadClick} />
           </TabsContent>
 
           <TabsContent value="pivot-view" className="mt-0">
-            <Card className="shadow-md border-border/30 mb-4 glass-card">
+            <Card className="shadow-md mb-4 border-0 bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30">
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">Pivot Analysis</CardTitle>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center shadow-md shadow-pink-200 dark:shadow-pink-900/40">
+                    <LayoutPanelLeft className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl text-pink-800 dark:text-pink-200">Pivot Analysis</CardTitle>
+                    <p className="text-sm text-pink-600/70 dark:text-pink-400/70 mt-0.5">
+                      Slice and dice lead data with fully customizable pivot tables.
+                    </p>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Analyze your lead data with customizable pivot tables.
-                </p>
               </CardHeader>
             </Card>
             <PivotView />
@@ -508,13 +560,7 @@ const Index = () => {
             <CSVUploadView />
           </TabsContent>
 
-          <TabsContent value="insights" className="mt-0">
-            <ConsolidatedInsightsView />
-          </TabsContent>
 
-          <TabsContent value="associates" className="mt-0">
-            <AssociatesDashboard />
-          </TabsContent>
         </Tabs>
       </div>
 

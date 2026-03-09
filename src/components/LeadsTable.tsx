@@ -288,6 +288,33 @@ export const LeadsTable = ({
     return formattedComments.length > 0 ? formattedComments.join(' | ') : '';
   };
 
+  // ── Associate summary ──────────────────────────────────────────
+  // NOTE: must be placed before any early returns to obey Rules of Hooks
+  const associateSummary = useMemo(() => {
+    const map: Record<string, { total: number; converted: number; trials: number; followUps: number }> = {};
+    for (const lead of filteredLeads as Lead[]) {
+      const name = lead.associate || 'Unassigned';
+      if (!map[name]) map[name] = { total: 0, converted: 0, trials: 0, followUps: 0 };
+      map[name].total++;
+      if (
+        lead.status === 'Converted' ||
+        lead.status === 'Won' ||
+        lead.stage === 'Membership Sold'
+      ) map[name].converted++;
+      if (
+        typeof lead.stage === 'string' &&
+        lead.stage.toLowerCase().includes('trial')
+      ) map[name].trials++;
+      const hasFollowUp = [1,2,3,4].some(i => {
+        const d = lead[`followUp${i}Date` as keyof typeof lead] as string;
+        const c = lead[`followUp${i}Comments` as keyof typeof lead] as string;
+        return (d && d.trim() !== '' && d.trim() !== '-') || (c && c.trim() !== '' && c.trim() !== '-');
+      });
+      if (hasFollowUp) map[name].followUps++;
+    }
+    return Object.entries(map).sort((a, b) => b[1].total - a[1].total);
+  }, [filteredLeads]);
+
   if (loading) {
     return (
       <Card className="shadow-md border-border/30">
@@ -304,6 +331,57 @@ export const LeadsTable = ({
   }
 
   return (
+    <>
+    {/* ── Associate Summary Panel ─────────────────────────────────── */}
+    {associateSummary.length > 0 && (
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-2 px-1">
+          <div className="w-1.5 h-4 rounded-full bg-gradient-to-b from-blue-500 to-teal-500" />
+          <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Associate Performance</span>
+          <span className="text-xs text-slate-400">— {filteredLeads.length} total leads</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {associateSummary.map(([name, stats]) => (
+            <div
+              key={name}
+              className="flex items-center gap-3 px-3 py-2 rounded-xl
+                bg-white dark:bg-slate-800
+                border border-slate-200 dark:border-slate-700
+                shadow-sm hover:shadow-md transition-shadow"
+            >
+              {/* Avatar */}
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center flex-shrink-0">
+                <span className="text-[10px] font-bold text-white">
+                  {name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2)}
+                </span>
+              </div>
+              {/* Name + counts */}
+              <div>
+                <p className="text-xs font-semibold text-slate-700 dark:text-slate-200 leading-tight truncate max-w-[110px]">{name}</p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">{stats.total} leads</span>
+                  <span className="text-slate-300 dark:text-slate-600">·</span>
+                  <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400" title="Converted">
+                    <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                    {stats.converted}
+                  </span>
+                  <span className="text-slate-300 dark:text-slate-600">·</span>
+                  <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-violet-600 dark:text-violet-400" title="Trials">
+                    <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    {stats.trials}
+                  </span>
+                  <span className="text-slate-300 dark:text-slate-600">·</span>
+                  <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400" title="Follow-ups done">
+                    <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                    {stats.followUps}/{stats.total}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
     <Card className="shadow-2xl border-0 overflow-hidden bg-white/95 backdrop-blur-sm rounded-xl">
       {/* Enhanced Header with sophisticated design */}
       <div className="relative overflow-hidden bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border-b border-gray-700/50">
@@ -1026,5 +1104,6 @@ export const LeadsTable = ({
         </div>
       </CardContent>
     </Card>
+    </>
   );
 };

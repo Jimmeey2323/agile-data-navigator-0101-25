@@ -15,7 +15,8 @@ import {
   Mail, 
   Phone, 
   Plus, 
-  MoreHorizontal, 
+  MoreHorizontal,
+  Kanban,
   Grip,
   Calendar,
   CalendarCheck,
@@ -139,15 +140,15 @@ export function LeadsKanbanView({ onLeadClick }: LeadsKanbanViewProps) {
   
   const getStatusColor = useCallback((status: string): string => {
     const colors: Record<string, string> = {
-      'Hot': 'from-red-500 to-orange-500',
-      'Warm': 'from-amber-500 to-yellow-500',
-      'Cold': 'from-blue-500 to-cyan-500',
-      'Converted': 'from-green-500 to-emerald-500',
-      'Won': 'from-green-600 to-emerald-600',
-      'Lost': 'from-red-600 to-red-700',
-      'Open': 'from-orange-500 to-orange-600'
+      'Hot': 'from-red-800 to-orange-800',
+      'Warm': 'from-amber-800 to-yellow-800',
+      'Cold': 'from-blue-800 to-cyan-800',
+      'Converted': 'from-green-800 to-emerald-800',
+      'Won': 'from-green-900 to-emerald-900',
+      'Lost': 'from-red-900 to-rose-900',
+      'Open': 'from-orange-800 to-amber-900'
     };
-    return colors[status] || 'from-gray-500 to-gray-400';
+    return colors[status] || 'from-slate-700 to-slate-800';
   }, []);
   
   const getGroupColor = useCallback((group: string): string => {
@@ -156,12 +157,12 @@ export function LeadsKanbanView({ onLeadClick }: LeadsKanbanViewProps) {
     }
     
     const colors = [
-      'from-indigo-600 to-purple-600',
-      'from-sky-600 to-indigo-600',
-      'from-emerald-600 to-teal-600',
-      'from-amber-600 to-orange-600',
-      'from-fuchsia-600 to-pink-600',
-      'from-violet-600 to-indigo-600'
+      'from-indigo-800 to-purple-900',
+      'from-sky-800 to-indigo-900',
+      'from-emerald-800 to-teal-900',
+      'from-amber-800 to-orange-900',
+      'from-fuchsia-800 to-pink-900',
+      'from-violet-800 to-indigo-900'
     ];
     
     const index = group.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
@@ -223,330 +224,326 @@ export function LeadsKanbanView({ onLeadClick }: LeadsKanbanViewProps) {
   
   if (loading) {
     return (
-      <div className="p-6 text-center">
-        <div className="animate-spin h-10 w-10 rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
-        <p className="mt-4 text-muted-foreground text-sm">Loading kanban board...</p>
-      </div>
-    );
-  }
-  
-  if (Object.keys(groupedLeads).length === 0) {
-    return (
-      <div className="p-6 text-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
-            <Zap className="h-8 w-8 text-slate-400" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-slate-700 mb-2">No leads found</h3>
-            <p className="text-slate-500 text-sm">Try adjusting your filters or import some leads to get started.</p>
-          </div>
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-200 dark:shadow-amber-900/30 animate-pulse">
+          <Kanban className="h-7 w-7 text-white" />
+        </div>
+        <div className="text-center">
+          <p className="font-semibold text-slate-700 dark:text-slate-200">Loading board…</p>
+          <p className="text-xs text-slate-400 mt-1">Organising your leads into columns</p>
         </div>
       </div>
     );
   }
-  
+
+  if (Object.keys(groupedLeads).length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center shadow-inner">
+          <Zap className="h-8 w-8 text-slate-400 dark:text-slate-500" />
+        </div>
+        <div className="text-center">
+          <h3 className="text-base font-semibold text-slate-700 dark:text-slate-200">No leads found</h3>
+          <p className="text-sm text-slate-400 mt-1">Adjust your filters or import leads to get started.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4">
-      {/* Enhanced Header with Controls */}
-      <Card className="border-border/30 shadow-lg bg-gradient-to-r from-slate-50 to-white">
-        <CardHeader className="pb-3">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-blue-500 to-teal-600 rounded-lg">
-                <Grid3X3 className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-slate-800">Advanced Kanban Board</h2>
-                <p className="text-xs text-slate-600">Drag, drop, and customize your lead management workflow</p>
-              </div>
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-2">
-              <Select value={groupByField} onValueChange={handleGroupByChange}>
-                <SelectTrigger className="w-36 h-8 text-xs">
-                  <SelectValue placeholder="Group by" />
-                </SelectTrigger>
-                <SelectContent>
-                  {groupByOptions.map(option => (
-                    <SelectItem key={option.value} value={option.value} className="text-xs">
-                      Group by {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+    <div className="space-y-5">
 
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-32 h-8 text-xs">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sortOptions.map(option => (
-                    <SelectItem key={option.value} value={option.value} className="text-xs">
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                className="h-8 px-2"
-              >
-                {sortOrder === 'asc' ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />}
-              </Button>
-
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8 px-2">
-                    <Settings className="h-3 w-3" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80">
-                  <div className="space-y-4">
-                    <h4 className="font-medium text-sm">Kanban Settings</h4>
-                    
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="compact-mode" className="text-xs">Compact Mode</Label>
-                        <Switch
-                          id="compact-mode"
-                          checked={compactMode}
-                          onCheckedChange={setCompactMode}
-                        />
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="show-avatars" className="text-xs">Show Avatars</Label>
-                        <Switch
-                          id="show-avatars"
-                          checked={showAvatars}
-                          onCheckedChange={setShowAvatars}
-                        />
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="show-empty" className="text-xs">Show Empty Columns</Label>
-                        <Switch
-                          id="show-empty"
-                          checked={showEmptyColumns}
-                          onCheckedChange={setShowEmptyColumns}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label className="text-xs">Card Height: {cardHeight[0]}px</Label>
-                        <Slider
-                          value={cardHeight}
-                          onValueChange={setCardHeight}
-                          max={200}
-                          min={80}
-                          step={10}
-                          className="w-full"
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label className="text-xs">Columns per Row: {columnsPerRow[0]}</Label>
-                        <Slider
-                          value={columnsPerRow}
-                          onValueChange={setColumnsPerRow}
-                          max={6}
-                          min={2}
-                          step={1}
-                          className="w-full"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toast.info("Kanban refreshed")}
-                className="h-8 px-2"
-              >
-                <RefreshCw className="h-3 w-3" />
-              </Button>
-            </div>
+      {/* ── Toolbar ────────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        {/* Title */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-200 dark:shadow-amber-900/30 flex-shrink-0">
+            <Kanban className="h-5 w-5 text-white" />
           </div>
-        </CardHeader>
-      </Card>
+          <div>
+            <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 leading-tight">Kanban Board</h2>
+            <p className="text-xs text-slate-400 dark:text-slate-500">
+              {filteredLeads.length} leads &middot; {sortedGroups.length} columns
+            </p>
+          </div>
+        </div>
 
-      {/* Kanban Board */}
-      <div 
-        className="kanban-board grid gap-6 pb-4 pt-1"
-        style={{
-          gridTemplateColumns: `repeat(${Math.min(columnsPerRow[0], sortedGroups.length)}, minmax(350px, 1fr))`
-        }}
-      >
-        {sortedGroups.map(group => (
-          <div key={group} className="kanban-column flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-gray-300 bg-white">
-            <div className={`sticky top-0 z-10 bg-gradient-to-r from-gray-800 to-gray-700 p-4 text-white shadow-2xl border-b border-gray-300`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Layers className="h-5 w-5" />
-                  <h3 className="text-base font-semibold truncate">{group || 'Undefined'}</h3>
-                  <Badge className="bg-white/20 text-white hover:bg-white/30 border-white/30 text-xs px-2 py-1">
-                    {groupedLeads[group].length}
-                  </Badge>
+        {/* Controls */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={groupByField} onValueChange={handleGroupByChange}>
+            <SelectTrigger className="h-8 w-36 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
+              <Layers className="h-3 w-3 mr-1.5 text-slate-400" />
+              <SelectValue placeholder="Group by" />
+            </SelectTrigger>
+            <SelectContent>
+              {groupByOptions.map(option => (
+                <SelectItem key={option.value} value={option.value} className="text-xs">
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="h-8 w-32 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              {sortOptions.map(option => (
+                <SelectItem key={option.value} value={option.value} className="text-xs">
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            className="h-8 w-8 p-0 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm"
+          >
+            {sortOrder === 'asc' ? <SortAsc className="h-3.5 w-3.5" /> : <SortDesc className="h-3.5 w-3.5" />}
+          </Button>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 w-8 p-0 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm"
+              >
+                <Settings className="h-3.5 w-3.5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-72 rounded-2xl border-slate-200 dark:border-slate-700 shadow-2xl p-5">
+              <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-200 mb-4">Board Settings</h4>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="compact-mode" className="text-xs text-slate-600 dark:text-slate-400">Compact mode</Label>
+                  <Switch id="compact-mode" checked={compactMode} onCheckedChange={setCompactMode} />
                 </div>
-                
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-white/70 hover:text-white hover:bg-white/20 transition-all duration-300 rounded-md">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="show-avatars" className="text-xs text-slate-600 dark:text-slate-400">Show avatars</Label>
+                  <Switch id="show-avatars" checked={showAvatars} onCheckedChange={setShowAvatars} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="show-empty" className="text-xs text-slate-600 dark:text-slate-400">Show empty columns</Label>
+                  <Switch id="show-empty" checked={showEmptyColumns} onCheckedChange={setShowEmptyColumns} />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-slate-600 dark:text-slate-400">Card height: {cardHeight[0]}px</Label>
+                  <Slider value={cardHeight} onValueChange={setCardHeight} max={200} min={80} step={10} />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-slate-600 dark:text-slate-400">Columns per row: {columnsPerRow[0]}</Label>
+                  <Slider value={columnsPerRow} onValueChange={setColumnsPerRow} max={6} min={2} step={1} />
+                </div>
               </div>
-            </div>
-            
-            <div 
-              className="flex-1 space-y-3 p-5 bg-gray-50 overflow-y-auto"
-              style={{ maxHeight: '70vh' }}
-            >
-              {groupedLeads[group].map(lead => (
-                <Card 
-                  key={lead.id} 
-                  className="kanban-card shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer border-l-4 bg-white border border-gray-300 hover:border-gray-400 group hover:scale-105 hover:-translate-y-1 rounded-xl"
-                  style={{
-                    borderLeftColor: `hsl(var(--${
-                      lead.status === 'Hot' ? 'destructive' : 
-                      lead.status === 'Warm' ? 'warning' : 
-                      lead.status === 'Cold' ? 'info' : 
-                      lead.status === 'Converted' ? 'success' : 'muted'
-                    }))`,
-                    minHeight: `${cardHeight[0]}px`
-                  }}
-                  onClick={() => onLeadClick(lead)}
+            </PopoverContent>
+          </Popover>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => toast.info("Board refreshed")}
+            className="h-8 w-8 p-0 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
+
+      {/* ── Board ──────────────────────────────────────────────────── */}
+      <div className="overflow-x-auto pb-6">
+        <div className="flex gap-4" style={{ minWidth: 'max-content' }}>
+          {sortedGroups.map(group => {
+            const colGradient = getGroupColor(group);
+            const count = groupedLeads[group].length;
+
+            return (
+              <div
+                key={group}
+                className="flex flex-col w-[295px] rounded-2xl overflow-hidden
+                  bg-slate-50/90 dark:bg-slate-800/60
+                  border border-slate-200/80 dark:border-slate-700/50
+                  shadow-lg backdrop-blur-sm"
+              >
+                {/* Column header */}
+                <div className={`bg-gradient-to-r ${colGradient} px-4 py-3.5`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <Layers className="h-4 w-4 text-white/80" />
+                      <span className="text-sm font-semibold text-white truncate max-w-[140px]">
+                        {group || 'Undefined'}
+                      </span>
+                      <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-white/25 text-white text-xs font-bold">
+                        {count}
+                      </span>
+                    </div>
+                    <button className="text-white/60 hover:text-white transition-colors">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="mt-2.5 h-1 rounded-full bg-white/20 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-white/60 transition-all duration-500"
+                      style={{ width: `${Math.min((count / Math.max(filteredLeads.length, 1)) * 100 * 3, 100)}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Cards list */}
+                <div
+                  className="flex-1 p-3 space-y-2.5 overflow-y-auto"
+                  style={{ maxHeight: '68vh' }}
                 >
-                  <CardContent className={`p-3 ${compactMode ? 'space-y-1' : 'space-y-2'}`}>
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-2 flex-1">
-                        {showAvatars && (
-                          <Avatar className={`border-2 border-gray-300 shadow-md ${compactMode ? 'h-6 w-6' : 'h-8 w-8'}`}>
-                            <AvatarFallback className={`text-white bg-gradient-to-br ${
-                              groupByField === 'status' ? getGroupColor(lead.status) : getGroupColor(group)
-                            } ${compactMode ? 'text-xs' : 'text-sm'}`}>
-                              {getInitials(lead.fullName)}
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
-                        <div className="space-y-1 flex-1 min-w-0">
-                          <h4 className={`font-semibold line-clamp-1 text-gray-800 group-hover:text-gray-900 transition-colors ${
-                            compactMode ? 'text-xs' : 'text-sm'
-                          }`}>
-                            {lead.fullName}
-                          </h4>
-                          {groupByField !== 'status' && lead.status && (
-                            <div className="flex items-center gap-1">
-                              {getStatusIcon(lead.status)}
-                              <Badge 
-                                variant="outline"
-                                className={`bg-white border-gray-300 text-gray-700 ${compactMode ? 'text-xs px-1 py-0' : 'text-xs'}`}
-                              >
-                                {lead.status}
-                              </Badge>
+                  {groupedLeads[group].map(lead => {
+                    const cardAccent = getGroupColor(lead.status || group);
+                    return (
+                      <div
+                        key={lead.id}
+                        onClick={() => onLeadClick(lead)}
+                        className="group relative bg-white dark:bg-slate-700/70
+                          rounded-xl border border-slate-200/70 dark:border-slate-600/40
+                          shadow-sm hover:shadow-xl hover:-translate-y-0.5
+                          transition-all duration-200 cursor-pointer overflow-hidden"
+                        style={{ minHeight: `${cardHeight[0]}px` }}
+                      >
+                        {/* Left accent strip */}
+                        <div className={`absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b ${cardAccent}`} />
+
+                        <div className={`px-3.5 pt-3 pb-3 ${compactMode ? 'space-y-1.5' : 'space-y-2.5'} pl-[14px]`}>
+
+                          {/* Lead name + avatar */}
+                          <div className="flex items-start gap-2.5">
+                            {showAvatars && (
+                              <Avatar className={`ring-2 ring-white dark:ring-slate-700 shadow-sm flex-shrink-0 ${compactMode ? 'h-6 w-6' : 'h-8 w-8'}`}>
+                                <AvatarFallback
+                                  className={`text-white font-bold bg-gradient-to-br ${cardAccent} ${compactMode ? 'text-[9px]' : 'text-xs'}`}
+                                >
+                                  {getInitials(lead.fullName)}
+                                </AvatarFallback>
+                              </Avatar>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className={`font-semibold text-slate-800 dark:text-slate-100 truncate leading-tight ${compactMode ? 'text-xs' : 'text-sm'}`}>
+                                {lead.fullName}
+                              </p>
+                              {groupByField !== 'status' && lead.status && (
+                                <div className="flex items-center gap-1 mt-0.5">
+                                  {getStatusIcon(lead.status)}
+                                  <span className="text-[10px] text-slate-500 dark:text-slate-400">{lead.status}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Contact info */}
+                          {!compactMode && (
+                            <div className="space-y-1">
+                              {lead.email && (
+                                <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                                  <Mail className="h-3 w-3 flex-shrink-0 opacity-70" />
+                                  <span className="truncate">{lead.email}</span>
+                                </div>
+                              )}
+                              {lead.phone && (
+                                <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                                  <Phone className="h-3 w-3 flex-shrink-0 opacity-70" />
+                                  <span>{lead.phone}</span>
+                                </div>
+                              )}
                             </div>
                           )}
+
+                          {/* Tags */}
+                          <div className="flex flex-wrap gap-1">
+                            {lead.source && groupByField !== 'source' && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-md
+                                bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300
+                                border border-sky-100 dark:border-sky-800/50">
+                                {getSourceIcon(lead.source)}
+                                <span className="max-w-[55px] truncate">{lead.source}</span>
+                              </span>
+                            )}
+                            {groupByField !== 'stage' && lead.stage && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-md
+                                bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300
+                                border border-violet-100 dark:border-violet-800/50">
+                                {getStageIcon(lead.stage)}
+                                <span className="max-w-[70px] truncate">{lead.stage}</span>
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Follow-ups */}
+                          {!compactMode && getFollowUpBadges(lead).length > 0 && (
+                            <details className="text-xs">
+                              <summary className="cursor-pointer text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 flex items-center gap-1 transition-colors select-none">
+                                <MessageSquare className="h-2.5 w-2.5" />
+                                {getFollowUpBadges(lead).length} follow-up{getFollowUpBadges(lead).length > 1 ? 's' : ''}
+                              </summary>
+                              <div className="mt-1.5 space-y-1.5 bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg border border-slate-100 dark:border-slate-700/50">
+                                {getFollowUpBadges(lead).slice(0, 2).map((fu, idx) => (
+                                  <div key={idx} className="flex flex-col gap-0.5">
+                                    <div className="flex items-center gap-1 font-medium text-slate-600 dark:text-slate-300">
+                                      <CalendarCheck className="h-2.5 w-2.5 text-emerald-500" />
+                                      <span>F{fu.index}: {formatDate(fu.date)}</span>
+                                    </div>
+                                    {fu.comment && (
+                                      <p className="ml-4 text-slate-500 dark:text-slate-400 line-clamp-1">{fu.comment}</p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </details>
+                          )}
+
+                          {/* Footer row */}
+                          <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/50">
+                            <span className="flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500">
+                              <Clock className="h-2.5 w-2.5" />
+                              {formatDate(lead.createdAt)}
+                            </span>
+                            {lead.associate && (
+                              <Avatar className="h-5 w-5 ring-1 ring-white dark:ring-slate-700 shadow-sm">
+                                <AvatarFallback
+                                  className="bg-slate-100 dark:bg-slate-600 text-slate-500 dark:text-slate-300"
+                                  style={{ fontSize: '7px' }}
+                                >
+                                  {getInitials(lead.associate)}
+                                </AvatarFallback>
+                              </Avatar>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    
-                    {!compactMode && (
-                      <div className="text-xs space-y-1 text-slate-600">
-                        {lead.email && (
-                          <div className="flex items-center gap-1 overflow-hidden">
-                            <Mail className="h-2.5 w-2.5 flex-shrink-0 text-gray-500" />
-                            <span className="truncate text-xs text-gray-600">{lead.email}</span>
-                          </div>
-                        )}
-                        {lead.phone && (
-                          <div className="flex items-center gap-1">
-                            <Phone className="h-2.5 w-2.5 flex-shrink-0 text-gray-500" />
-                            <span className="text-xs text-gray-600">{lead.phone}</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    
-                    <div className="flex flex-wrap gap-1">
-                      {lead.source && groupByField !== 'source' && (
-                        <Badge variant="outline" className={`flex items-center gap-1 bg-blue-50 border-blue-200 text-blue-700 ${
-                          compactMode ? 'text-xs px-1 py-0' : 'text-xs'
-                        }`}>
-                          {getSourceIcon(lead.source)}
-                          <span className="truncate max-w-[60px]">{lead.source}</span>
-                        </Badge>
-                      )}
-                      
-                      {groupByField !== 'stage' && lead.stage && (
-                        <Badge variant="outline" className={`flex items-center gap-1 bg-purple-50 border-purple-200 text-purple-700 ${
-                          compactMode ? 'text-xs px-1 py-0' : 'text-xs'
-                        }`}>
-                          {getStageIcon(lead.stage)}
-                          <span className="truncate max-w-[80px]">{lead.stage}</span>
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    {/* Follow-up Section */}
-                    {!compactMode && getFollowUpBadges(lead).length > 0 && (
-                      <div className="mt-2">
-                        <details className="text-xs">
-                          <summary className="cursor-pointer text-gray-500 font-medium flex items-center gap-1 hover:text-gray-700 transition-colors">
-                            <MessageSquare className="h-2.5 w-2.5" />
-                            Follow-ups ({getFollowUpBadges(lead).length})
-                          </summary>
-                          <div className="mt-1 space-y-1 bg-slate-50 p-2 rounded-md border border-slate-100">
-                            {getFollowUpBadges(lead).slice(0, 2).map((followUp, idx) => (
-                              <div key={idx} className="text-xs flex flex-col">
-                                <div className="flex items-center gap-1 font-medium text-slate-700">
-                                  <CalendarCheck className="h-2.5 w-2.5 text-green-600" />
-                                  <span>F{followUp.index}: {formatDate(followUp.date)}</span>
-                                </div>
-                                {followUp.comment && (
-                                  <p className="ml-3 text-slate-600 mt-0.5 line-clamp-1 text-xs">{followUp.comment}</p>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </details>
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center justify-between pt-1 border-t border-slate-100">
-                      <span className={`text-slate-500 flex items-center gap-1 ${compactMode ? 'text-xs' : 'text-xs'}`}>
-                        <Clock className="h-2.5 w-2.5" />
-                        {formatDate(lead.createdAt)}
-                      </span>
-                      
-                      <div className="flex items-center">
-                        <Avatar className={`border border-white shadow-sm ${compactMode ? 'h-4 w-4' : 'h-5 w-5'}`}>
-                          <AvatarFallback className="bg-slate-200 text-slate-600" style={{ fontSize: compactMode ? '6px' : '8px' }}>
-                            {getInitials(lead.associate || 'NA')}
-                          </AvatarFallback>
-                        </Avatar>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-              
-              <Button 
-                variant="ghost" 
-                className={`w-full justify-start text-slate-500 hover:text-slate-700 hover:bg-white border-2 border-dashed border-slate-200 hover:border-slate-300 transition-all ${
-                  compactMode ? 'text-xs py-1' : 'text-xs'
-                }`}
-                onClick={() => toast.info("Add new lead functionality coming soon")}
-              >
-                <Plus className={`mr-2 ${compactMode ? 'h-3 w-3' : 'h-4 w-4'}`} />
-                Add Card
-              </Button>
-            </div>
-          </div>
-        ))}
+                    );
+                  })}
+
+                  {/* Add card button */}
+                  <button
+                    onClick={() => toast.info("Add new lead functionality coming soon")}
+                    className="w-full flex items-center justify-center gap-1.5 text-xs
+                      text-slate-400 dark:text-slate-500
+                      hover:text-slate-600 dark:hover:text-slate-300
+                      py-2.5 rounded-xl
+                      border-2 border-dashed border-slate-200 dark:border-slate-700
+                      hover:border-slate-300 dark:hover:border-slate-600
+                      hover:bg-white/70 dark:hover:bg-slate-700/30
+                      transition-all duration-150"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Add card
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

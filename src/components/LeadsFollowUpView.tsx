@@ -373,36 +373,36 @@ export function LeadsFollowUpView({ onLeadClick }: LeadsFollowUpViewProps) {
           )}
 
           <Card className="border-0 shadow-sm">
-            <ScrollArea className="w-full">
-              <Table>
+            <div className="overflow-x-auto w-full">
+              <Table className="table-auto w-max min-w-full">
                 <TableHeader>
                   <TableRow className="bg-muted/50">
-                    <TableHead className="w-[200px] font-semibold">
+                    <TableHead className="whitespace-nowrap font-semibold">
                       <Button
                         variant="ghost"
-                        className="h-auto p-0 font-semibold hover:bg-transparent"
+                        className="h-auto p-0 font-semibold hover:bg-transparent whitespace-nowrap"
                         onClick={() => handleSort('fullName')}
                       >
                         Lead Info
                         {getSortIcon('fullName')}
                       </Button>
                     </TableHead>
-                    <TableHead className="w-[150px] font-semibold">
+                    <TableHead className="whitespace-nowrap font-semibold">
                       <Button
                         variant="ghost"
-                        className="h-auto p-0 font-semibold hover:bg-transparent"
+                        className="h-auto p-0 font-semibold hover:bg-transparent whitespace-nowrap"
                         onClick={() => handleSort('source')}
                       >
                         Source & Stage
                         {getSortIcon('source')}
                       </Button>
                     </TableHead>
-                    <TableHead className="w-[200px] font-semibold">Remarks</TableHead>
-                    <TableHead className="font-semibold">Follow-up 1</TableHead>
-                    <TableHead className="font-semibold">Follow-up 2</TableHead>
-                    <TableHead className="font-semibold">Follow-up 3</TableHead>
-                    <TableHead className="font-semibold">Follow-up 4</TableHead>
-                    <TableHead className="w-[100px] font-semibold">Actions</TableHead>
+                    <TableHead className="whitespace-nowrap font-semibold">Remarks</TableHead>
+                    <TableHead className="whitespace-nowrap font-semibold">Follow-up 1</TableHead>
+                    <TableHead className="whitespace-nowrap font-semibold">Follow-up 2</TableHead>
+                    <TableHead className="whitespace-nowrap font-semibold">Follow-up 3</TableHead>
+                    <TableHead className="whitespace-nowrap font-semibold">Follow-up 4</TableHead>
+                    <TableHead className="whitespace-nowrap font-semibold">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -440,7 +440,7 @@ export function LeadsFollowUpView({ onLeadClick }: LeadsFollowUpViewProps) {
                   </TableCell>
 
                   {/* Remarks */}
-                  <TableCell className="align-top max-w-[250px]">
+                  <TableCell className="align-top min-w-[180px] max-w-[280px]">
                     {lead.remarks ? (
                       <div className="text-xs bg-muted/30 p-2 rounded text-foreground leading-relaxed">
                         {lead.remarks}
@@ -451,7 +451,7 @@ export function LeadsFollowUpView({ onLeadClick }: LeadsFollowUpViewProps) {
                   </TableCell>
 
                   {/* Follow-up 1 */}
-                  <TableCell className="align-top max-w-[250px]">
+                  <TableCell className="align-top min-w-[200px] max-w-[300px]">
                     {(lead.followUp1Date || lead.followUp1Comments) ? (
                       <div className="space-y-2">
                         {lead.followUp1Date && (
@@ -472,7 +472,7 @@ export function LeadsFollowUpView({ onLeadClick }: LeadsFollowUpViewProps) {
                   </TableCell>
 
                   {/* Follow-up 2 */}
-                  <TableCell className="align-top max-w-[250px]">
+                  <TableCell className="align-top min-w-[200px] max-w-[300px]">
                     {(lead.followUp2Date || lead.followUp2Comments) ? (
                       <div className="space-y-2">
                         {lead.followUp2Date && (
@@ -493,7 +493,7 @@ export function LeadsFollowUpView({ onLeadClick }: LeadsFollowUpViewProps) {
                   </TableCell>
 
                   {/* Follow-up 3 */}
-                  <TableCell className="align-top max-w-[250px]">
+                  <TableCell className="align-top min-w-[200px] max-w-[300px]">
                     {(lead.followUp3Date || lead.followUp3Comments) ? (
                       <div className="space-y-2">
                         {lead.followUp3Date && (
@@ -514,7 +514,7 @@ export function LeadsFollowUpView({ onLeadClick }: LeadsFollowUpViewProps) {
                   </TableCell>
 
                   {/* Follow-up 4 */}
-                  <TableCell className="align-top max-w-[250px]">
+                  <TableCell className="align-top min-w-[200px] max-w-[300px]">
                     {(lead.followUp4Date || lead.followUp4Comments) ? (
                       <div className="space-y-2">
                         {lead.followUp4Date && (
@@ -549,7 +549,7 @@ export function LeadsFollowUpView({ onLeadClick }: LeadsFollowUpViewProps) {
                   ))}
                 </TableBody>
               </Table>
-            </ScrollArea>
+            </div>
           </Card>
         </div>
       ))}

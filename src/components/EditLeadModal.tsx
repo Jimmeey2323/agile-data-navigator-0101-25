@@ -388,578 +388,346 @@ export function EditLeadModal({
   };
   
   if (!isOpen) return null;
-  
+
+  const followUpsDone = [1,2,3,4].filter(i => {
+    const d = formData[`followUp${i}Date` as keyof Lead] as string;
+    const c = formData[`followUp${i}Comments` as keyof Lead] as string;
+    return (d && d.trim() !== '' && d.trim() !== '-') || (c && c.trim() !== '' && c.trim() !== '-');
+  }).length;
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-7xl h-[95vh] p-0 bg-white border-0 shadow-2xl rounded-2xl flex flex-col overflow-hidden">
-        {/* Header - Fixed */}
-        <div className="flex-shrink-0 px-8 py-6 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white shadow-lg">
+      <DialogContent className="max-w-5xl h-[90vh] p-0 bg-white border-0 shadow-2xl rounded-xl flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="flex-shrink-0 px-6 py-5 bg-gradient-to-r from-blue-950 via-blue-900 to-indigo-900 text-white">
           <DialogHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <Avatar className="h-16 w-16 border-4 border-white/20 shadow-2xl ring-4 ring-gray-700/50">
-                    <AvatarFallback className="bg-gradient-to-br from-gray-700 via-gray-600 to-gray-500 text-white font-bold text-lg">
-                      {formData.fullName ? formData.fullName.split(' ').map(n => n[0]).join('').toUpperCase() : 'NL'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center">
-                    <CheckCircle className="h-3 w-3 text-white" />
-                  </div>
-                </div>
-                <div>
-                  <DialogTitle className="text-3xl font-bold text-white">
-                    {lead?.id && !lead.id.startsWith('new-') ? 'Edit Lead Profile' : 'Create New Lead'}
-                  </DialogTitle>
-                  <p className="text-gray-300 mt-2 font-medium">
-                    {formData.fullName || 'New Lead'} • {formData.source || 'No source'} • {formData.status || 'No status'}
-                  </p>
-                  {isAIConfigured && (
-                    <div className="flex items-center gap-2 mt-1">
-                      <Brain className="h-4 w-4 text-purple-300" />
-                      <span className="text-purple-300 text-sm">AI Enhanced</span>
-                      <Sparkles className="h-3 w-3 text-purple-300" />
-                    </div>
-                  )}
+            <div className="flex items-center gap-4">
+              <Avatar className="h-12 w-12 border-2 border-white/20">
+                <AvatarFallback className="bg-blue-800 text-white font-bold text-sm">
+                  {formData.fullName ? formData.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2) : 'NL'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <DialogTitle className="text-lg font-semibold text-white leading-tight">
+                  {formData.fullName || 'New Lead'}
+                </DialogTitle>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  {formData.source && <span className="text-xs text-slate-400">{formData.source}</span>}
+                  {formData.source && formData.status && <span className="text-slate-600">·</span>}
+                  {formData.status && <span className="text-xs text-slate-300">{formData.status}</span>}
+                  {formData.status && formData.stage && <span className="text-slate-600">·</span>}
+                  {formData.stage && <span className="text-xs text-slate-400">{formData.stage}</span>}
                 </div>
               </div>
-              
-              <div className="flex items-center gap-6">
-                {/* Lead Score with Calculation */}
-                <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-lg">
-                  <div className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
-                    <Calculator className="h-4 w-4" />
-                    Lead Score
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Progress value={leadScoreCalculation.total} className="w-24 h-3 bg-white/20" />
-                    <span className="text-2xl font-bold text-white">{leadScoreCalculation.total}%</span>
-                  </div>
-                  <div className="text-xs text-gray-300 mt-1">
-                    {leadScoreCalculation.total >= 80 ? 'Excellent' : 
-                     leadScoreCalculation.total >= 60 ? 'Good' : 
-                     leadScoreCalculation.total >= 40 ? 'Fair' : 'Needs Improvement'}
-                  </div>
+              <div className="flex items-center gap-5 flex-shrink-0">
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-white leading-none">{leadScoreCalculation.total}</div>
+                  <div className="text-[11px] text-blue-300 mt-0.5">Lead Score</div>
                 </div>
-                
-                {/* Auto-save toggle */}
-                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 shadow-lg">
-                  <Switch checked={autoSave} onCheckedChange={setAutoSave} />
-                  <span className="text-sm font-medium text-white">Auto-save</span>
+                <div className="w-px h-10 bg-blue-800" />
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-white leading-none">{followUpsDone}<span className="text-sm font-normal text-blue-300">/4</span></div>
+                  <div className="text-[11px] text-blue-300 mt-0.5">Follow-ups</div>
                 </div>
-                
-                <Button variant="ghost" size="icon" onClick={handleClose} className="hover:bg-white/20 rounded-full text-white">
-                  <X className="h-6 w-6" />
-                </Button>
+                <div className="w-px h-10 bg-blue-800" />
+                <button onClick={handleClose} className="p-1.5 rounded-lg text-blue-200 hover:text-white hover:bg-blue-800 transition-colors">
+                  <X className="h-5 w-5" />
+                </button>
               </div>
             </div>
           </DialogHeader>
         </div>
 
-        {/* Content - Scrollable */}
+        {/* Content */}
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-            {/* Tab Navigation - Fixed */}
-            <div className="flex-shrink-0 px-8 py-4 bg-gray-50 border-b border-gray-200">
-              <TabsList className="grid grid-cols-7 w-full bg-white shadow-lg rounded-xl border border-gray-200">
-                <TabsTrigger value="overview" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-700 data-[state=active]:to-gray-600 data-[state=active]:text-white text-xs">
-                  <User className="h-4 w-4" />
-                  Overview
-                </TabsTrigger>
-                <TabsTrigger value="details" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-700 data-[state=active]:to-gray-600 data-[state=active]:text-white text-xs">
-                  <FileText className="h-4 w-4" />
-                  Details
-                </TabsTrigger>
-                <TabsTrigger value="followups" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-700 data-[state=active]:to-gray-600 data-[state=active]:text-white text-xs">
-                  <MessageSquare className="h-4 w-4" />
-                  Follow-ups
-                </TabsTrigger>
-                <TabsTrigger value="score" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-700 data-[state=active]:to-gray-600 data-[state=active]:text-white text-xs">
-                  {isAIConfigured ? <Brain className="h-4 w-4" /> : <Calculator className="h-4 w-4" />}
-                  {isAIConfigured ? 'AI Score' : 'Score'}
-                </TabsTrigger>
-                <TabsTrigger value="insights" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-700 data-[state=active]:to-gray-600 data-[state=active]:text-white text-xs">
-                  <BarChart3 className="h-4 w-4" />
-                  Insights
-                </TabsTrigger>
-                <TabsTrigger value="activity" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-700 data-[state=active]:to-gray-600 data-[state=active]:text-white text-xs">
-                  <Activity className="h-4 w-4" />
-                  Activity
-                </TabsTrigger>
-                {isAIConfigured && (
-                  <TabsTrigger value="ai-suggestions" className="flex items-center gap-2 rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-600 data-[state=active]:text-white text-xs">
-                    <Sparkles className="h-4 w-4" />
-                    AI Suggestions
+            {/* Tab bar */}
+            <div className="flex-shrink-0 px-6 bg-white border-b border-slate-200">
+              <TabsList className="h-11 bg-transparent p-0 gap-0 rounded-none">
+                {[
+                  { value: 'overview', label: 'Profile', icon: <User className="h-3.5 w-3.5" /> },
+                  { value: 'followups', label: 'Follow-ups', icon: <MessageSquare className="h-3.5 w-3.5" /> },
+                  { value: 'analytics', label: 'Analytics', icon: <BarChart3 className="h-3.5 w-3.5" /> },
+                ].map(tab => (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className="flex items-center gap-1.5 px-4 h-full text-sm font-medium text-slate-500 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-700 data-[state=active]:text-blue-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none hover:text-blue-700 transition-colors"
+                  >
+                    {tab.icon}
+                    {tab.label}
                   </TabsTrigger>
-                )}
+                ))}
               </TabsList>
             </div>
 
-            {/* Tab Content - Scrollable with proper height */}
             <div className="flex-1 overflow-hidden">
               <ScrollArea className="h-full w-full">
-                <div className="p-8 pb-24">
-                  <TabsContent value="overview" className="mt-0 space-y-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Basic Information */}
-                      <Card className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
-                        <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-700">
-                          <CardTitle className="flex items-center gap-2 text-white text-sm">
-                            <User className="h-5 w-5" />
-                            Basic Information
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4 p-6">
-                          <div>
-                            <Label htmlFor="fullName" className="text-xs font-semibold text-slate-700">Full Name *</Label>
-                            <Input 
-                              id="fullName" 
-                              value={formData.fullName} 
-                              onChange={e => handleInputChange('fullName', e.target.value)} 
-                              className="bg-white border-gray-300 mt-1 focus:ring-2 focus:ring-blue-500/50 text-sm" 
-                              placeholder="Enter full name" 
-                            />
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="email" className="text-xs font-semibold text-slate-700">Email Address</Label>
-                            <Input 
-                              id="email" 
-                              type="email" 
-                              value={formData.email} 
-                              onChange={e => handleInputChange('email', e.target.value)} 
-                              className="bg-white border-gray-300 mt-1 focus:ring-2 focus:ring-blue-500/50 text-sm" 
-                              placeholder="Enter email address" 
-                            />
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="phone" className="text-xs font-semibold text-slate-700">Phone Number</Label>
-                            <Input 
-                              id="phone" 
-                              value={formData.phone} 
-                              onChange={e => handleInputChange('phone', e.target.value)} 
-                              className="bg-white border-gray-300 mt-1 focus:ring-2 focus:ring-blue-500/50 text-sm" 
-                              placeholder="Enter phone number" 
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
+                <div className="p-6 pb-20">
 
-                      {/* Lead Classification */}
-                      <Card className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
-                        <CardHeader className="bg-gradient-to-r from-gray-800 to-gray-700">
-                          <CardTitle className="flex items-center gap-2 text-white text-sm">
-                            <Target className="h-5 w-5" />
-                            Lead Classification
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4 p-6">
+                  {/* ── PROFILE TAB (contact info + editable fields) ── */}
+                  <TabsContent value="overview" className="mt-0">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+                      {/* Left: Contact details (editable) */}
+                      <div className="space-y-4">
+                        <div className="border border-slate-200 rounded-xl overflow-hidden">
+                          <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
+                            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Contact Details</h3>
+                          </div>
+                          <div className="p-4 space-y-3">
+                            <div>
+                              <Label htmlFor="fullName" className="text-xs text-slate-500 font-medium">Full Name *</Label>
+                              <Input id="fullName" value={formData.fullName} onChange={e => handleInputChange('fullName', e.target.value)} className="mt-1 h-8 text-sm border-slate-200 bg-white" placeholder="Enter full name" />
+                            </div>
+                            <div>
+                              <Label htmlFor="email" className="text-xs text-slate-500 font-medium">Email</Label>
+                              <Input id="email" type="email" value={formData.email} onChange={e => handleInputChange('email', e.target.value)} className="mt-1 h-8 text-sm border-slate-200 bg-white" placeholder="Email address" />
+                            </div>
+                            <div>
+                              <Label htmlFor="phone" className="text-xs text-slate-500 font-medium">Phone</Label>
+                              <Input id="phone" value={formData.phone} onChange={e => handleInputChange('phone', e.target.value)} className="mt-1 h-8 text-sm border-slate-200 bg-white" placeholder="Phone number" />
+                            </div>
+                            <div>
+                              <Label htmlFor="createdAt" className="text-xs text-slate-500 font-medium">Date Added</Label>
+                              <Input id="createdAt" type="date" value={formData.createdAt} onChange={e => handleInputChange('createdAt', e.target.value)} className="mt-1 h-8 text-sm border-slate-200 bg-white" />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Remarks */}
+                        <div className="border border-slate-200 rounded-xl overflow-hidden">
+                          <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
+                            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Remarks</h3>
+                          </div>
+                          <div className="p-4">
+                            <Textarea value={formData.remarks} onChange={e => handleInputChange('remarks', e.target.value)} className="text-sm border-slate-200 bg-white min-h-[90px] resize-none" placeholder="Notes or remarks..." />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right: Classification (editable) */}
+                      <div className="border border-slate-200 rounded-xl overflow-hidden h-fit">
+                        <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
+                          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Classification</h3>
+                        </div>
+                        <div className="p-4 space-y-3">
                           <div>
-                            <Label htmlFor="source" className="text-xs font-semibold text-slate-700">Source</Label>
-                            <Select value={formData.source} onValueChange={value => handleInputChange('source', value)}>
-                              <SelectTrigger className="bg-white border-gray-300 mt-1 text-sm">
-                                <SelectValue placeholder="Select source" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {sourceOptions.map(option => <SelectItem key={option} value={option} className="text-sm">{option}</SelectItem>)}
-                              </SelectContent>
+                            <Label className="text-xs text-slate-500 font-medium">Source</Label>
+                            <Select value={formData.source} onValueChange={v => handleInputChange('source', v)}>
+                              <SelectTrigger className="mt-1 h-8 text-sm border-slate-200 bg-white"><SelectValue placeholder="Select source" /></SelectTrigger>
+                              <SelectContent>{sourceOptions.map(o => <SelectItem key={o} value={o} className="text-sm">{o}</SelectItem>)}</SelectContent>
                             </Select>
                           </div>
-                          
                           <div>
-                            <Label htmlFor="status" className="text-xs font-semibold text-slate-700">Status</Label>
-                            <Select value={formData.status} onValueChange={value => handleInputChange('status', value)}>
-                              <SelectTrigger className="bg-white border-gray-300 mt-1 text-sm">
-                                <SelectValue placeholder="Select status" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {statusOptions.map(option => <SelectItem key={option} value={option} className="text-sm">{option}</SelectItem>)}
-                              </SelectContent>
+                            <Label className="text-xs text-slate-500 font-medium">Status</Label>
+                            <Select value={formData.status} onValueChange={v => handleInputChange('status', v)}>
+                              <SelectTrigger className="mt-1 h-8 text-sm border-slate-200 bg-white"><SelectValue placeholder="Select status" /></SelectTrigger>
+                              <SelectContent>{statusOptions.map(o => <SelectItem key={o} value={o} className="text-sm">{o}</SelectItem>)}</SelectContent>
                             </Select>
                           </div>
-                          
                           <div>
-                            <Label htmlFor="stage" className="text-xs font-semibold text-slate-700">Stage</Label>
-                            <Select value={formData.stage} onValueChange={value => handleInputChange('stage', value)}>
-                              <SelectTrigger className="bg-white border-gray-300 mt-1 text-sm">
-                                <SelectValue placeholder="Select stage" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {stageOptions.map(option => <SelectItem key={option} value={option} className="text-sm">{option}</SelectItem>)}
-                              </SelectContent>
+                            <Label className="text-xs text-slate-500 font-medium">Stage</Label>
+                            <Select value={formData.stage} onValueChange={v => handleInputChange('stage', v)}>
+                              <SelectTrigger className="mt-1 h-8 text-sm border-slate-200 bg-white"><SelectValue placeholder="Select stage" /></SelectTrigger>
+                              <SelectContent>{stageOptions.map(o => <SelectItem key={o} value={o} className="text-sm">{o}</SelectItem>)}</SelectContent>
                             </Select>
                           </div>
-                        </CardContent>
-                      </Card>
+                          <div>
+                            <Label className="text-xs text-slate-500 font-medium">Associate</Label>
+                            <Select value={formData.associate} onValueChange={v => handleInputChange('associate', v)}>
+                              <SelectTrigger className="mt-1 h-8 text-sm border-slate-200 bg-white"><SelectValue placeholder="Select associate" /></SelectTrigger>
+                              <SelectContent>{associateOptions.map(o => <SelectItem key={o} value={o} className="text-sm">{o}</SelectItem>)}</SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-slate-500 font-medium">Center</Label>
+                            <Select value={formData.center} onValueChange={v => handleInputChange('center', v)}>
+                              <SelectTrigger className="mt-1 h-8 text-sm border-slate-200 bg-white"><SelectValue placeholder="Select center" /></SelectTrigger>
+                              <SelectContent>{centerOptions.map(o => <SelectItem key={o} value={o} className="text-sm">{o}</SelectItem>)}</SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  {/* ── FOLLOW-UPS TAB ── */}
+                  <TabsContent value="followups" className="mt-0">
+                    {/* Progress indicator */}
+                    <div className="flex items-center gap-3 mb-5 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                      <div className="flex gap-1.5">
+                        {[1,2,3,4].map(i => {
+                          const d = formData[`followUp${i}Date` as keyof Lead] as string;
+                          const c = formData[`followUp${i}Comments` as keyof Lead] as string;
+                          const isDone = (d && d.trim() !== '' && d.trim() !== '-') || (c && c.trim() !== '' && c.trim() !== '-');
+                          return (
+                            <div key={i} className={`w-7 h-7 rounded-md flex items-center justify-center text-xs font-semibold border ${
+                              isDone ? 'bg-blue-900 text-white border-blue-900' : 'bg-white text-slate-400 border-slate-200'
+                            }`}>{i}</div>
+                          );
+                        })}
+                      </div>
+                      <span className="text-sm text-slate-600 font-medium">{followUpsDone} of 4 follow-ups recorded</span>
                     </div>
 
-                    {/* Engagement Chart */}
-                    {engagementData.length > 0 && (
-                      <Card className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
-                        <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50">
-                          <CardTitle className="flex items-center gap-2 text-slate-800 text-sm">
-                            <LineChart className="h-5 w-5" />
-                            Engagement Timeline
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                          <ResponsiveContainer width="100%" height={200}>
-                            <RechartsLineChart data={engagementData}>
-                              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                              <XAxis dataKey="name" stroke="#64748b" className="text-xs" />
-                              <YAxis stroke="#64748b" className="text-xs" />
-                              <Tooltip contentStyle={{
-                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                border: '1px solid rgba(255, 255, 255, 0.3)',
-                                borderRadius: '12px',
-                                backdropFilter: 'blur(10px)',
-                                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                                fontSize: '12px'
-                              }} />
-                              <Line type="monotone" dataKey="engagement" stroke="#6366f1" strokeWidth={3} dot={{
-                                fill: '#6366f1',
-                                strokeWidth: 2,
-                                r: 6
-                              }} />
-                            </RechartsLineChart>
-                          </ResponsiveContainer>
-                        </CardContent>
-                      </Card>
+                    {/* 2x2 grid of follow-up cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[1,2,3,4].map(num => {
+                        const dateField = `followUp${num}Date` as keyof Lead;
+                        const commentsField = `followUp${num}Comments` as keyof Lead;
+                        const date = formData[dateField] as string;
+                        const comments = formData[commentsField] as string;
+                        const hasDate = date && date.trim() !== '' && date.trim() !== '-';
+                        const hasComment = comments && comments.trim() !== '' && comments.trim() !== '-';
+                        const isDone = hasDate || hasComment;
+
+                        return (
+                          <div key={num} className={`border rounded-xl overflow-hidden ${isDone ? 'border-blue-200' : 'border-slate-200'}`}>
+                            <div className={`px-4 py-2.5 flex items-center justify-between border-b ${isDone ? 'bg-gradient-to-r from-blue-900 to-indigo-900 border-blue-800' : 'bg-slate-50 border-slate-200'}`}>
+                              <span className={`text-xs font-semibold uppercase tracking-wider ${isDone ? 'text-white' : 'text-slate-400'}`}>Follow-up {num}</span>
+                              {isDone && <CheckCircle className="h-3.5 w-3.5 text-blue-200" />}
+                            </div>
+                            <div className="p-4 bg-white space-y-3">
+                              <div>
+                                <Label className="text-xs text-slate-500 font-medium">Date</Label>
+                                <Input type="date" value={date || ''} onChange={e => handleInputChange(dateField, e.target.value)} className="mt-1 h-8 text-sm border-slate-200 bg-white" />
+                              </div>
+                              <div>
+                                <Label className="text-xs text-slate-500 font-medium">Comments</Label>
+                                <Textarea value={comments || ''} onChange={e => handleInputChange(commentsField, e.target.value)} placeholder={`Notes for follow-up ${num}...`} className="mt-1 text-sm border-slate-200 bg-white min-h-[70px] resize-none" />
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </TabsContent>
+
+                  {/* ── ANALYTICS TAB ── */}
+                  <TabsContent value="analytics" className="mt-0 space-y-5">
+                    {/* Score summary */}
+                    <div className="border border-slate-200 rounded-xl overflow-hidden">
+                      <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
+                        <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Lead Score Breakdown</h3>
+                      </div>
+                      <div className="p-4">
+                        <div className="flex items-center gap-4 mb-4">
+                          <div className="text-4xl font-bold text-blue-900">{leadScoreCalculation.total}</div>
+                          <div>
+                            <div className="text-sm font-medium text-slate-700">
+                              {leadScoreCalculation.total >= 80 ? 'Excellent' : leadScoreCalculation.total >= 60 ? 'Good' : leadScoreCalculation.total >= 40 ? 'Fair' : 'Needs Improvement'}
+                            </div>
+                            <div className="text-xs text-slate-400 mt-0.5">out of 100 points</div>
+                          </div>
+                          <div className="flex-1">
+                            <Progress value={leadScoreCalculation.total} className="h-2 bg-slate-100" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          {leadScoreCalculation.breakdown.map((item, i) => (
+                            <div key={i} className="flex items-center gap-3">
+                              <span className="text-xs text-slate-500 w-36 truncate">{item.category}</span>
+                              <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div className="h-full bg-gradient-to-r from-blue-700 to-indigo-600 rounded-full transition-all" style={{ width: `${(item.points / 30) * 100}%` }} />
+                              </div>
+                              <span className="text-xs font-semibold text-slate-700 w-6 text-right">{item.points}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Activity timeline */}
+                    <div className="border border-slate-200 rounded-xl overflow-hidden">
+                      <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
+                        <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Activity Timeline</h3>
+                      </div>
+                      <div className="p-4">
+                        {timelineData.length > 0 ? (
+                          <div className="relative">
+                            <div className="absolute left-[11px] top-3 bottom-3 w-px bg-slate-200" />
+                            <div className="space-y-4">
+                              {timelineData.map((activity, index) => (
+                                <div key={index} className="flex items-start gap-3">
+                                  <div className="relative z-10 w-6 h-6 rounded-full bg-gradient-to-br from-blue-900 to-indigo-800 flex items-center justify-center text-white flex-shrink-0">
+                                    <span className="scale-75">{activity.icon}</span>
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <span className="text-sm font-medium text-slate-800">{activity.title}</span>
+                                      <span className="text-xs text-slate-400">{formatDate(activity.date)}</span>
+                                    </div>
+                                    {activity.description && <p className="text-xs text-slate-500 mt-0.5">{activity.description}</p>}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <Activity className="h-8 w-8 text-slate-300 mx-auto mb-2" />
+                            <p className="text-sm text-slate-400">No activity recorded yet</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Similar leads */}
+                    {similarLeads.length > 0 && (
+                      <div className="border border-slate-200 rounded-xl overflow-hidden">
+                        <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
+                          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Similar Leads</h3>
+                        </div>
+                        <div className="p-4 space-y-2">
+                          {similarLeads.map(sl => (
+                            <div key={sl.id} className="flex items-center gap-3 py-2 border-b border-slate-100 last:border-0">
+                              <Avatar className="h-7 w-7 flex-shrink-0">
+                                <AvatarFallback className="bg-slate-200 text-slate-600 text-xs font-semibold">
+                                  {sl.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-slate-800 truncate">{sl.fullName}</p>
+                                <p className="text-xs text-slate-400 truncate">{sl.source} · {sl.status}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     )}
                   </TabsContent>
 
-                  <TabsContent value="details" className="mt-0 space-y-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <Card className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
-                        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
-                          <CardTitle className="flex items-center gap-2 text-slate-800 text-sm">
-                            <Building className="h-5 w-5" />
-                            Assignment & Location
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4 p-6">
-                          <div>
-                            <Label htmlFor="associate" className="text-xs font-semibold text-slate-700">Associate</Label>
-                            <Select value={formData.associate} onValueChange={value => handleInputChange('associate', value)}>
-                              <SelectTrigger className="bg-white border-gray-300 mt-1 text-sm">
-                                <SelectValue placeholder="Select associate" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {associateOptions.map(option => <SelectItem key={option} value={option} className="text-sm">{option}</SelectItem>)}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="center" className="text-xs font-semibold text-slate-700">Center</Label>
-                            <Select value={formData.center} onValueChange={value => handleInputChange('center', value)}>
-                              <SelectTrigger className="bg-white border-gray-300 mt-1 text-sm">
-                                <SelectValue placeholder="Select center" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {centerOptions.map(option => <SelectItem key={option} value={option} className="text-sm">{option}</SelectItem>)}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="createdAt" className="text-xs font-semibold text-slate-700">Created Date</Label>
-                            <Input 
-                              id="createdAt" 
-                              type="date" 
-                              value={formData.createdAt} 
-                              onChange={e => handleInputChange('createdAt', e.target.value)} 
-                              className="bg-white border-gray-300 mt-1 focus:ring-2 focus:ring-blue-500/50 text-sm" 
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
-                        <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50">
-                          <CardTitle className="flex items-center gap-2 text-slate-800 text-sm">
-                            <FileText className="h-5 w-5" />
-                            Notes & Remarks
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                          <div>
-                            <Label htmlFor="remarks" className="text-xs font-semibold text-slate-700">Remarks</Label>
-                            <Textarea 
-                              id="remarks" 
-                              value={formData.remarks} 
-                              onChange={e => handleInputChange('remarks', e.target.value)} 
-                              className="bg-white border-gray-300 min-h-[120px] mt-1 focus:ring-2 focus:ring-blue-500/50 text-sm" 
-                              placeholder="Add any additional notes or remarks about this lead..." 
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="followups" className="mt-0 space-y-6">
-                    {/* Follow-up Timeline Overview */}
-                    <Card className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
-                      <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
-                        <CardTitle className="flex items-center gap-2 text-slate-800 text-base font-bold">
-                          <MessageSquare className="h-5 w-5" />
-                          Follow-up Timeline
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {[1, 2, 3, 4].map(num => {
-                            const dateField = `followUp${num}Date` as keyof Lead;
-                            const commentsField = `followUp${num}Comments` as keyof Lead;
-                            const date = formData[dateField] as string;
-                            const comments = formData[commentsField] as string;
-                            const rawDate = lead ? (lead[dateField] as string) : '';
-                            const hasValidDate = date && date.trim() !== '' && date.trim() !== '-';
-                            const hasValidComments = comments && comments.trim() !== '' && comments.trim() !== '-';
-                            
-                            return (
-                              <div key={num} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                <div className="flex-shrink-0">
-                                  <Badge 
-                                    variant={hasValidDate ? "default" : hasValidComments ? "secondary" : "outline"} 
-                                    className="text-xs"
-                                  >
-                                    Follow-up {num}
-                                  </Badge>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  {hasValidDate && (
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-                                        {formatDate(date)}
-                                      </Badge>
-                                    </div>
-                                  )}
-                                  {hasValidComments && (
-                                    <div className="text-sm text-gray-600 line-clamp-2">
-                                      {comments}
-                                    </div>
-                                  )}
-                                  {!hasValidDate && !hasValidComments && (
-                                    <div className="text-xs text-gray-400 italic">
-                                      No follow-up recorded
-                                    </div>
-                                  )}
-                                  {!hasValidDate && hasValidComments && (
-                                    <div className="text-xs text-amber-600 font-medium mb-1">
-                                      No date recorded
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                          {/* Fallback message if no follow-ups at all */}
-                          {![1,2,3,4].some(num => {
-                            const date = formData[`followUp${num}Date` as keyof Lead] as string;
-                            const comments = formData[`followUp${num}Comments` as keyof Lead] as string;
-                            return (date && date.trim() !== '' && date.trim() !== '-') || (comments && comments.trim() !== '' && comments.trim() !== '-');
-                          }) && (
-                            <div className="text-center py-8 text-gray-400">
-                              <MessageSquare className="h-10 w-10 mx-auto mb-2 text-gray-300" />
-                              <p className="text-sm">No follow-ups recorded yet</p>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                  </TabsContent>
-
-                  <TabsContent value="score" className="mt-0 space-y-6">
-                    <SmartLeadScoring lead={formData} />
-                  </TabsContent>
-
-                  <TabsContent value="insights" className="mt-0 space-y-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Source Distribution Chart */}
-                      <Card className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
-                        <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50">
-                          <CardTitle className="flex items-center gap-2 text-slate-800 text-sm">
-                            <PieChart className="h-5 w-5" />
-                            Source Distribution
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                          <ResponsiveContainer width="100%" height={250}>
-                            <RechartsPieChart>
-                              <Pie 
-                                data={sourceDistribution} 
-                                cx="50%" 
-                                cy="50%" 
-                                outerRadius={80} 
-                                dataKey="value" 
-                                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                className="text-xs"
-                              >
-                                {sourceDistribution.map((entry, index) => (
-                                  <Cell key={`cell-${index}`} fill={entry.fill} />
-                                ))}
-                              </Pie>
-                              <Tooltip />
-                            </RechartsPieChart>
-                          </ResponsiveContainer>
-                        </CardContent>
-                      </Card>
-
-                      {/* Similar Leads */}
-                      <Card className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
-                        <CardHeader className="bg-gradient-to-r from-rose-50 to-pink-50">
-                          <CardTitle className="flex items-center gap-2 text-slate-800 text-sm">
-                            <Users className="h-5 w-5" />
-                            Similar Leads
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                          {similarLeads.length > 0 ? (
-                            <div className="space-y-3">
-                              {similarLeads.map(similarLead => (
-                                <div key={similarLead.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                  <Avatar className="h-8 w-8">
-                                    <AvatarFallback className="bg-gradient-to-br from-slate-500 to-slate-600 text-white text-xs">
-                                      {similarLead.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex-1">
-                                    <p className="font-medium text-sm">{similarLead.fullName}</p>
-                                    <p className="text-xs text-slate-600">{similarLead.source} • {similarLead.status}</p>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <p className="text-slate-600 text-center py-8 text-sm">No similar leads found</p>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="activity" className="mt-0 space-y-6">
-                    <Card className="bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
-                      <CardHeader className="bg-gradient-to-r from-cyan-50 to-blue-50">
-                        <CardTitle className="flex items-center gap-2 text-slate-800 text-sm">
-                          <Activity className="h-5 w-5" />
-                          Activity Timeline
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-6">
-                        {timelineData.length > 0 ? (
-                          <div className="space-y-6">
-                            {timelineData.map((activity, index) => (
-                              <div key={index} className="flex items-start gap-4">
-                                <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-teal-600 rounded-full flex items-center justify-center text-white shadow-lg">
-                                  {activity.icon}
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <h4 className="font-semibold text-slate-800 text-sm">{activity.title}</h4>
-                                    <Badge variant="outline" className="text-xs bg-white border-gray-200">
-                                      {formatDate(activity.date)}
-                                    </Badge>
-                                  </div>
-                                  <p className="text-slate-600 text-sm">{activity.description}</p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center py-12">
-                            <Activity className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                            <p className="text-slate-600 text-sm">No activity recorded yet</p>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-
-                  {isAIConfigured && (
-                    <TabsContent value="ai-suggestions" className="mt-0 space-y-6">
-                      <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200 shadow-xl rounded-2xl overflow-hidden">
-                        <CardHeader className="bg-gradient-to-r from-purple-100 to-pink-100">
-                          <CardTitle className="flex items-center gap-2 text-purple-800 text-sm">
-                            <Sparkles className="h-5 w-5" />
-                            AI-Powered Suggestions
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                          {aiSuggestions.length > 0 ? (
-                            <div className="space-y-4">
-                              <h4 className="font-semibold text-purple-800 mb-3">Follow-up Recommendations</h4>
-                              {aiSuggestions.map((suggestion, index) => (
-                                <div key={index} className="flex items-start gap-3 p-3 bg-white rounded-lg border border-purple-200">
-                                  <div className="w-6 h-6 rounded-full bg-purple-200 text-purple-800 flex items-center justify-center text-xs font-bold mt-0.5">
-                                    {index + 1}
-                                  </div>
-                                  <p className="text-sm text-purple-700 flex-1">{suggestion}</p>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="text-xs border-purple-200 text-purple-700 hover:bg-purple-50"
-                                    onClick={() => {
-                                      // Auto-fill next follow-up with suggestion
-                                      const nextFollowUp = !formData.followUp1Date ? 1 : 
-                                                          !formData.followUp2Date ? 2 : 
-                                                          !formData.followUp3Date ? 3 : 4;
-                                      if (nextFollowUp <= 4) {
-                                        handleInputChange(`followUp${nextFollowUp}Comments` as keyof Lead, suggestion);
-                                        toast.success(`Added to Follow-up ${nextFollowUp}`);
-                                      }
-                                    }}
-                                  >
-                                    Use
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="text-center py-8">
-                              <Brain className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-                              <p className="text-purple-600 text-sm">AI suggestions will appear here based on lead data</p>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-                  )}
                 </div>
               </ScrollArea>
             </div>
           </Tabs>
         </div>
 
-        {/* Footer - Fixed at bottom */}
-        <div className="flex-shrink-0 px-8 py-4 bg-gray-50 border-t border-gray-200 shadow-lg">
+        {/* Footer */}
+        <div className="flex-shrink-0 px-6 py-3 bg-white border-t border-slate-200">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-slate-600">
+            <div className="flex items-center gap-2 text-sm text-slate-500">
               {hasUnsavedChanges && (
                 <>
                   <AlertCircle className="h-4 w-4 text-amber-500" />
-                  <span className="font-medium">You have unsaved changes</span>
+                  <span>Unsaved changes</span>
                 </>
               )}
             </div>
-            
-            <div className="flex items-center gap-4">
-              <Button variant="outline" onClick={handleClose} disabled={isLoading} className="bg-white border-gray-300 hover:bg-gray-50 text-sm">
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={handleClose} disabled={isLoading} className="h-8 text-sm border-slate-200 text-slate-600 hover:bg-slate-50">
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={isLoading || !formData.fullName.trim()} className="bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-800 hover:to-gray-700 shadow-lg text-sm">
+              <Button onClick={handleSave} disabled={isLoading || !formData.fullName.trim()} className="h-8 text-sm bg-gradient-to-r from-blue-900 to-indigo-900 hover:from-blue-950 hover:to-indigo-950 text-white">
                 {isLoading ? (
                   <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    <RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" />
                     Saving...
                   </>
                 ) : (
                   <>
-                    <Save className="h-4 w-4 mr-2" />
+                    <Save className="h-3.5 w-3.5 mr-1.5" />
                     {lead?.id && !lead.id.startsWith('new-') ? 'Update Lead' : 'Create Lead'}
                   </>
                 )}
