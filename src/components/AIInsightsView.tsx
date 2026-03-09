@@ -128,7 +128,7 @@ export function AIInsightsView() {
       title: "Channel Effectiveness",
       description: "Website leads convert at 2.3x the rate of social media leads",
       type: "opportunity",
-      icon: <Target className="w-5 h-5 text-indigo-500" />,
+      icon: <Target className="w-5 h-5 text-slate-700" />,
       action: "Reallocate marketing budget"
     },
     {
@@ -162,7 +162,7 @@ export function AIInsightsView() {
       <Card className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700 shadow-2xl overflow-hidden rounded-2xl">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center text-xl text-white">
-            <BrainCircuit className="w-5 h-5 mr-2 text-blue-400" />
+            <BrainCircuit className="w-5 h-5 mr-2 text-slate-700" />
             AI Lead Insights
           </CardTitle>
         </CardHeader>

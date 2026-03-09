@@ -399,7 +399,7 @@ export function EditLeadModal({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-5xl h-[90vh] p-0 bg-white border-0 shadow-2xl rounded-xl flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex-shrink-0 px-6 py-5 bg-gradient-to-r from-blue-950 via-blue-900 to-indigo-900 text-white">
+        <div className="flex-shrink-0 px-6 py-5 bg-gradient-to-r from-gray-900 via-black to-gray-900 text-white border-b-4 border-blue-500 animate-color-shift">
           <DialogHeader>
             <div className="flex items-center gap-4">
               <Avatar className="h-12 w-12 border-2 border-white/20">
@@ -452,7 +452,7 @@ export function EditLeadModal({
                   <TabsTrigger
                     key={tab.value}
                     value={tab.value}
-                    className="flex items-center gap-1.5 px-4 h-full text-sm font-medium text-slate-500 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-700 data-[state=active]:text-blue-800 data-[state=active]:bg-transparent data-[state=active]:shadow-none hover:text-blue-700 transition-colors"
+                    className="flex items-center gap-1.5 px-4 h-full text-sm font-medium text-slate-500 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-700 data-[state=active]:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-700 data-[state=active]:to-blue-600 data-[state=active]:shadow-lg hover:text-blue-700 transition-all duration-300"
                   >
                     {tab.icon}
                     {tab.label}
@@ -584,7 +584,7 @@ export function EditLeadModal({
 
                         return (
                           <div key={num} className={`border rounded-xl overflow-hidden ${isDone ? 'border-blue-200' : 'border-slate-200'}`}>
-                            <div className={`px-4 py-2.5 flex items-center justify-between border-b ${isDone ? 'bg-gradient-to-r from-blue-900 to-indigo-900 border-blue-800' : 'bg-slate-50 border-slate-200'}`}>
+                            <div className={`px-4 py-2.5 flex items-center justify-between border-b ${isDone ? 'bg-gradient-to-r from-blue-900 to-blue-800 border-blue-800' : 'bg-slate-50 border-slate-200'}`}>
                               <span className={`text-xs font-semibold uppercase tracking-wider ${isDone ? 'text-white' : 'text-slate-400'}`}>Follow-up {num}</span>
                               {isDone && <CheckCircle className="h-3.5 w-3.5 text-blue-200" />}
                             </div>
@@ -629,7 +629,7 @@ export function EditLeadModal({
                             <div key={i} className="flex items-center gap-3">
                               <span className="text-xs text-slate-500 w-36 truncate">{item.category}</span>
                               <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                <div className="h-full bg-gradient-to-r from-blue-700 to-indigo-600 rounded-full transition-all" style={{ width: `${(item.points / 30) * 100}%` }} />
+                                <div className="h-full bg-gradient-to-r from-blue-700 to-blue-600 rounded-full transition-all" style={{ width: `${(item.points / 30) * 100}%` }} />
                               </div>
                               <span className="text-xs font-semibold text-slate-700 w-6 text-right">{item.points}</span>
                             </div>
@@ -650,7 +650,7 @@ export function EditLeadModal({
                             <div className="space-y-4">
                               {timelineData.map((activity, index) => (
                                 <div key={index} className="flex items-start gap-3">
-                                  <div className="relative z-10 w-6 h-6 rounded-full bg-gradient-to-br from-blue-900 to-indigo-800 flex items-center justify-center text-white flex-shrink-0">
+                                  <div className="relative z-10 w-6 h-6 rounded-full bg-gradient-to-br from-blue-900 to-blue-800 flex items-center justify-center text-white flex-shrink-0">
                                     <span className="scale-75">{activity.icon}</span>
                                   </div>
                                   <div className="flex-1 min-w-0">
@@ -719,7 +719,7 @@ export function EditLeadModal({
               <Button variant="outline" onClick={handleClose} disabled={isLoading} className="h-8 text-sm border-slate-200 text-slate-600 hover:bg-slate-50">
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={isLoading || !formData.fullName.trim()} className="h-8 text-sm bg-gradient-to-r from-blue-900 to-indigo-900 hover:from-blue-950 hover:to-indigo-950 text-white">
+              <Button onClick={handleSave} disabled={isLoading || !formData.fullName.trim()} className="h-8 text-sm bg-gradient-to-r from-blue-900 to-blue-800 hover:from-blue-950 hover:to-blue-950 text-white">
                 {isLoading ? (
                   <>
                     <RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" />

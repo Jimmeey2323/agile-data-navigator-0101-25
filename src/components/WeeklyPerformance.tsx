@@ -68,10 +68,10 @@ interface AssociateWeeklyData {
 }
 
 const PERFORMANCE_COLORS = {
-  excellent: '#10b981',
-  good: '#3b82f6', 
-  average: '#f59e0b',
-  poor: '#ef4444'
+  excellent: '#1e3a8a',
+  good: '#1d4ed8', 
+  average: '#3b82f6',
+  poor: '#60a5fa'
 };
 
 const getPerformanceLevel = (value: number, metric: string) => {
@@ -407,9 +407,9 @@ export function WeeklyPerformance() {
                   <YAxis yAxisId="right" orientation="right" />
                   <Tooltip />
                   <Legend />
-                  <Bar yAxisId="left" dataKey="leadsGenerated" fill="#3b82f6" name="Leads Generated" />
-                  <Line yAxisId="right" type="monotone" dataKey="conversionRate" stroke="#10b981" strokeWidth={3} name="Conversion Rate %" />
-                  <Line yAxisId="right" type="monotone" dataKey="followUpRate" stroke="#f59e0b" strokeWidth={2} name="Follow-up Rate %" />
+                  <Bar yAxisId="left" dataKey="leadsGenerated" fill="#1d4ed8" name="Leads Generated" />
+                  <Line yAxisId="right" type="monotone" dataKey="conversionRate" stroke="#1e3a8a" strokeWidth={3} name="Conversion Rate %" />
+                  <Line yAxisId="right" type="monotone" dataKey="followUpRate" stroke="#3b82f6" strokeWidth={2} name="Follow-up Rate %" />
                 </ComposedChart>
               </ResponsiveContainer>
             </CardContent>
@@ -433,7 +433,7 @@ export function WeeklyPerformance() {
                     <XAxis dataKey="week" />
                     <YAxis />
                     <Tooltip />
-                    <Area type="monotone" dataKey="conversionRate" stroke="#10b981" fill="#10b981" fillOpacity={0.3} />
+                    <Area type="monotone" dataKey="conversionRate" stroke="#1e3a8a" fill="#1e3a8a" fillOpacity={0.3} />
                   </AreaChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -454,7 +454,7 @@ export function WeeklyPerformance() {
                     <XAxis dataKey="week" />
                     <YAxis />
                     <Tooltip formatter={(value) => [`₹${Number(value).toLocaleString()}`, 'Revenue']} />
-                    <Area type="monotone" dataKey="revenue" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.3} />
+                    <Area type="monotone" dataKey="revenue" stroke="#1d4ed8" fill="#1d4ed8" fillOpacity={0.3} />
                   </AreaChart>
                 </ResponsiveContainer>
               </CardContent>

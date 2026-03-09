@@ -109,7 +109,7 @@ export function MetricsPanel() {
   const followUpRate = 78.5; // percentage of leads with follow-ups
   const followUpChange = 12.3; // percentage improvement
 
-  // Format revenue values
+  // Format revenue values with 1 decimal place
   const formatRevenue = (value: number): string => {
     if (value >= 10000000) { // 1 Crore
       return `₹${(value / 10000000).toFixed(1)}Cr`;
@@ -118,7 +118,7 @@ export function MetricsPanel() {
     } else if (value >= 1000) { // 1 Thousand
       return `₹${(value / 1000).toFixed(1)}K`;
     } else {
-      return `₹${value}`;
+      return `₹${value.toFixed(1)}`;
     }
   };
 
@@ -142,18 +142,18 @@ export function MetricsPanel() {
     <section className="w-full">
       {/* Enhanced title section with dark accents */}
       <div className="relative mb-6">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-teal-600/10 rounded-2xl blur-xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-blue-600/10 to-teal-600/10 rounded-2xl blur-xl"></div>
         <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700 rounded-2xl p-6 shadow-2xl backdrop-blur-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-teal-600 flex items-center justify-center shadow-lg">
-                <BarChart3 className="h-6 w-6 text-white animate-pulse" />
+                <BarChart3 className="h-6 w-6 text-gray-200 animate-pulse" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-teal-400 bg-clip-text text-transparent">
+                <h2 className="text-2xl font-bold text-gray-200">
                   Key Metrics
                 </h2>
-                <p className="text-sm text-gray-400 mt-1">Real-time performance insights</p>
+                <p className="text-sm text-gray-300 mt-1">Real-time performance insights</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -399,7 +399,7 @@ export function MetricsPanel() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               {/* Current Period Stats */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-4 rounded-lg">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
                 <h4 className="font-semibold text-gray-700 mb-2">Current Period</h4>
                 <div className="text-2xl font-bold text-blue-600">{drillDownModal.value}</div>
                 <div className="text-sm text-gray-600">{drillDownModal.description}</div>
@@ -497,7 +497,7 @@ const generateChartData = (type: 'line' | 'bar' | 'area' | 'doughnut', title: st
       labels: ['Converted', 'Pending'],
       datasets: [{
         data,
-        backgroundColor: ['#10b981', '#6b7280'],
+        backgroundColor: ['#1e3a8a', '#1d4ed8'],
         borderWidth: 0,
       }]
     };
@@ -521,7 +521,7 @@ const generateChartData = (type: 'line' | 'bar' | 'area' | 'doughnut', title: st
       labels: baseLabels,
       datasets: [{
         ...baseDataset,
-        borderColor: '#3b82f6',
+        borderColor: '#1d4ed8',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
         fill: false,
       }]
@@ -531,8 +531,8 @@ const generateChartData = (type: 'line' | 'bar' | 'area' | 'doughnut', title: st
       labels: baseLabels,
       datasets: [{
         ...baseDataset,
-        borderColor: '#10b981',
-        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+        borderColor: '#1d4ed8',
+        backgroundColor: 'rgba(29, 78, 216, 0.2)',
         fill: true,
       }]
     };
@@ -541,8 +541,8 @@ const generateChartData = (type: 'line' | 'bar' | 'area' | 'doughnut', title: st
       labels: baseLabels,
       datasets: [{
         ...baseDataset,
-        backgroundColor: 'rgba(139, 92, 246, 0.8)',
-        borderColor: '#8b5cf6',
+        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+        borderColor: '#3b82f6',
         borderWidth: 1,
       }]
     };
@@ -659,44 +659,71 @@ function MetricCard({
 
   const cardContent = (
     <Card
-      className="overflow-hidden bg-white border-0 shadow-2xl transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:-translate-y-2 hover:scale-[1.02] group cursor-pointer rounded-2xl backdrop-blur-lg ring-1 ring-gradient-to-r ring-from-gray-800 ring-to-gray-600 hover:ring-from-blue-600 hover:ring-to-teal-600 transform-gpu"
+      className="overflow-hidden bg-gradient-to-br from-white via-gray-50/80 to-white border-0 shadow-[0_8px_32px_rgba(31,38,135,0.17)] hover:shadow-[0_12px_48px_rgba(31,38,135,0.25)] transition-all duration-700 hover:-translate-y-3 hover:scale-[1.03] group cursor-pointer rounded-3xl backdrop-blur-xl backdrop-saturate-200 ring-1 ring-white/20 hover:ring-white/40 transform-gpu relative before:absolute before:inset-0 before:rounded-3xl before:bg-gradient-to-br before:from-blue-600/5 before:via-blue-600/5 before:to-teal-600/5 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500"
       onClick={onDrillDown}
-      style={{ height: 161 }} // Increased height by 15% (140 * 1.15 = 161)
+      style={{ height: 165, minHeight: 165, maxHeight: 165 }} // Fixed container height with constraints
     >
-      {/* Dark gradient header bar */}
-      <div className="h-1 w-full bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 group-hover:from-blue-600 group-hover:via-purple-600 group-hover:to-teal-600 transition-all duration-500" />
+      {/* Sophisticated gradient header with animated shimmer */}
+      <div className="h-1.5 w-full bg-gradient-to-r from-slate-200 via-blue-300/60 to-slate-200 group-hover:from-blue-500 group-hover:via-blue-500 group-hover:to-teal-500 transition-all duration-700 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+      </div>
       
-      <CardContent className="p-4 relative overflow-hidden h-full flex flex-col"> {/* Reduced padding and flex layout */}
-        {/* Subtle animated background accent */}
-        <div className="absolute inset-0 opacity-5 bg-gradient-to-br from-gray-800/10 via-transparent to-gray-600/10 group-hover:opacity-10 transition-opacity duration-500" />
+      <CardContent className="p-4 relative overflow-hidden flex flex-col" style={{ height: 'calc(100% - 6px)' }}> {/* Controlled padding and explicit height calculation */}
+        {/* Advanced glassmorphism background with animated particles */}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+          <div className="absolute top-4 right-6 w-2 h-2 bg-blue-400/30 rounded-full animate-pulse" />
+          <div className="absolute top-8 right-4 w-1 h-1 bg-blue-400/40 rounded-full animate-pulse delay-300" />
+          <div className="absolute bottom-6 left-4 w-1.5 h-1.5 bg-teal-400/35 rounded-full animate-pulse delay-500" />
+        </div>
+        <div className="absolute inset-0 opacity-3 bg-gradient-to-br from-blue-600/8 via-transparent to-blue-600/8 group-hover:opacity-8 transition-opacity duration-700" />
         
-        <div className="flex justify-between items-start relative z-10 flex-1">
-          <div className="flex-1 min-w-0"> {/* Added min-w-0 for text overflow */}
-            <p className="text-xs font-semibold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-1 tracking-wide uppercase group-hover:from-blue-600 group-hover:to-teal-600 transition-all duration-300">{title}</p>
-            <h3 className="text-2xl font-extrabold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-1 group-hover:from-blue-700 group-hover:to-purple-700 transition-all duration-300">
+        <div className="flex justify-between items-start relative z-10 flex-shrink-0 mb-2"> {/* Changed from flex-1 to flex-shrink-0 with fixed margin */}
+          <div className="flex-1 min-w-0 overflow-hidden"> {/* Added overflow-hidden for text containment */}
+            <p className="text-xs font-bold bg-gradient-to-r from-gray-700 to-gray-500 bg-clip-text text-transparent mb-1 tracking-wider uppercase group-hover:from-blue-600 group-hover:to-blue-600 transition-all duration-500 relative truncate"> {/* Reduced margin and added truncate */}
+              <span className="relative z-10">{title}</span>
+              <span className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-blue-600/20 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500" />
+            </p>
+            <h3 className="text-2xl font-black bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent mb-1 group-hover:from-blue-700 group-hover:via-blue-700 group-hover:to-teal-700 transition-all duration-500 relative drop-shadow-sm leading-tight truncate"> {/* Reduced size from 3xl to 2xl, reduced margin, added leading-tight and truncate */}
               {loading ? (
                 <div className="h-6 w-20 bg-gray-200 animate-pulse rounded"></div>
               ) : (
                 <>
-                  {isCurrency && !value.toString().includes('₹') ? '₹' : ''}
-                  <CountUp
-                    start={0}
-                    end={numericValue}
-                    duration={2}
-                    separator="," 
-                    decimals={isPercentage ? 1 : 0}
-                    decimal="."
-                    suffix={isPercentage && !value.toString().includes('%') ? '%' : ''}
-                  />
+                  {isCurrency ? (
+                    // For currency values, use formatted display but CountUp the scaled number
+                    <CountUp
+                      start={0}
+                      end={currencyValue >= 10000000 ? currencyValue / 10000000 : 
+                           currencyValue >= 100000 ? currencyValue / 100000 : 
+                           currencyValue >= 1000 ? currencyValue / 1000 : currencyValue}
+                      duration={2}
+                      separator="," 
+                      decimals={1}
+                      decimal="."
+                      prefix="₹"
+                      suffix={currencyValue >= 10000000 ? 'Cr' : 
+                             currencyValue >= 100000 ? 'L' : 
+                             currencyValue >= 1000 ? 'K' : ''}
+                    />
+                  ) : (
+                    <CountUp
+                      start={0}
+                      end={numericValue}
+                      duration={2}
+                      separator="," 
+                      decimals={isPercentage ? 1 : 0}
+                      decimal="."
+                      suffix={isPercentage && !value.toString().includes('%') ? '%' : ''}
+                    />
+                  )}
                 </>
               )}
             </h3>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0"> {/* Added flex-shrink-0 */}
               <div className={cn(
-                "flex items-center text-xs font-semibold px-2 py-0.5 rounded-full transition-all duration-300",
+                "flex items-center text-xs font-bold px-2 py-0.5 rounded-full transition-all duration-500 backdrop-blur-sm shadow-lg flex-shrink-0", /* Reduced padding and added flex-shrink-0 */
                 positive 
-                  ? "text-emerald-700 bg-emerald-100 group-hover:bg-emerald-200 border border-emerald-300" 
-                  : "text-red-700 bg-red-100 group-hover:bg-red-200 border border-red-300"
+                  ? "text-emerald-800 bg-gradient-to-r from-emerald-100 to-emerald-50 group-hover:from-emerald-200 group-hover:to-emerald-100 border border-emerald-300/60 group-hover:border-emerald-400 shadow-emerald-200/50" 
+                  : "text-red-800 bg-gradient-to-r from-red-100 to-red-50 group-hover:from-red-200 group-hover:to-red-100 border border-red-300/60 group-hover:border-red-400 shadow-red-200/50"
               )}>
                 {positive ? (
                   <ArrowUpRight className="h-3 w-3 mr-1" />
@@ -711,17 +738,18 @@ function MetricCard({
               </div>
             </div>
           </div>
-          <div className="h-10 w-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-700 group-hover:from-blue-600 group-hover:to-teal-600 transition-all duration-500 shadow-lg group-hover:shadow-xl group-hover:scale-110 transform-gpu border border-gray-600 group-hover:border-blue-500">
-            <div className="transform group-hover:scale-110 transition-transform duration-300">
+          <div className="h-10 w-10 rounded-2xl flex items-center justify-center bg-gradient-to-br from-gray-800 via-gray-700 to-gray-600 group-hover:from-blue-600 group-hover:via-blue-600 group-hover:to-teal-600 transition-all duration-700 shadow-2xl shadow-gray-900/25 group-hover:shadow-blue-600/30 group-hover:scale-110 transform-gpu border border-gray-500/50 group-hover:border-blue-400/60 backdrop-blur-sm relative overflow-hidden flex-shrink-0"> {/* Reduced size from 12x12 to 10x10 and added flex-shrink-0 */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-500" />
+            <div className="transform group-hover:scale-125 group-hover:rotate-12 transition-all duration-500 relative z-10">
               {React.cloneElement(icon as React.ReactElement, {
-                className: "h-5 w-5 text-white"
+                className: "h-4 w-4 text-white" // Reduced icon size from h-5 w-5 to h-4 w-4
               })}
             </div>
           </div>
         </div>
         
-        {/* Chart section at the bottom */}
-        <div className="mt-2 h-12 w-full relative z-10"> {/* Fixed height chart area */}
+        {/* Enhanced chart section with gradient background */}
+        <div className="flex-1 min-h-0 w-full relative z-10 rounded-xl bg-gradient-to-br from-gray-50/80 to-white/60 backdrop-blur-sm border border-gray-200/40 p-2 group-hover:border-blue-300/40 transition-all duration-500 overflow-hidden"> {/* Changed to flex-1 with min-h-0 for proper flex behavior and added overflow-hidden */}
           {!loading && (() => {
             const chartType = Math.random() > 0.75 ? 'doughnut' : 
                              Math.random() > 0.5 ? 'bar' : 
@@ -730,27 +758,32 @@ function MetricCard({
             
             switch(chartType) {
               case 'line':
-                return <MiniLineChart data={chartData} />;
+                return <div className="h-full w-full overflow-hidden"><MiniLineChart data={chartData} /></div>;
               case 'bar':
-                return <MiniBarChart data={chartData} />;
+                return <div className="h-full w-full overflow-hidden"><MiniBarChart data={chartData} /></div>;
               case 'area':
-                return <MiniAreaChart data={chartData} />;
+                return <div className="h-full w-full overflow-hidden"><MiniAreaChart data={chartData} /></div>;
               case 'doughnut':
                 return (
-                  <div className="h-full w-12 mx-auto">
-                    <MiniDoughnutChart data={chartData} />
+                  <div className="h-full w-full flex items-center justify-center overflow-hidden">
+                    <div className="h-full w-8 max-w-full"> {/* Reduced from w-12 to w-8 and added max-w-full */}
+                      <MiniDoughnutChart data={chartData} />
+                    </div>
                   </div>
                 );
               default:
-                return <MiniLineChart data={chartData} />;
+                return <div className="h-full w-full overflow-hidden"><MiniLineChart data={chartData} /></div>;
             }
           })()}
         </div>
         
-        {/* Subtle shine effect on hover */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-gray-800/5 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-1000" />
+        {/* Advanced shine and glow effects on hover */}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none">
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-blue-400/8 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-1500 ease-out" />
+          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/60 to-transparent transform group-hover:translate-x-full transition-transform duration-1200 delay-200" />
         </div>
+        {/* Outer glow effect */}
+        <div className="absolute -inset-1 bg-gradient-to-br from-blue-600/0 via-blue-600/0 to-teal-600/0 group-hover:from-blue-600/10 group-hover:via-blue-600/10 group-hover:to-teal-600/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-all duration-700 blur-xl" />
       </CardContent>
     </Card>
   );

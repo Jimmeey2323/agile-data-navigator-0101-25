@@ -291,27 +291,102 @@ export const LeadsTable = ({
   // ── Associate summary ──────────────────────────────────────────
   // NOTE: must be placed before any early returns to obey Rules of Hooks
   const associateSummary = useMemo(() => {
-    const map: Record<string, { total: number; converted: number; trials: number; followUps: number }> = {};
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const map: Record<string, {
+      total: number;
+      converted: number;
+      trials: number;
+      followUps: number;
+      conversionRate: number;
+      followUpRate: number;
+      stages: Record<string, number>;
+      sources: Record<string, number>;
+      mostCommonStage?: string;
+      mostCommonSource?: string;
+      monthly: { total: number; converted: number; conversionRate: number; };
+      weekly: { total: number; converted: number; conversionRate: number; };
+    }> = {};
+
     for (const lead of filteredLeads as Lead[]) {
       const name = lead.associate || 'Unassigned';
-      if (!map[name]) map[name] = { total: 0, converted: 0, trials: 0, followUps: 0 };
-      map[name].total++;
-      if (
-        lead.status === 'Converted' ||
-        lead.status === 'Won' ||
-        lead.stage === 'Membership Sold'
-      ) map[name].converted++;
-      if (
-        typeof lead.stage === 'string' &&
-        lead.stage.toLowerCase().includes('trial')
-      ) map[name].trials++;
-      const hasFollowUp = [1,2,3,4].some(i => {
+      if (!map[name]) {
+        map[name] = {
+          total: 0,
+          converted: 0,
+          trials: 0,
+          followUps: 0,
+          conversionRate: 0,
+          followUpRate: 0,
+          stages: {},
+          sources: {},
+          monthly: { total: 0, converted: 0, conversionRate: 0 },
+          weekly: { total: 0, converted: 0, conversionRate: 0 },
+        };
+      }
+
+      const stats = map[name];
+      stats.total++;
+
+      // Increment stage and source counts
+      if (lead.stage) stats.stages[lead.stage] = (stats.stages[lead.stage] || 0) + 1;
+      if (lead.source) stats.sources[lead.source] = (stats.sources[lead.source] || 0) + 1;
+
+      const isConverted = lead.status === 'Converted' || lead.status === 'Won' || lead.stage === 'Membership Sold';
+      if (isConverted) {
+        stats.converted++;
+      }
+
+      if (typeof lead.stage === 'string' && lead.stage.toLowerCase().includes('trial')) {
+        stats.trials++;
+      }
+
+      const hasFollowUp = [1, 2, 3, 4].some(i => {
         const d = lead[`followUp${i}Date` as keyof typeof lead] as string;
         const c = lead[`followUp${i}Comments` as keyof typeof lead] as string;
-        return (d && d.trim() !== '' && d.trim() !== '-') || (c && c.trim() !== '' && c.trim() !== '-');
+        const hasDate = d && d.trim() !== '' && d.trim() !== '-';
+        const hasMeaningfulComment = c && c.trim() !== '' && c.trim() !== '-';
+        return hasDate || hasMeaningfulComment;
       });
-      if (hasFollowUp) map[name].followUps++;
+
+      if (hasFollowUp) {
+        stats.followUps++;
+      }
+
+      const leadDate = new Date(lead.createdAt);
+      if (leadDate >= startOfMonth) {
+        stats.monthly.total++;
+        if (isConverted) {
+          stats.monthly.converted++;
+        }
+      }
+      if (leadDate >= oneWeekAgo) {
+        stats.weekly.total++;
+        if (isConverted) {
+          stats.weekly.converted++;
+        }
+      }
     }
+    
+    // Find most common stage/source and calculate rates
+    for (const name in map) {
+      const stats = map[name];
+      stats.conversionRate = stats.total > 0 ? (stats.converted / stats.total) * 100 : 0;
+      stats.followUpRate = stats.total > 0 ? (stats.followUps / stats.total) * 100 : 0;
+      stats.monthly.conversionRate = stats.monthly.total > 0 ? (stats.monthly.converted / stats.monthly.total) * 100 : 0;
+      stats.weekly.conversionRate = stats.weekly.total > 0 ? (stats.weekly.converted / stats.weekly.total) * 100 : 0;
+
+      const findMostCommon = (record: Record<string, number>) => 
+        Object.keys(record).length > 0 
+          ? Object.entries(record).reduce((a, b) => a[1] > b[1] ? a : b)[0] 
+          : 'N/A';
+
+      stats.mostCommonStage = findMostCommon(stats.stages);
+      stats.mostCommonSource = findMostCommon(stats.sources);
+    }
+
     return Object.entries(map).sort((a, b) => b[1].total - a[1].total);
   }, [filteredLeads]);
 
@@ -336,66 +411,115 @@ export const LeadsTable = ({
     {associateSummary.length > 0 && (
       <div className="mb-4">
         <div className="flex items-center gap-2 mb-2 px-1">
-          <div className="w-1.5 h-4 rounded-full bg-gradient-to-b from-blue-500 to-teal-500" />
-          <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Associate Performance</span>
-          <span className="text-xs text-slate-400">— {filteredLeads.length} total leads</span>
+          <div className="w-1.5 h-4 rounded-full bg-gradient-to-b from-blue-900 to-blue-800" />
+          <span className="text-xs font-semibold text-slate-800 dark:text-slate-300 uppercase tracking-wider">Associate Performance</span>
+          <span className="text-xs text-slate-600">— {filteredLeads.length} total leads</span>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-6 grid-rows-2 gap-2 pb-2">
           {associateSummary.map(([name, stats]) => (
-            <div
-              key={name}
-              className="flex items-center gap-3 px-3 py-2 rounded-xl
-                bg-white dark:bg-slate-800
-                border border-slate-200 dark:border-slate-700
-                shadow-sm hover:shadow-md transition-shadow"
-            >
-              {/* Avatar */}
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-teal-500 flex items-center justify-center flex-shrink-0">
-                <span className="text-[10px] font-bold text-white">
-                  {name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2)}
-                </span>
-              </div>
-              {/* Name + counts */}
-              <div>
-                <p className="text-xs font-semibold text-slate-700 dark:text-slate-200 leading-tight truncate max-w-[110px]">{name}</p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">{stats.total} leads</span>
-                  <span className="text-slate-300 dark:text-slate-600">·</span>
-                  <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400" title="Converted">
-                    <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
-                    {stats.converted}
-                  </span>
-                  <span className="text-slate-300 dark:text-slate-600">·</span>
-                  <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-violet-600 dark:text-violet-400" title="Trials">
-                    <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                    {stats.trials}
-                  </span>
-                  <span className="text-slate-300 dark:text-slate-600">·</span>
-                  <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400" title="Follow-ups done">
-                    <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-                    {stats.followUps}/{stats.total}
-                  </span>
+            <Popover key={name}>
+              <PopoverTrigger asChild>
+                <div
+                  className="flex items-center gap-3 px-3 py-2 rounded-xl
+                    bg-white dark:bg-slate-800
+                    border border-slate-200 dark:border-slate-700
+                    shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                >
+                  {/* Avatar */}
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-900 to-blue-800 flex items-center justify-center flex-shrink-0">
+                    <span className="text-[10px] font-bold text-white">
+                      {name.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2)}
+                    </span>
+                  </div>
+                  {/* Name + counts */}
+                  <div>
+                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-200 leading-tight truncate max-w-[110px]">{name}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">{stats.total} leads</span>
+                      <span className="text-slate-300 dark:text-slate-600">·</span>
+                      <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400" title="Converted">
+                        <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                        {stats.converted}
+                      </span>
+                      <span className="text-slate-300 dark:text-slate-600">·</span>
+                      <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-violet-600 dark:text-violet-400" title="Trials">
+                        <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        {stats.trials}
+                      </span>
+                      <span className="text-slate-300 dark:text-slate-600">·</span>
+                      <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400" title="Follow-ups done">
+                        <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                        {stats.followUps}/{stats.total}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-96 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-slate-200 dark:border-slate-700 shadow-2xl">
+                <div className="grid gap-4">
+                  <div className="space-y-2">
+                    <h4 className="font-medium leading-none text-slate-800 dark:text-slate-100">{name}'s Detailed Metrics</h4>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      Overall and recent performance breakdown.
+                    </p>
+                  </div>
+                  <div className="grid gap-3">
+                    {/* Overall Stats */}
+                    <div className="p-3 bg-slate-100 dark:bg-slate-800/50 rounded-lg">
+                      <h5 className="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2">Overall Performance</h5>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        <div className="flex justify-between items-center"><span>Leads Attended:</span> <span className="font-bold">{stats.total}</span></div>
+                        <div className="flex justify-between items-center"><span>Trials Completed:</span> <span className="font-bold">{stats.trials}</span></div>
+                        <div className="flex justify-between items-center"><span>Converted:</span> <span className="font-bold">{stats.converted}</span></div>
+                        <div className="flex justify-between items-center"><span>Follow-ups:</span> <span className="font-bold">{stats.followUps}</span></div>
+                        <div className="flex justify-between items-center"><span>Conversion Rate:</span> <span className="font-bold text-emerald-500">{stats.conversionRate.toFixed(1)}%</span></div>
+                        <div className="flex justify-between items-center"><span>Follow-up Rate:</span> <span className="font-bold text-amber-500">{stats.followUpRate.toFixed(1)}%</span></div>
+                        <div className="flex justify-between items-center col-span-2"><span>Most Common Stage:</span> <span className="font-bold text-violet-500">{stats.mostCommonStage}</span></div>
+                        <div className="flex justify-between items-center col-span-2"><span>Most Common Source:</span> <span className="font-bold text-sky-500">{stats.mostCommonSource}</span></div>
+                      </div>
+                    </div>
+                    
+                    {/* Time-based Stats */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 bg-slate-100 dark:bg-slate-800/50 rounded-lg">
+                        <h5 className="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2">Current Month</h5>
+                        <div className="space-y-1 text-sm">
+                          <div className="flex justify-between"><span>Leads:</span> <span className="font-bold">{stats.monthly.total}</span></div>
+                          <div className="flex justify-between"><span>Converted:</span> <span className="font-bold">{stats.monthly.converted}</span></div>
+                          <div className="flex justify-between"><span>Conv. Rate:</span> <span className="font-bold text-emerald-500">{stats.monthly.conversionRate.toFixed(1)}%</span></div>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-slate-100 dark:bg-slate-800/50 rounded-lg">
+                        <h5 className="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2">Last 7 Days</h5>
+                        <div className="space-y-1 text-sm">
+                          <div className="flex justify-between"><span>Leads:</span> <span className="font-bold">{stats.weekly.total}</span></div>
+                          <div className="flex justify-between"><span>Converted:</span> <span className="font-bold">{stats.weekly.converted}</span></div>
+                          <div className="flex justify-between"><span>Conv. Rate:</span> <span className="font-bold text-emerald-500">{stats.weekly.conversionRate.toFixed(1)}%</span></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           ))}
         </div>
       </div>
     )}
     <Card className="shadow-2xl border-0 overflow-hidden bg-white/95 backdrop-blur-sm rounded-xl">
       {/* Enhanced Header with sophisticated design */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border-b border-gray-700/50">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/10 via-purple-900/10 to-blue-900/10"></div>
+      <div className="relative overflow-hidden bg-gradient-to-r from-gray-900 via-black to-gray-900 border-b-4 border-blue-500 animate-color-shift">
+        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-gray-900/30 to-black/30"></div>
         <div className="relative flex items-center justify-between px-8 py-6">
           <div className="flex items-center gap-6">
             <div className="relative">
               <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
-                <Activity className="h-7 w-7 text-white" />
+                <Activity className="h-7 w-7 text-gray-200" />
               </div>
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white tracking-wide font-sans">
+              <h2 className="text-xl font-bold text-gray-200 tracking-wide font-sans">
                 Lead Management System
               </h2>
               <p className="text-gray-300 mt-1 font-medium text-sm tracking-wide">
@@ -408,7 +532,7 @@ export const LeadsTable = ({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="sm" onClick={() => setShowBookmarkedOnly(!showBookmarkedOnly)} className={`text-white hover:bg-white/20 transition-colors ${showBookmarkedOnly ? "bg-white/20" : ""}`}>
+                    <Button variant="ghost" size="sm" onClick={() => setShowBookmarkedOnly(!showBookmarkedOnly)} className={`text-gray-200 hover:bg-white/20 transition-colors ${showBookmarkedOnly ? "bg-white/20" : ""}`}>
                     {showBookmarkedOnly ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
                   </Button>
                 </TooltipTrigger>
@@ -420,7 +544,7 @@ export const LeadsTable = ({
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-44 bg-white/10 border-white/30 text-white font-medium text-sm backdrop-blur-sm justify-between">
+                <Button variant="outline" className="w-44 bg-white/10 border-white/30 text-gray-200 font-medium text-sm backdrop-blur-sm justify-between">
                   <span>
                     {groupByFields.length === 0 ? 'Group by...' : `${groupByFields.length} field${groupByFields.length > 1 ? 's' : ''}`}
                   </span>
@@ -493,7 +617,7 @@ export const LeadsTable = ({
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 transition-colors">
+                <Button variant="ghost" size="sm" className="text-gray-200 hover:bg-white/20 transition-colors">
                   <Columns className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
@@ -517,9 +641,9 @@ export const LeadsTable = ({
         <div className="overflow-x-auto bg-white rounded-b-xl border-l-4 border-r-4 border-black max-w-[98vw]"> {/* Made table wider */}
           <div className="relative">
             <Table className="w-full text-sm min-w-[1400px]"> {/* Added minimum width */}
-              <TableHeader className="sticky top-0 z-20 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 shadow-lg">
-                <TableRow className="border-0 hover:bg-gradient-to-r hover:from-gray-800 hover:via-gray-700 hover:to-gray-800 transition-all duration-300">
-                  <TableHead className="w-16 text-white font-bold text-center border-r border-white/10 h-14 bg-transparent">
+              <TableHeader className="sticky top-0 z-20 bg-gradient-to-r from-gray-900 via-black to-gray-900 shadow-lg">
+                <TableRow className="border-0 hover:bg-gradient-to-r hover:from-gray-800 hover:via-gray-900 hover:to-gray-800 transition-all duration-300">
+                  <TableHead className="w-16 text-gray-200 font-bold text-center border-r border-white/10 h-14 bg-transparent">
                     <Checkbox 
                       checked={selectedLeads.length === Object.values(groupedLeads).flat().length && Object.values(groupedLeads).flat().length > 0} 
                       onCheckedChange={handleSelectAllLeads} 
@@ -527,7 +651,7 @@ export const LeadsTable = ({
                     />
                   </TableHead>
                   {visibleColumns.name && (
-                    <TableHead className="min-w-[280px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
+                    <TableHead className="min-w-[280px] text-gray-200 font-bold border-r border-white/10 h-14 bg-transparent">
                       <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('fullName')}>
                         <User className="h-4 w-4 mr-2" />
                         FULL NAME
@@ -578,7 +702,7 @@ export const LeadsTable = ({
                     </TableHead>
                   )}
                   {visibleColumns.associate && (
-                    <TableHead className="min-w-[180px] text-white font-bold border-r border-white/10 h-14 bg-transparent">
+                    <TableHead className="min-w-[180px] text-gray-200 font-bold border-r border-white/10 h-14 bg-transparent">
                       <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('associate')}>
                         <User className="h-4 w-4 mr-2" />
                         ASSOCIATE
@@ -595,7 +719,7 @@ export const LeadsTable = ({
                     </TableHead>
                   )}
                   {visibleColumns.stage && (
-                    <TableHead className="min-w-[220px] text-white font-bold border-r border-white/10 h-14 bg-transparent"> {/* Increased from 160px to 220px */}
+                    <TableHead className="min-w-[220px] text-gray-200 font-bold border-r border-white/10 h-14 bg-transparent"> {/* Increased from 160px to 220px */}
                       <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('stage')}>
                         <Target className="h-4 w-4 mr-2" />
                         STAGE
@@ -629,7 +753,7 @@ export const LeadsTable = ({
                     </TableHead>
                   )}
                   {visibleColumns.remarks && (
-                    <TableHead className="min-w-[350px] text-white font-bold border-r border-white/10 h-14 bg-transparent"> {/* Increased from 200px to 350px */}
+                    <TableHead className="min-w-[350px] text-gray-200 font-bold border-r border-white/10 h-14 bg-transparent"> {/* Increased from 200px to 350px */}
                       <div className="flex items-center cursor-pointer py-2" onClick={() => handleSort('remarks')}>
                         <FileText className="h-4 w-4 mr-2" />
                         REMARKS
@@ -654,14 +778,14 @@ export const LeadsTable = ({
                     </TableHead>
                   )}
                   {visibleColumns.followUpComments && (
-                    <TableHead className="min-w-[450px] text-white font-bold border-r border-white/10 h-14 bg-transparent"> {/* Increased from 300px to 450px */}
+                    <TableHead className="min-w-[450px] text-gray-200 font-bold border-r border-white/10 h-14 bg-transparent"> {/* Increased from 300px to 450px */}
                       <div className="flex items-center py-2">
                         <MessageCircle className="h-4 w-4 mr-2" />
                         FOLLOW-UP COMMENTS
                       </div>
                     </TableHead>
                   )}
-                  <TableHead className="w-24 text-white font-bold text-center h-14 bg-transparent">
+                  <TableHead className="w-24 text-gray-200 font-bold text-center h-14 bg-transparent">
                     ACTIONS
                   </TableHead>
                 </TableRow>
@@ -777,7 +901,7 @@ export const LeadsTable = ({
                               <TableCell className="max-h-10 py-1 border-r border-gray-100">
                                 <div className="flex items-center gap-3">
                                   <Avatar className="h-8 w-8 border-2 border-gray-200">
-                                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-teal-600 text-white text-sm font-bold">
+                                    <AvatarFallback className="bg-gradient-to-br from-blue-900 to-blue-800 text-white text-sm font-bold">
                                       {getInitials(lead.fullName)}
                                     </AvatarFallback>
                                   </Avatar>
@@ -799,13 +923,13 @@ export const LeadsTable = ({
                                     <div className="flex flex-col gap-1 text-sm text-gray-600">
                                       {lead.email && (
                                         <div className="flex items-center gap-1">
-                                          <Mail className="h-3 w-3" />
+                                          <Mail className="h-4 w-4" />
                                           <span className="truncate max-w-[160px]">{lead.email}</span>
                                         </div>
                                       )}
                                       {lead.phone && (
                                         <div className="flex items-center gap-1">
-                                          <Phone className="h-3 w-3" />
+                                          <Phone className="h-4 w-4" />
                                           <span className="truncate max-w-[160px]">{lead.phone}</span>
                                         </div>
                                       )}
@@ -855,8 +979,8 @@ export const LeadsTable = ({
                             {visibleColumns.associate && (
                               <TableCell className="max-h-10 py-1 border-r border-gray-100">
                                 <div className="flex items-center gap-2">
-                                  <Avatar className="h-6 w-6">
-                                    <AvatarFallback className="bg-gradient-to-br from-gray-500 to-gray-600 text-white text-sm font-bold">
+                                  <Avatar className="h-8 w-8">
+                                    <AvatarFallback className="bg-gradient-to-br from-blue-700 to-blue-600 text-white text-sm font-bold">
                                       {getInitials(lead.associate)}
                                     </AvatarFallback>
                                   </Avatar>
@@ -938,7 +1062,7 @@ export const LeadsTable = ({
                               <TableCell className="max-h-10 py-1 border-r border-gray-100" onClick={e => e.stopPropagation()}>
                                 <div className="flex items-center gap-3">
                                   <div className="flex items-center gap-1">
-                                    <MessageCircle className="h-4 w-4 text-blue-600" />
+                                    <MessageCircle className="h-4 w-4 text-slate-700" />
                                     <span className="text-sm font-semibold">
                                       {followUpStatus.completed}/{followUpStatus.total}
                                     </span>
